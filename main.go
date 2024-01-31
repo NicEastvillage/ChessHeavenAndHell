@@ -9,7 +9,10 @@ func main() {
 
 	rl.SetTargetFPS(60)
 
-	var board = NewBoard(8, 8)
+	assets.LoadAll()
+	defer assets.UnloadAll()
+
+	var board = NewStandardBoardWithPiece()
 
 	for !rl.WindowShouldClose() {
 		rl.BeginDrawing()
