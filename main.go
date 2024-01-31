@@ -3,16 +3,22 @@ package main
 import rl "github.com/gen2brain/raylib-go/raylib"
 
 func main() {
-	rl.InitWindow(800, 450, "raylib [core] example - basic window")
+	rl.SetConfigFlags(rl.FlagWindowResizable)
+	rl.InitWindow(1600, 980, "raylib [core] example - basic window")
 	defer rl.CloseWindow()
 
 	rl.SetTargetFPS(60)
+
+	var board = NewBoard(8, 8)
 
 	for !rl.WindowShouldClose() {
 		rl.BeginDrawing()
 
 		rl.ClearBackground(rl.RayWhite)
-		rl.DrawText("Congrats! You created your first window!", 190, 200, 20, rl.LightGray)
+
+		rl.Translatef(float32(rl.GetScreenWidth()/2), float32(rl.GetScreenHeight()/2), 0)
+		rl.Translatef(-4*TILE_SIZE, -4*TILE_SIZE, 0)
+		board.Render()
 
 		rl.EndDrawing()
 	}
