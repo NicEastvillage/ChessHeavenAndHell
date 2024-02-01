@@ -44,38 +44,3 @@ func (v Vec2) CompwiseMin(u Vec2) Vec2 {
 func (v Vec2) ToRlVec() rl.Vector2 {
 	return rl.NewVector2(float32(v.x), float32(v.y))
 }
-
-type AARect struct {
-	// BottomLeft is included, topRight is excluded
-	bottomLeft, topRight Vec2
-}
-
-func NewAARect(p1, p2 Vec2) AARect {
-	var bottomLeft = Vec2{
-		x: min(p1.x, p2.x),
-		y: min(p1.y, p2.y),
-	}
-	var topRight = Vec2{
-		x: max(p1.x, p2.x),
-		y: max(p1.y, p2.y),
-	}
-	return AARect{bottomLeft: bottomLeft, topRight: topRight}
-}
-
-func NewAARectEmpty() AARect {
-	return AARect{bottomLeft: Vec2{x: 0, y: 0}, topRight: Vec2{x: 0, y: 0}}
-}
-
-func (r AARect) IsEmpty() bool {
-	return r.topRight.x <= r.bottomLeft.x || r.topRight.y <= r.bottomLeft.y
-}
-
-func (r AARect) ExpandedToInclude(p Vec2) AARect {
-	if r.IsEmpty() {
-		return AARect{bottomLeft: p, topRight: p.Add(ONEONE)}
-	}
-	return AARect{
-		bottomLeft: r.bottomLeft.CompwiseMin(p),
-		topRight:   r.topRight.CompwiseMax(p.Add(ONEONE)),
-	}
-}

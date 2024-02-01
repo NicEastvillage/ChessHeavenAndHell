@@ -15,7 +15,7 @@ func NewBoard(width, height int) Board {
 	return Board{tiles: tiles}
 }
 
-func NewStandardBoardWithPiece() Board {
+func NewStandardBoardWithPieces() Board {
 	var board = NewBoard(8, 8)
 	board.pieces = make([]Piece, 32)
 	board.pieces = append(board.pieces, NewPiece(0, 0, assets.texBlackRook))
@@ -50,12 +50,4 @@ func (b *Board) Render() {
 	for _, piece := range b.pieces {
 		piece.Render()
 	}
-}
-
-func (b *Board) BoundingRect() AARect {
-	var rect = NewAARectEmpty()
-	for _, tile := range b.tiles {
-		rect = rect.ExpandedToInclude(tile.coord)
-	}
-	return rect
 }

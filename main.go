@@ -5,7 +5,7 @@ import rg "github.com/gen2brain/raylib-go/raygui"
 
 func main() {
 	rl.SetConfigFlags(rl.FlagWindowResizable)
-	rl.InitWindow(1600, 980, "raylib [core] example - basic window")
+	rl.InitWindow(1600, 980, "Chess - Heaven and Hell")
 	defer rl.CloseWindow()
 
 	rl.SetTargetFPS(60)
@@ -16,18 +16,20 @@ func main() {
 	assets.LoadAll()
 	defer assets.UnloadAll()
 
-	var board = NewStandardBoardWithPiece()
+	var board = NewStandardBoardWithPieces()
+	var planeIndex = int32(1)
 
 	for !rl.WindowShouldClose() {
 		rl.BeginDrawing()
-
 		rl.ClearBackground(rl.RayWhite)
+
+		board.Render()
 
 		if rg.Button(rl.NewRectangle(20, 20, 120, 32), "Test") {
 			println("Clicked!")
 		}
 
-		board.Render()
+		planeIndex = rg.ToggleGroup(rl.NewRectangle(float32(rl.GetScreenWidth()/2-(120*3+int(rg.GetStyle(rg.DEFAULT, rg.GROUP_PADDING)))/2), float32(rl.GetScreenHeight()-32-20), 120, 32), "Heaven;Earth;Hell", planeIndex)
 
 		rl.EndDrawing()
 	}
