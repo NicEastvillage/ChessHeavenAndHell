@@ -1,22 +1,31 @@
 package main
 
+type BoardStyle int32
+
+const (
+	BoardStyleEarth BoardStyle = iota
+	BoardStyleHeaven
+	BoardStyleHell
+)
+
 type Board struct {
+	style  BoardStyle
 	tiles  []Tile
 	pieces []Piece
 }
 
-func NewBoard(width, height int) Board {
+func NewBoard(width, height int, style BoardStyle) Board {
 	var tiles = make([]Tile, width*height)
 	for y := 0; y < height; y++ {
 		for x := 0; x < width; x++ {
 			tiles[y*width+x] = Tile{coord: Vec2{x: x, y: y}}
 		}
 	}
-	return Board{tiles: tiles}
+	return Board{tiles: tiles, style: style}
 }
 
 func NewStandardBoardWithPieces() Board {
-	var board = NewBoard(8, 8)
+	var board = NewBoard(8, 8, BoardStyleEarth)
 	board.pieces = make([]Piece, 32)
 	board.pieces = append(board.pieces, NewPiece(0, 0, assets.texBlackRook))
 	board.pieces = append(board.pieces, NewPiece(1, 0, assets.texBlackKnight))
@@ -45,7 +54,7 @@ func NewStandardBoardWithPieces() Board {
 
 func (b *Board) Render() {
 	for _, tile := range b.tiles {
-		tile.Render()
+		tile.Render(b.style)
 	}
 	for _, piece := range b.pieces {
 		piece.Render()
