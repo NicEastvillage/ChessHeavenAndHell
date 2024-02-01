@@ -11,5 +11,6 @@ func (t *Tile) Render() {
 	if t.coord.x%2 != t.coord.y%2 {
 		color = rl.Brown
 	}
-	rl.DrawRectangle(int32(t.coord.x*TILE_SIZE), int32(t.coord.y*TILE_SIZE), TILE_SIZE, TILE_SIZE, color)
+	var pos = GetWorldOrigo().Add(t.coord.Scale(TILE_SIZE))
+	rl.DrawRectangle(int32(pos.x), int32(pos.y), TILE_SIZE, TILE_SIZE, color)
 }

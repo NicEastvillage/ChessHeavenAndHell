@@ -12,5 +12,6 @@ func NewPiece(x int, y int, texture rl.Texture2D) Piece {
 }
 
 func (p *Piece) Render() {
-	rl.DrawTextureEx(p.texture, rl.Vector2{X: float32(p.coord.x * TILE_SIZE), Y: float32(p.coord.y * TILE_SIZE)}, 0, TILE_SIZE/128., rl.White)
+	var pos = GetWorldOrigo().Add(p.coord.Scale(TILE_SIZE))
+	rl.DrawTextureEx(p.texture, pos.ToRlVec(), 0, TILE_SIZE/128., rl.White)
 }

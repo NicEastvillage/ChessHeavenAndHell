@@ -1,5 +1,7 @@
 package main
 
+import rl "github.com/gen2brain/raylib-go/raylib"
+
 var UP = Vec2{0, 1}
 var DOWN = Vec2{0, -1}
 var LEFT = Vec2{-1, 0}
@@ -37,6 +39,10 @@ func (v Vec2) CompwiseMax(u Vec2) Vec2 {
 
 func (v Vec2) CompwiseMin(u Vec2) Vec2 {
 	return Vec2{x: min(v.x, u.x), y: min(v.y, u.y)}
+}
+
+func (v Vec2) ToRlVec() rl.Vector2 {
+	return rl.NewVector2(float32(v.x), float32(v.y))
 }
 
 type AARect struct {
