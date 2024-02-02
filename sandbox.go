@@ -9,50 +9,8 @@ type Sandbox struct {
 	tiles       []Tile
 	pieces      []Piece
 	nextPieceId uint32
-}
-
-func NewSandbox() Sandbox {
-	var s = Sandbox{}
-	setupBoard(&s, 0, BoardStyleHeaven, false)
-	setupBoard(&s, 1, BoardStyleEarth, true)
-	setupBoard(&s, 2, BoardStyleHell, false)
-	return s
-}
-
-func setupBoard(sandbox *Sandbox, boardId uint32, style BoardStyle, withPieces bool) {
-	var board = sandbox.GetBoard(boardId)
-	board.id = boardId
-	board.style = style
-	for y := 0; y < 8; y++ {
-		for x := 0; x < 8; x++ {
-			sandbox.NewTile(board.id, Vec2{x, y})
-		}
-	}
-	if !withPieces {
-		return
-	}
-	sandbox.NewPiece(boardId, Vec2{0, 0}, assets.texBlackRook)
-	sandbox.NewPiece(boardId, Vec2{1, 0}, assets.texBlackKnight)
-	sandbox.NewPiece(boardId, Vec2{2, 0}, assets.texBlackBishop)
-	sandbox.NewPiece(boardId, Vec2{3, 0}, assets.texBlackQueen)
-	sandbox.NewPiece(boardId, Vec2{4, 0}, assets.texBlackKing)
-	sandbox.NewPiece(boardId, Vec2{5, 0}, assets.texBlackBishop)
-	sandbox.NewPiece(boardId, Vec2{6, 0}, assets.texBlackKnight)
-	sandbox.NewPiece(boardId, Vec2{7, 0}, assets.texBlackRook)
-	for x := 0; x < 8; x++ {
-		sandbox.NewPiece(boardId, Vec2{x, 1}, assets.texBlackPawn)
-	}
-	sandbox.NewPiece(boardId, Vec2{0, 7}, assets.texWhiteRook)
-	sandbox.NewPiece(boardId, Vec2{1, 7}, assets.texWhiteKnight)
-	sandbox.NewPiece(boardId, Vec2{2, 7}, assets.texWhiteBishop)
-	sandbox.NewPiece(boardId, Vec2{3, 7}, assets.texWhiteQueen)
-	sandbox.NewPiece(boardId, Vec2{4, 7}, assets.texWhiteKing)
-	sandbox.NewPiece(boardId, Vec2{5, 7}, assets.texWhiteBishop)
-	sandbox.NewPiece(boardId, Vec2{6, 7}, assets.texWhiteKnight)
-	sandbox.NewPiece(boardId, Vec2{7, 7}, assets.texWhiteRook)
-	for x := 0; x < 8; x++ {
-		sandbox.NewPiece(boardId, Vec2{x, 6}, assets.texWhitePawn)
-	}
+	effectTypes []StatusEffectType
+	effects     []StatusEffect
 }
 
 func (s *Sandbox) GetBoard(id uint32) *Board {
@@ -125,6 +83,26 @@ func (s *Sandbox) RemovePiece(id uint32) bool {
 	return false
 }
 
+func (s *Sandbox) RegisterEffectType(tex rl.Texture2D) *StatusEffectType {
+	// We assume effect types are never unregistered
+	s.effectTypes = append(s.effectTypes, StatusEffectType{
+		id:  uint32(len(s.effectTypes)),
+		tex: tex,
+	})
+	return &s.effectTypes[len(s.effectTypes)-1]
+}
+
+func (s *Sandbox) GetStatusEffectType(id uint32) *StatusEffectType {
+	return &s.effectTypes[id]
+}
+
+func (s *Sandbox) NewStatusEffect(piece uint32, typ uint32) {
+	s.effects = append(s.effects, StatusEffect{
+		piece: piece,
+		typ:   typ,
+	})
+}
+
 func (s *Sandbox) Render(board uint32) {
 	for i := 0; i < len(s.tiles); i++ {
 		if s.tiles[i].board == board {
@@ -134,6 +112,19 @@ func (s *Sandbox) Render(board uint32) {
 	for i := 0; i < len(s.pieces); i++ {
 		if s.pieces[i].board == board {
 			s.pieces[i].Render()
+		}
+	}
+	for i := 0; i < len(s.pieces); i++ {
+		if s.pieces[i].board == board {
+			var effectsToRender = make([]*StatusEffect, 0)
+			for j := 0; j < len(s.effects); j++ {
+				if s.effects[j].piece == s.pieces[i].id {
+					effectsToRender = append(effectsToRender, &s.effects[j])
+				}
+			}
+			for j := 0; j < len(effectsToRender); j++ {
+				effectsToRender[j].Render(s.pieces[i].coord, j, len(effectsToRender))
+			}
 		}
 	}
 }

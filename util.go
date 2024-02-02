@@ -2,7 +2,7 @@ package main
 
 import rl "github.com/gen2brain/raylib-go/raylib"
 
-const TileSize = 100
+const TileSize = 80
 
 func Absi(v int) int {
 	if v <= 0 {
