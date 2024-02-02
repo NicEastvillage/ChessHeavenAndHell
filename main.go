@@ -35,12 +35,18 @@ func main() {
 	for !rl.WindowShouldClose() {
 
 		if rl.IsMouseButtonPressed(rl.MouseButtonLeft) {
-			var hoveredCoord = GetHoveredCoord()
-			var piece = sandbox.GetPieceAt(hoveredCoord)
+			var coord = GetHoveredCoord()
+			var piece = sandbox.GetPieceAt(coord)
 			if piece == nil {
 				selection.Deselect()
 			} else {
 				selection.SelectPiece(piece.id)
+			}
+		} else if id, ok := selection.GetSelectedPieceId(); ok {
+			if rl.IsMouseButtonPressed(rl.MouseButtonRight) {
+				var coord = GetHoveredCoord()
+				var piece = sandbox.GetPiece(id)
+				piece.coord = coord
 			}
 		}
 

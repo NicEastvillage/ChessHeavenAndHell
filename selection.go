@@ -26,3 +26,10 @@ func (s *Selection) SelectPiece(id uint32) {
 func (s *Selection) IsPieceSelected(id uint32) bool {
 	return s.typ == SelectionTypePiece && s.id == id
 }
+
+func (s *Selection) GetSelectedPieceId() (uint32, bool) {
+	if s.typ != SelectionTypePiece {
+		return s.id, false
+	}
+	return s.id, true
+}
