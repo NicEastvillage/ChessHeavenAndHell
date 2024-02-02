@@ -16,14 +16,14 @@ func main() {
 	assets.LoadAll()
 	defer assets.UnloadAll()
 
-	var boards = [3]Board{NewBoard(8, 8, BoardStyleHeaven), NewStandardBoardWithPieces(), NewBoard(8, 8, BoardStyleHell)}
+	sandbox = NewSandbox()
 	var planeIndex = int32(1)
 
 	for !rl.WindowShouldClose() {
 		rl.BeginDrawing()
 		rl.ClearBackground(rl.RayWhite)
 
-		boards[planeIndex].Render()
+		sandbox.Render(uint32(planeIndex))
 
 		if rg.Button(rl.NewRectangle(20, 20, 120, 32), "Test") {
 			println("Clicked!")
