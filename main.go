@@ -1,6 +1,9 @@
 package main
 
-import rl "github.com/gen2brain/raylib-go/raylib"
+import (
+	rl "github.com/gen2brain/raylib-go/raylib"
+	"math/rand"
+)
 import rg "github.com/gen2brain/raylib-go/raygui"
 
 func main() {
@@ -25,11 +28,15 @@ func main() {
 
 		sandbox.Render(uint32(planeIndex))
 
-		if rg.Button(rl.NewRectangle(20, 20, 120, 32), "Test") {
+		if rg.Button(rl.NewRectangle(20, 20, 200, 36), "Remove random") {
 			println("Clicked!")
+			if len(sandbox.pieces) > 0 {
+				var id = sandbox.pieces[rand.Intn(len(sandbox.pieces))].id
+				sandbox.RemovePiece(id)
+			}
 		}
 
-		planeIndex = rg.ToggleGroup(rl.NewRectangle(float32(rl.GetScreenWidth()/2-(120*3+int(rg.GetStyle(rg.DEFAULT, rg.GROUP_PADDING)))/2), float32(rl.GetScreenHeight()-32-20), 120, 32), "Heaven;Earth;Hell", planeIndex)
+		planeIndex = rg.ToggleGroup(rl.NewRectangle(float32(rl.GetScreenWidth()/2-(120*3+int(rg.GetStyle(rg.DEFAULT, rg.GROUP_PADDING)))/2), float32(rl.GetScreenHeight()-36-20), 120, 36), "Heaven;Earth;Hell", planeIndex)
 
 		rl.EndDrawing()
 	}

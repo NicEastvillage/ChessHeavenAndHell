@@ -73,6 +73,22 @@ func (s *Sandbox) GetTile(board uint32, coord Vec2) *Tile {
 	return nil
 }
 
+func (s *Sandbox) RemoveTile(board uint32, coord Vec2) bool {
+	if len(s.tiles) == 0 {
+		return false
+	}
+	// The slice is unordered, so we insert the last Tile where there removed Tile was and shorten the slice
+	var last = s.tiles[len(s.tiles)-1]
+	for i := 0; i < len(s.tiles); i++ {
+		if s.tiles[i].board == board && s.tiles[i].coord == coord {
+			s.tiles[i] = last
+			s.tiles = s.tiles[:len(s.tiles)-1]
+			return true
+		}
+	}
+	return false
+}
+
 func (s *Sandbox) NewPiece(board uint32, coord Vec2, tex rl.Texture2D) *Piece {
 	s.nextPieceId++
 	s.pieces = append(s.pieces, Piece{
@@ -91,6 +107,22 @@ func (s *Sandbox) GetPiece(id uint32) *Piece {
 		}
 	}
 	return nil
+}
+
+func (s *Sandbox) RemovePiece(id uint32) bool {
+	if len(s.pieces) == 0 {
+		return false
+	}
+	// The slice is unordered, so we insert the last Piece where there removed Piece was and shorten the slice
+	var last = s.pieces[len(s.pieces)-1]
+	for i := 0; i < len(s.pieces); i++ {
+		if s.pieces[i].id == id {
+			s.pieces[i] = last
+			s.pieces = s.pieces[:len(s.pieces)-1]
+			return true
+		}
+	}
+	return false
 }
 
 func (s *Sandbox) Render(board uint32) {
