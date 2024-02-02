@@ -33,6 +33,17 @@ func main() {
 	}
 
 	for !rl.WindowShouldClose() {
+
+		if rl.IsMouseButtonPressed(rl.MouseButtonLeft) {
+			var hoveredCoord = GetHoveredCoord()
+			var piece = sandbox.GetPieceAt(hoveredCoord)
+			if piece == nil {
+				selection.Deselect()
+			} else {
+				selection.SelectPiece(piece.id)
+			}
+		}
+
 		rl.BeginDrawing()
 		rl.ClearBackground(rl.RayWhite)
 
