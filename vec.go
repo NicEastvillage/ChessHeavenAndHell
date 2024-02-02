@@ -2,8 +2,8 @@ package main
 
 import rl "github.com/gen2brain/raylib-go/raylib"
 
-var UP = Vec2{0, 1}
-var DOWN = Vec2{0, -1}
+var UP = Vec2{0, -1}
+var DOWN = Vec2{0, 1}
 var LEFT = Vec2{-1, 0}
 var RIGHT = Vec2{1, 0}
 var ZEROZERO = Vec2{0, 0}

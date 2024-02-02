@@ -17,6 +17,15 @@ type AssetManager struct {
 	texBlackRook   rl.Texture2D
 	texBlackQueen  rl.Texture2D
 	texBlackKing   rl.Texture2D
+
+	texItemChaosOrb rl.Texture2D
+	texItemCoin     rl.Texture2D
+	texItemFire     rl.Texture2D
+	texItemIce      rl.Texture2D
+
+	texEffectBlood rl.Texture2D
+	texEffectMedal rl.Texture2D
+	texEffectCurse rl.Texture2D
 }
 
 func (am *AssetManager) LoadAll() {
@@ -32,6 +41,15 @@ func (am *AssetManager) LoadAll() {
 	am.texBlackRook = rl.LoadTexture("Assets/black_rook.png")
 	am.texBlackQueen = rl.LoadTexture("Assets/black_queen.png")
 	am.texBlackKing = rl.LoadTexture("Assets/black_king.png")
+
+	am.texItemChaosOrb = rl.LoadTexture("Assets/item_chaos_orb.png")
+	am.texItemCoin = rl.LoadTexture("Assets/item_coin.png")
+	am.texItemFire = rl.LoadTexture("Assets/item_fire.png")
+	am.texItemIce = rl.LoadTexture("Assets/item_ice.png")
+
+	am.texEffectBlood = rl.LoadTexture("Assets/se_blood.png")
+	am.texEffectMedal = rl.LoadTexture("Assets/se_medal.png")
+	am.texEffectCurse = rl.LoadTexture("Assets/se_curse.png")
 }
 
 func (am *AssetManager) UnloadAll() {
@@ -47,4 +65,13 @@ func (am *AssetManager) UnloadAll() {
 	rl.UnloadTexture(am.texBlackRook)
 	rl.UnloadTexture(am.texBlackQueen)
 	rl.UnloadTexture(am.texBlackKing)
+
+	rl.UnloadTexture(am.texItemChaosOrb)
+	rl.UnloadTexture(am.texItemCoin)
+	rl.UnloadTexture(am.texItemFire)
+	rl.UnloadTexture(am.texItemIce)
+
+	rl.UnloadTexture(am.texEffectBlood)
+	rl.UnloadTexture(am.texEffectMedal)
+	rl.UnloadTexture(am.texEffectCurse)
 }

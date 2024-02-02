@@ -3,13 +3,14 @@ package main
 import rl "github.com/gen2brain/raylib-go/raylib"
 
 type Tile struct {
+	board uint32
 	coord Vec2
 }
 
 func (t *Tile) Render(style BoardStyle) {
 	var color = colorAt(t.coord, style)
-	var pos = GetWorldOrigo().Add(t.coord.Scale(TILE_SIZE))
-	rl.DrawRectangle(int32(pos.x), int32(pos.y), TILE_SIZE, TILE_SIZE, color)
+	var pos = GetWorldOrigo().Add(t.coord.Scale(TileSize))
+	rl.DrawRectangle(int32(pos.x), int32(pos.y), TileSize, TileSize, color)
 }
 
 func colorAt(coord Vec2, style BoardStyle) rl.Color {
