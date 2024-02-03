@@ -151,6 +151,15 @@ func (s *Sandbox) GetStatusEffectType(id uint32) *StatusEffectType {
 	return &s.effectTypes[id]
 }
 
+func (s *Sandbox) GetStatusEffectTypeByName(name string) *StatusEffectType {
+	for i := 0; i < len(s.effectTypes); i++ {
+		if s.effectTypes[i].name == name {
+			return &s.effectTypes[i]
+		}
+	}
+	return nil
+}
+
 func (s *Sandbox) NewStatusEffect(piece uint32, typ uint32) *StatusEffect {
 	s.effects = append(s.effects, StatusEffect{
 		piece: piece,
@@ -171,6 +180,15 @@ func (s *Sandbox) RegisterObstacleType(name string, tex rl.Texture2D) *ObstacleT
 
 func (s *Sandbox) GetObstacleType(id uint32) *ObstacleType {
 	return &s.obstacleTypes[id]
+}
+
+func (s *Sandbox) GetObstacleTypeByName(name string) *ObstacleType {
+	for i := 0; i < len(s.obstacleTypes); i++ {
+		if s.obstacleTypes[i].name == name {
+			return &s.obstacleTypes[i]
+		}
+	}
+	return nil
 }
 
 func (s *Sandbox) NewObstacle(coord Vec2, typ uint32) *Obstacle {
