@@ -29,6 +29,10 @@ func (v Vec2) ManLength() int {
 	return Absi(v.x) + Absi(v.y)
 }
 
+func (v Vec2) Modulo(d int) Vec2 {
+	return Vec2{x: v.x % d, y: v.y % d}
+}
+
 func (v Vec2) CompwiseMul(u Vec2) Vec2 {
 	return Vec2{x: v.x * u.x, y: v.y * u.y}
 }

@@ -33,6 +33,9 @@ func main() {
 	}
 
 	for !rl.WindowShouldClose() {
+
+		handleBoardInteraction()
+
 		rl.BeginDrawing()
 		rl.ClearBackground(rl.RayWhite)
 
@@ -49,6 +52,24 @@ func main() {
 		planeIndex = rg.ToggleGroup(rl.NewRectangle(float32(rl.GetScreenWidth()/2-(120*3+int(rg.GetStyle(rg.DEFAULT, rg.GROUP_PADDING)))/2), float32(rl.GetScreenHeight()-36-20), 120, 36), "Heaven;Earth;Hell", planeIndex)
 
 		rl.EndDrawing()
+	}
+}
+
+func handleBoardInteraction() {
+	if rl.IsMouseButtonPressed(rl.MouseButtonLeft) {
+		var coord = GetHoveredCoord()
+		var piece = sandbox.GetPieceAt(coord)
+		if piece == nil {
+			selection.Deselect()
+		} else {
+			selection.SelectPiece(piece.id)
+		}
+	} else if id, ok := selection.GetSelectedPieceId(); ok {
+		if rl.IsMouseButtonPressed(rl.MouseButtonRight) {
+			var coord = GetHoveredCoord()
+			var piece = sandbox.GetPiece(id)
+			piece.coord = coord
+		}
 	}
 }
 

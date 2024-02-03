@@ -83,6 +83,15 @@ func (s *Sandbox) RemovePiece(id uint32) bool {
 	return false
 }
 
+func (s *Sandbox) GetPieceAt(coord Vec2) *Piece {
+	for i := 0; i < len(s.pieces); i++ {
+		if s.pieces[i].coord == coord {
+			return &s.pieces[i]
+		}
+	}
+	return nil
+}
+
 func (s *Sandbox) RegisterEffectType(tex rl.Texture2D) *StatusEffectType {
 	// We assume effect types are never unregistered
 	s.effectTypes = append(s.effectTypes, StatusEffectType{
