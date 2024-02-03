@@ -1,6 +1,9 @@
 package main
 
-import rl "github.com/gen2brain/raylib-go/raylib"
+import (
+	rl "github.com/gen2brain/raylib-go/raylib"
+	"sort"
+)
 
 var sandbox = Sandbox{}
 
@@ -73,16 +76,35 @@ func (s *Sandbox) RemovePiece(id uint32) bool {
 	if len(s.pieces) == 0 {
 		return false
 	}
+
+	// Remove status effects on this piece
+	var removedEffects = 0
+	for i := len(s.effects) - 1; i >= 0; i-- {
+		if s.effects[i].piece == id {
+			removedEffects++
+			s.effects[i] = s.effects[len(s.effects)-removedEffects]
+		}
+	}
+	s.effects = s.effects[:len(s.effects)-removedEffects]
+
 	// The slice is unordered, so we insert the last Piece where there removed Piece was and shorten the slice
-	var last = s.pieces[len(s.pieces)-1]
 	for i := 0; i < len(s.pieces); i++ {
 		if s.pieces[i].id == id {
-			s.pieces[i] = last
+			s.pieces[i] = s.pieces[len(s.pieces)-1]
 			s.pieces = s.pieces[:len(s.pieces)-1]
 			return true
 		}
 	}
 	return false
+}
+
+func (s *Sandbox) GetPieceAt(coord Vec2) *Piece {
+	for i := 0; i < len(s.pieces); i++ {
+		if s.pieces[i].coord == coord {
+			return &s.pieces[i]
+		}
+	}
+	return nil
 }
 
 func (s *Sandbox) RegisterEffectType(tex rl.Texture2D) *StatusEffectType {
@@ -161,6 +183,9 @@ func (s *Sandbox) Render(board uint32) {
 					effectsToRender = append(effectsToRender, &s.effects[j])
 				}
 			}
+			sort.Slice(effectsToRender, func(a, b int) bool {
+				return effectsToRender[a].typ > effectsToRender[b].typ
+			})
 			for j := 0; j < len(effectsToRender); j++ {
 				effectsToRender[j].Render(s.pieces[i].coord, j, len(effectsToRender))
 			}
