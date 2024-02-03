@@ -10,6 +10,7 @@ var sandbox = Sandbox{}
 type Sandbox struct {
 	boards        [3]Board
 	tiles         []Tile
+	pieceTypes    []PieceType
 	pieces        []Piece
 	nextPieceId   uint32
 	effectTypes   []StatusEffectType
@@ -52,13 +53,38 @@ func (s *Sandbox) RemoveTile(board uint32, coord Vec2) bool {
 	return false
 }
 
-func (s *Sandbox) NewPiece(board uint32, coord Vec2, tex rl.Texture2D) *Piece {
+func (s *Sandbox) RegisterPieceType(name string, texWhite rl.Texture2D, texBlack rl.Texture2D) *PieceType {
+	// We assume piece types are never unregistered
+	s.pieceTypes = append(s.pieceTypes, PieceType{
+		id:       uint32(len(s.pieceTypes)),
+		name:     name,
+		texWhite: texWhite,
+		texBlack: texBlack,
+	})
+	return &s.pieceTypes[len(s.pieceTypes)-1]
+}
+
+func (s *Sandbox) GetPieceType(id uint32) *PieceType {
+	return &s.pieceTypes[id]
+}
+
+func (s *Sandbox) GetPieceTypeByName(name string) *PieceType {
+	for i := 0; i < len(s.pieceTypes); i++ {
+		if s.pieceTypes[i].name == name {
+			return &s.pieceTypes[i]
+		}
+	}
+	return nil
+}
+
+func (s *Sandbox) NewPiece(typ uint32, color PieceColor, board uint32, coord Vec2) *Piece {
 	s.nextPieceId++
 	s.pieces = append(s.pieces, Piece{
-		id:      s.nextPieceId - 1,
-		board:   board,
-		coord:   coord,
-		texture: tex,
+		id:    s.nextPieceId - 1,
+		typ:   typ,
+		color: color,
+		board: board,
+		coord: coord,
 	})
 	return &s.pieces[len(s.pieces)-1]
 }

@@ -19,6 +19,7 @@ func main() {
 	assets.LoadAll()
 	defer assets.UnloadAll()
 
+	registerPieceTypes()
 	registerStatusEffectTypes()
 	registerObstacleTypes()
 	setupBoard(0, BoardStyleHeaven, false)
@@ -82,6 +83,15 @@ func handleBoardInteraction() {
 	}
 }
 
+func registerPieceTypes() {
+	sandbox.RegisterPieceType(PAWN, assets.texWhitePawn, assets.texBlackPawn)
+	sandbox.RegisterPieceType(KNIGHT, assets.texWhiteKnight, assets.texBlackKnight)
+	sandbox.RegisterPieceType(BISHOP, assets.texWhiteBishop, assets.texBlackBishop)
+	sandbox.RegisterPieceType(ROOK, assets.texWhiteRook, assets.texBlackRook)
+	sandbox.RegisterPieceType(QUEEN, assets.texWhiteQueen, assets.texBlackQueen)
+	sandbox.RegisterPieceType(KING, assets.texWhiteKing, assets.texBlackKing)
+}
+
 func registerStatusEffectTypes() {
 	sandbox.RegisterEffectType(assets.texEffectBlood)
 	sandbox.RegisterEffectType(assets.texEffectMedal)
@@ -107,26 +117,26 @@ func setupBoard(boardId uint32, style BoardStyle, withPieces bool) {
 	if !withPieces {
 		return
 	}
-	sandbox.NewPiece(boardId, Vec2{0, 0}, assets.texBlackRook)
-	sandbox.NewPiece(boardId, Vec2{1, 0}, assets.texBlackKnight)
-	sandbox.NewPiece(boardId, Vec2{2, 0}, assets.texBlackBishop)
-	sandbox.NewPiece(boardId, Vec2{3, 0}, assets.texBlackQueen)
-	sandbox.NewPiece(boardId, Vec2{4, 0}, assets.texBlackKing)
-	sandbox.NewPiece(boardId, Vec2{5, 0}, assets.texBlackBishop)
-	sandbox.NewPiece(boardId, Vec2{6, 0}, assets.texBlackKnight)
-	sandbox.NewPiece(boardId, Vec2{7, 0}, assets.texBlackRook)
+	sandbox.NewPiece(sandbox.GetPieceTypeByName(ROOK).id, BLACK, boardId, Vec2{0, 0})
+	sandbox.NewPiece(sandbox.GetPieceTypeByName(KNIGHT).id, BLACK, boardId, Vec2{1, 0})
+	sandbox.NewPiece(sandbox.GetPieceTypeByName(BISHOP).id, BLACK, boardId, Vec2{2, 0})
+	sandbox.NewPiece(sandbox.GetPieceTypeByName(QUEEN).id, BLACK, boardId, Vec2{3, 0})
+	sandbox.NewPiece(sandbox.GetPieceTypeByName(KING).id, BLACK, boardId, Vec2{4, 0})
+	sandbox.NewPiece(sandbox.GetPieceTypeByName(BISHOP).id, BLACK, boardId, Vec2{5, 0})
+	sandbox.NewPiece(sandbox.GetPieceTypeByName(KNIGHT).id, BLACK, boardId, Vec2{6, 0})
+	sandbox.NewPiece(sandbox.GetPieceTypeByName(ROOK).id, BLACK, boardId, Vec2{7, 0})
 	for x := 0; x < 8; x++ {
-		sandbox.NewPiece(boardId, Vec2{x, 1}, assets.texBlackPawn)
+		sandbox.NewPiece(sandbox.GetPieceTypeByName(PAWN).id, BLACK, boardId, Vec2{x, 1})
 	}
-	sandbox.NewPiece(boardId, Vec2{0, 7}, assets.texWhiteRook)
-	sandbox.NewPiece(boardId, Vec2{1, 7}, assets.texWhiteKnight)
-	sandbox.NewPiece(boardId, Vec2{2, 7}, assets.texWhiteBishop)
-	sandbox.NewPiece(boardId, Vec2{3, 7}, assets.texWhiteQueen)
-	sandbox.NewPiece(boardId, Vec2{4, 7}, assets.texWhiteKing)
-	sandbox.NewPiece(boardId, Vec2{5, 7}, assets.texWhiteBishop)
-	sandbox.NewPiece(boardId, Vec2{6, 7}, assets.texWhiteKnight)
-	sandbox.NewPiece(boardId, Vec2{7, 7}, assets.texWhiteRook)
+	sandbox.NewPiece(sandbox.GetPieceTypeByName(ROOK).id, WHITE, boardId, Vec2{0, 7})
+	sandbox.NewPiece(sandbox.GetPieceTypeByName(KNIGHT).id, WHITE, boardId, Vec2{1, 7})
+	sandbox.NewPiece(sandbox.GetPieceTypeByName(BISHOP).id, WHITE, boardId, Vec2{2, 7})
+	sandbox.NewPiece(sandbox.GetPieceTypeByName(QUEEN).id, WHITE, boardId, Vec2{3, 7})
+	sandbox.NewPiece(sandbox.GetPieceTypeByName(KING).id, WHITE, boardId, Vec2{4, 7})
+	sandbox.NewPiece(sandbox.GetPieceTypeByName(BISHOP).id, WHITE, boardId, Vec2{5, 7})
+	sandbox.NewPiece(sandbox.GetPieceTypeByName(KNIGHT).id, WHITE, boardId, Vec2{6, 7})
+	sandbox.NewPiece(sandbox.GetPieceTypeByName(ROOK).id, WHITE, boardId, Vec2{7, 7})
 	for x := 0; x < 8; x++ {
-		sandbox.NewPiece(boardId, Vec2{x, 6}, assets.texWhitePawn)
+		sandbox.NewPiece(sandbox.GetPieceTypeByName(PAWN).id, WHITE, boardId, Vec2{x, 6})
 	}
 }
