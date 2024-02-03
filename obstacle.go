@@ -5,9 +5,17 @@ import (
 	"math"
 )
 
+const (
+	NameChaosOrb = "Chaos Orb"
+	NameCoin     = "Coin"
+	NameIce      = "Ice"
+	NameFire     = "Fire"
+)
+
 type ObstacleType struct {
-	id  uint32
-	tex rl.Texture2D
+	id   uint32
+	name string
+	tex  rl.Texture2D
 }
 
 type Obstacle struct {

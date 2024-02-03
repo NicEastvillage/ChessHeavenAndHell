@@ -2,9 +2,16 @@ package main
 
 import rl "github.com/gen2brain/raylib-go/raylib"
 
+const (
+	NameExperience = "Experience"
+	NameBloody     = "Bloody"
+	NameCurse      = "Curse"
+)
+
 type StatusEffectType struct {
-	id  uint32
-	tex rl.Texture2D
+	id   uint32
+	name string
+	tex  rl.Texture2D
 }
 
 type StatusEffect struct {

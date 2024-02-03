@@ -10,6 +10,7 @@ var sandbox = Sandbox{}
 type Sandbox struct {
 	boards        [3]Board
 	tiles         []Tile
+	pieceTypes    []PieceType
 	pieces        []Piece
 	nextPieceId   uint32
 	effectTypes   []StatusEffectType
@@ -52,15 +53,44 @@ func (s *Sandbox) RemoveTile(board uint32, coord Vec2) bool {
 	return false
 }
 
-func (s *Sandbox) NewPiece(board uint32, coord Vec2, tex rl.Texture2D) *Piece {
+func (s *Sandbox) RegisterPieceType(name string, texWhite rl.Texture2D, texBlack rl.Texture2D) *PieceType {
+	// We assume piece types are never unregistered
+	s.pieceTypes = append(s.pieceTypes, PieceType{
+		id:       uint32(len(s.pieceTypes)),
+		name:     name,
+		texWhite: texWhite,
+		texBlack: texBlack,
+	})
+	return &s.pieceTypes[len(s.pieceTypes)-1]
+}
+
+func (s *Sandbox) GetPieceType(id uint32) *PieceType {
+	return &s.pieceTypes[id]
+}
+
+func (s *Sandbox) GetPieceTypeByName(name string) *PieceType {
+	for i := 0; i < len(s.pieceTypes); i++ {
+		if s.pieceTypes[i].name == name {
+			return &s.pieceTypes[i]
+		}
+	}
+	return nil
+}
+
+func (s *Sandbox) NewPiece(typ uint32, color PieceColor, board uint32, coord Vec2) *Piece {
 	s.nextPieceId++
 	s.pieces = append(s.pieces, Piece{
-		id:      s.nextPieceId - 1,
-		board:   board,
-		coord:   coord,
-		texture: tex,
+		id:    s.nextPieceId - 1,
+		typ:   typ,
+		color: color,
+		board: board,
+		coord: coord,
 	})
 	return &s.pieces[len(s.pieces)-1]
+}
+
+func (s *Sandbox) NewPieceFromName(typ string, color PieceColor, board uint32, coord Vec2) *Piece {
+	return s.NewPiece(s.GetPieceTypeByName(typ).id, color, board, coord)
 }
 
 func (s *Sandbox) GetPiece(id uint32) *Piece {
@@ -107,17 +137,27 @@ func (s *Sandbox) GetPieceAt(coord Vec2) *Piece {
 	return nil
 }
 
-func (s *Sandbox) RegisterEffectType(tex rl.Texture2D) *StatusEffectType {
+func (s *Sandbox) RegisterEffectType(name string, tex rl.Texture2D) *StatusEffectType {
 	// We assume effect types are never unregistered
 	s.effectTypes = append(s.effectTypes, StatusEffectType{
-		id:  uint32(len(s.effectTypes)),
-		tex: tex,
+		id:   uint32(len(s.effectTypes)),
+		name: name,
+		tex:  tex,
 	})
 	return &s.effectTypes[len(s.effectTypes)-1]
 }
 
 func (s *Sandbox) GetStatusEffectType(id uint32) *StatusEffectType {
 	return &s.effectTypes[id]
+}
+
+func (s *Sandbox) GetStatusEffectTypeByName(name string) *StatusEffectType {
+	for i := 0; i < len(s.effectTypes); i++ {
+		if s.effectTypes[i].name == name {
+			return &s.effectTypes[i]
+		}
+	}
+	return nil
 }
 
 func (s *Sandbox) NewStatusEffect(piece uint32, typ uint32) *StatusEffect {
@@ -128,17 +168,27 @@ func (s *Sandbox) NewStatusEffect(piece uint32, typ uint32) *StatusEffect {
 	return &s.effects[len(s.effects)-1]
 }
 
-func (s *Sandbox) RegisterObstacleType(tex rl.Texture2D) *ObstacleType {
+func (s *Sandbox) RegisterObstacleType(name string, tex rl.Texture2D) *ObstacleType {
 	// We assume obstacle types are never unregistered
 	s.obstacleTypes = append(s.obstacleTypes, ObstacleType{
-		id:  uint32(len(s.obstacleTypes)),
-		tex: tex,
+		id:   uint32(len(s.obstacleTypes)),
+		name: name,
+		tex:  tex,
 	})
 	return &s.obstacleTypes[len(s.obstacleTypes)-1]
 }
 
 func (s *Sandbox) GetObstacleType(id uint32) *ObstacleType {
 	return &s.obstacleTypes[id]
+}
+
+func (s *Sandbox) GetObstacleTypeByName(name string) *ObstacleType {
+	for i := 0; i < len(s.obstacleTypes); i++ {
+		if s.obstacleTypes[i].name == name {
+			return &s.obstacleTypes[i]
+		}
+	}
+	return nil
 }
 
 func (s *Sandbox) NewObstacle(coord Vec2, typ uint32) *Obstacle {
