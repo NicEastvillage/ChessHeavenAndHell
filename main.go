@@ -69,6 +69,8 @@ func handleBoardInteraction() {
 			var coord = GetHoveredCoord()
 			var piece = sandbox.GetPiece(id)
 			piece.coord = coord
+		} else if rl.IsKeyPressed(rl.KeyDelete) {
+			sandbox.RemovePiece(id)
 		}
 	}
 }
