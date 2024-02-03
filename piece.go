@@ -3,12 +3,12 @@ package main
 import rl "github.com/gen2brain/raylib-go/raylib"
 
 const (
-	PAWN   = "Pawn"
-	KNIGHT = "Knight"
-	BISHOP = "Bishop"
-	ROOK   = "Rook"
-	QUEEN  = "Queen"
-	KING   = "King"
+	NamePawn   = "Pawn"
+	NameKnight = "Knight"
+	NameBishop = "Bishop"
+	NameRook   = "Rook"
+	NameQueen  = "Queen"
+	NameKing   = "King"
 )
 
 type PieceColor uint32
