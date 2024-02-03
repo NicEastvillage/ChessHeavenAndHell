@@ -20,6 +20,7 @@ func main() {
 	defer assets.UnloadAll()
 
 	registerStatusEffectTypes()
+	registerObstacleTypes()
 	setupBoard(0, BoardStyleHeaven, false)
 	setupBoard(1, BoardStyleEarth, true)
 	setupBoard(2, BoardStyleHell, false)
@@ -30,6 +31,12 @@ func main() {
 		var piece = sandbox.pieces[rand.Intn(len(sandbox.pieces))].id
 		var effect = sandbox.effectTypes[rand.Intn(len(sandbox.effectTypes))].id
 		sandbox.NewStatusEffect(piece, effect)
+	}
+	for x := 0; x < 8; x++ {
+		for i := 0; i < x; i++ {
+			var obstType = sandbox.obstacleTypes[rand.Intn(len(sandbox.obstacleTypes))].id
+			sandbox.NewObstacle(Vec2{x: x, y: 4}, obstType)
+		}
 	}
 
 	for !rl.WindowShouldClose() {
@@ -56,6 +63,13 @@ func registerStatusEffectTypes() {
 	sandbox.RegisterEffectType(assets.texEffectBlood)
 	sandbox.RegisterEffectType(assets.texEffectMedal)
 	sandbox.RegisterEffectType(assets.texEffectCurse)
+}
+
+func registerObstacleTypes() {
+	sandbox.RegisterObstacleType(assets.texObstacleChaosOrb)
+	sandbox.RegisterObstacleType(assets.texObstacleCoin)
+	sandbox.RegisterObstacleType(assets.texObstacleIce)
+	sandbox.RegisterObstacleType(assets.texObstacleFire)
 }
 
 func setupBoard(boardId uint32, style BoardStyle, withPieces bool) {

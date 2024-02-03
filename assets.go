@@ -18,10 +18,10 @@ type AssetManager struct {
 	texBlackQueen  rl.Texture2D
 	texBlackKing   rl.Texture2D
 
-	texItemChaosOrb rl.Texture2D
-	texItemCoin     rl.Texture2D
-	texItemFire     rl.Texture2D
-	texItemIce      rl.Texture2D
+	texObstacleChaosOrb rl.Texture2D
+	texObstacleCoin     rl.Texture2D
+	texObstacleFire     rl.Texture2D
+	texObstacleIce      rl.Texture2D
 
 	texEffectBlood rl.Texture2D
 	texEffectMedal rl.Texture2D
@@ -42,10 +42,10 @@ func (am *AssetManager) LoadAll() {
 	am.texBlackQueen = rl.LoadTexture("Assets/black_queen.png")
 	am.texBlackKing = rl.LoadTexture("Assets/black_king.png")
 
-	am.texItemChaosOrb = rl.LoadTexture("Assets/item_chaos_orb.png")
-	am.texItemCoin = rl.LoadTexture("Assets/item_coin.png")
-	am.texItemFire = rl.LoadTexture("Assets/item_fire.png")
-	am.texItemIce = rl.LoadTexture("Assets/item_ice.png")
+	am.texObstacleChaosOrb = rl.LoadTexture("Assets/obstacle_chaos_orb.png")
+	am.texObstacleCoin = rl.LoadTexture("Assets/obstacle_coin.png")
+	am.texObstacleFire = rl.LoadTexture("Assets/obstacle_fire.png")
+	am.texObstacleIce = rl.LoadTexture("Assets/obstacle_ice.png")
 
 	am.texEffectBlood = rl.LoadTexture("Assets/se_blood.png")
 	am.texEffectMedal = rl.LoadTexture("Assets/se_medal.png")
@@ -66,10 +66,10 @@ func (am *AssetManager) UnloadAll() {
 	rl.UnloadTexture(am.texBlackQueen)
 	rl.UnloadTexture(am.texBlackKing)
 
-	rl.UnloadTexture(am.texItemChaosOrb)
-	rl.UnloadTexture(am.texItemCoin)
-	rl.UnloadTexture(am.texItemFire)
-	rl.UnloadTexture(am.texItemIce)
+	rl.UnloadTexture(am.texObstacleChaosOrb)
+	rl.UnloadTexture(am.texObstacleCoin)
+	rl.UnloadTexture(am.texObstacleFire)
+	rl.UnloadTexture(am.texObstacleIce)
 
 	rl.UnloadTexture(am.texEffectBlood)
 	rl.UnloadTexture(am.texEffectMedal)
