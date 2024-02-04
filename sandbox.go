@@ -1,8 +1,9 @@
 package main
 
 import (
-	rl "github.com/gen2brain/raylib-go/raylib"
 	"sort"
+
+	rl "github.com/gen2brain/raylib-go/raylib"
 )
 
 var sandbox = Sandbox{}
@@ -107,15 +108,7 @@ func (s *Sandbox) RemovePiece(id uint32) bool {
 		return false
 	}
 
-	// Remove status effects on this piece
-	var removedEffects = 0
-	for i := len(s.effects) - 1; i >= 0; i-- {
-		if s.effects[i].piece == id {
-			removedEffects++
-			s.effects[i] = s.effects[len(s.effects)-removedEffects]
-		}
-	}
-	s.effects = s.effects[:len(s.effects)-removedEffects]
+	s.RemoveEffectsFromPiece(id)
 
 	// The slice is unordered, so we insert the last Piece where there removed Piece was and shorten the slice
 	for i := 0; i < len(s.pieces); i++ {
@@ -126,6 +119,17 @@ func (s *Sandbox) RemovePiece(id uint32) bool {
 		}
 	}
 	return false
+}
+
+func (s *Sandbox) RemoveEffectsFromPiece(pieceId uint32) {
+	var removedEffects = 0
+	for i := len(s.effects) - 1; i >= 0; i-- {
+		if s.effects[i].piece == pieceId {
+			removedEffects++
+			s.effects[i] = s.effects[len(s.effects)-removedEffects]
+		}
+	}
+	s.effects = s.effects[:len(s.effects)-removedEffects]
 }
 
 func (s *Sandbox) GetPieceAt(coord Vec2) *Piece {
@@ -151,6 +155,16 @@ func (s *Sandbox) GetStatusEffectType(id uint32) *StatusEffectType {
 	return &s.effectTypes[id]
 }
 
+func (s *Sandbox) GetStatusEffectCount(pieceId uint32, statusType uint32) int {
+	var count = 0
+	for _, effect := range sandbox.effects {
+		if effect.typ == statusType && effect.piece == pieceId {
+			count++
+		}
+	}
+	return count
+}
+
 func (s *Sandbox) GetStatusEffectTypeByName(name string) *StatusEffectType {
 	for i := 0; i < len(s.effectTypes); i++ {
 		if s.effectTypes[i].name == name {
@@ -166,6 +180,15 @@ func (s *Sandbox) NewStatusEffect(piece uint32, typ uint32) *StatusEffect {
 		typ:   typ,
 	})
 	return &s.effects[len(s.effects)-1]
+}
+
+func (s *Sandbox) RemoveStatusEffect(piece uint32, typ uint32) {
+	for i, effect := range s.effects {
+		if effect.typ == typ && effect.piece == piece {
+			s.effects = append(s.effects[:i], s.effects[i+1:]...)
+			return
+		}
+	}
 }
 
 func (s *Sandbox) RegisterObstacleType(name string, tex rl.Texture2D) *ObstacleType {

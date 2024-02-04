@@ -1,10 +1,12 @@
 package main
 
 import (
-	rl "github.com/gen2brain/raylib-go/raylib"
 	"math/rand"
+
+	rl "github.com/gen2brain/raylib-go/raylib"
+
+	rg "github.com/gen2brain/raylib-go/raygui"
 )
-import rg "github.com/gen2brain/raylib-go/raygui"
 
 func main() {
 	rl.SetConfigFlags(rl.FlagWindowResizable)
@@ -55,6 +57,21 @@ func main() {
 }
 
 func handleBoardInteraction(ui *UIState) {
+	handleMouseInteraction(ui)
+
+	if pieceId, ok := selection.GetSelectedPieceId(); ok {
+		if rl.IsKeyPressed(rl.KeyDelete) || rl.IsKeyPressed(rl.KeyBackspace) {
+			sandbox.RemovePiece(pieceId)
+		}
+	}
+}
+
+func handleMouseInteraction(ui *UIState) {
+	// Don't handle mouse events when clicking inside the right hand side panel
+	if rl.GetMousePosition().X > float32(rl.GetScreenWidth()-UiRightMenuWidth) {
+		return
+	}
+
 	if rl.IsMouseButtonPressed(rl.MouseButtonLeft) {
 		var coord = GetHoveredCoord()
 		var piece = sandbox.GetPieceAt(coord)
@@ -69,8 +86,6 @@ func handleBoardInteraction(ui *UIState) {
 			var coord = GetHoveredCoord()
 			var piece = sandbox.GetPiece(id)
 			piece.coord = coord
-		} else if rl.IsKeyPressed(rl.KeyDelete) || rl.IsKeyPressed(rl.KeyBackspace) {
-			sandbox.RemovePiece(id)
 		}
 	} else if ui.anyPieceSelected {
 		if rl.IsMouseButtonPressed(rl.MouseButtonRight) {
