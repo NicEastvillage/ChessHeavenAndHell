@@ -26,7 +26,7 @@ func main() {
 	setupBoard(1, BoardStyleEarth, true)
 	setupBoard(2, BoardStyleHell, false)
 
-	var planeIndex = int32(1)
+	var ui = NewUIState()
 
 	for i := 0; i < 20; i++ {
 		var piece = sandbox.pieces[rand.Intn(len(sandbox.pieces))].id
@@ -42,28 +42,19 @@ func main() {
 
 	for !rl.WindowShouldClose() {
 
-		handleBoardInteraction()
+		handleBoardInteraction(&ui)
 
 		rl.BeginDrawing()
 		rl.ClearBackground(rl.RayWhite)
 
-		sandbox.Render(uint32(planeIndex))
-
-		if rg.Button(rl.NewRectangle(20, 20, 200, 36), "Remove random") {
-			println("Clicked!")
-			if len(sandbox.pieces) > 0 {
-				var id = sandbox.pieces[rand.Intn(len(sandbox.pieces))].id
-				sandbox.RemovePiece(id)
-			}
-		}
-
-		planeIndex = rg.ToggleGroup(rl.NewRectangle(float32(rl.GetScreenWidth()/2-(120*3+int(rg.GetStyle(rg.DEFAULT, rg.GROUP_PADDING)))/2), float32(rl.GetScreenHeight()-36-20), 120, 36), "Heaven;Earth;Hell", planeIndex)
+		sandbox.Render(uint32(ui.board))
+		ui.Render()
 
 		rl.EndDrawing()
 	}
 }
 
-func handleBoardInteraction() {
+func handleBoardInteraction(ui *UIState) {
 	if rl.IsMouseButtonPressed(rl.MouseButtonLeft) {
 		var coord = GetHoveredCoord()
 		var piece = sandbox.GetPieceAt(coord)
@@ -71,14 +62,20 @@ func handleBoardInteraction() {
 			selection.Deselect()
 		} else {
 			selection.SelectPiece(piece.id)
+			ui.anyPieceSelected = false
 		}
 	} else if id, ok := selection.GetSelectedPieceId(); ok {
 		if rl.IsMouseButtonPressed(rl.MouseButtonRight) {
 			var coord = GetHoveredCoord()
 			var piece = sandbox.GetPiece(id)
 			piece.coord = coord
-		} else if rl.IsKeyPressed(rl.KeyDelete) {
+		} else if rl.IsKeyPressed(rl.KeyDelete) || rl.IsKeyPressed(rl.KeyBackspace) {
 			sandbox.RemovePiece(id)
+		}
+	} else if ui.anyPieceSelected {
+		if rl.IsMouseButtonPressed(rl.MouseButtonRight) {
+			var coord = GetHoveredCoord()
+			sandbox.NewPiece(ui.piece, PieceColor(ui.color), uint32(ui.board), coord)
 		}
 	}
 }
