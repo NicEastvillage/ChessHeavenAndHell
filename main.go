@@ -36,7 +36,7 @@ func main() {
 	for x := 0; x < 8; x++ {
 		for i := 0; i < x; i++ {
 			var obstType = sandbox.obstacleTypes[rand.Intn(len(sandbox.obstacleTypes))].id
-			sandbox.NewObstacle(Vec2{x: x, y: 4}, obstType)
+			sandbox.NewObstacle(Vec2{x: x, y: 4}, 0, obstType)
 		}
 	}
 

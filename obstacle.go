@@ -20,6 +20,7 @@ type ObstacleType struct {
 
 type Obstacle struct {
 	coord Vec2
+	board uint32
 	typ   uint32
 }
 

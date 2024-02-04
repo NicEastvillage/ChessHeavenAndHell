@@ -191,9 +191,10 @@ func (s *Sandbox) GetObstacleTypeByName(name string) *ObstacleType {
 	return nil
 }
 
-func (s *Sandbox) NewObstacle(coord Vec2, typ uint32) *Obstacle {
+func (s *Sandbox) NewObstacle(coord Vec2, board uint32, typ uint32) *Obstacle {
 	s.obstacles = append(s.obstacles, Obstacle{
 		coord: coord,
+		board: board,
 		typ:   typ,
 	})
 	return &s.obstacles[len(s.obstacles)-1]
@@ -207,10 +208,10 @@ func (s *Sandbox) Render(board uint32) {
 	}
 	var obstacleHasBeenRenderedFlag = make([]bool, len(s.obstacles))
 	for i := 0; i < len(s.obstacles); i++ {
-		if !obstacleHasBeenRenderedFlag[i] {
+		if !obstacleHasBeenRenderedFlag[i] && s.obstacles[i].board == board {
 			var obstaclesOnThisCoord = make([]*Obstacle, 0)
 			for j := i; j < len(s.obstacles); j++ {
-				if !obstacleHasBeenRenderedFlag[j] && s.obstacles[i].coord == s.obstacles[j].coord {
+				if !obstacleHasBeenRenderedFlag[j] && s.obstacles[i].coord == s.obstacles[j].coord && s.obstacles[i].board == board {
 					obstacleHasBeenRenderedFlag[j] = true
 					obstaclesOnThisCoord = append(obstaclesOnThisCoord, &s.obstacles[j])
 				}
