@@ -155,16 +155,6 @@ func (s *Sandbox) GetStatusEffectType(id uint32) *StatusEffectType {
 	return &s.effectTypes[id]
 }
 
-func (s *Sandbox) GetStatusEffectCount(pieceId uint32, statusType uint32) int {
-	var count = 0
-	for _, effect := range sandbox.effects {
-		if effect.typ == statusType && effect.piece == pieceId {
-			count++
-		}
-	}
-	return count
-}
-
 func (s *Sandbox) GetStatusEffectTypeByName(name string) *StatusEffectType {
 	for i := 0; i < len(s.effectTypes); i++ {
 		if s.effectTypes[i].name == name {
@@ -189,6 +179,16 @@ func (s *Sandbox) RemoveStatusEffect(piece uint32, typ uint32) {
 			return
 		}
 	}
+}
+
+func (s *Sandbox) GetStatusEffectCount(pieceId uint32, statusType uint32) int {
+	var count = 0
+	for _, effect := range sandbox.effects {
+		if effect.typ == statusType && effect.piece == pieceId {
+			count++
+		}
+	}
+	return count
 }
 
 func (s *Sandbox) RegisterObstacleType(name string, tex rl.Texture2D) *ObstacleType {
@@ -221,6 +221,27 @@ func (s *Sandbox) NewObstacle(coord Vec2, board uint32, typ uint32) *Obstacle {
 		typ:   typ,
 	})
 	return &s.obstacles[len(s.obstacles)-1]
+}
+
+func (s *Sandbox) GetObstacleCount(coord Vec2, typ uint32) int {
+	var count = 0
+	for i := 0; i < len(s.obstacles); i++ {
+		if s.obstacles[i].typ == typ && s.obstacles[i].coord == coord {
+			count++
+		}
+	}
+	return count
+}
+
+func (s *Sandbox) RemoveObstacle(coord Vec2, typ uint32) bool {
+	for i := 0; i < len(s.obstacles); i++ {
+		if s.obstacles[i].typ == typ && s.obstacles[i].coord == coord {
+			s.obstacles[i] = s.obstacles[len(s.obstacles)-1]
+			s.obstacles = s.obstacles[:len(s.obstacles)-1]
+			return true
+		}
+	}
+	return false
 }
 
 func (s *Sandbox) Render(board uint32, selection *Selection) {
