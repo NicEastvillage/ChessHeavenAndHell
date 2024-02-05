@@ -76,24 +76,24 @@ func (s *UiState) RenderPieceContextMenu() {
 	var selectedPiece, _ = s.selection.GetSelectedPieceId()
 
 	for i, effect := range sandbox.effectTypes {
-		var iconPosX = int32(rl.GetScreenWidth()) - 85
+		var iconPosX = int32(rl.GetScreenWidth()) - 100
 		var iconPosY = int32(i*55 + UiMargin + UiMarginBig + UiButtonH)
 		rl.DrawTexture(effect.tex, iconPosX, iconPosY, rl.White)
 
 		var effectCount = sandbox.GetStatusEffectCount(selectedPiece, effect.id)
-		rl.DrawText(fmt.Sprint(effectCount), iconPosX+5, iconPosY+25, 16, rl.Black)
-		if rg.Button(rl.NewRectangle(float32(iconPosX-55), float32(iconPosY), 40, 30), "--") && effectCount > 0 {
+		rl.DrawText(fmt.Sprint(effectCount), iconPosX+7, iconPosY+25, 16, rl.Black)
+		if rg.Button(rl.NewRectangle(float32(iconPosX-52), float32(iconPosY), 40, 30), "--") && effectCount > 0 {
 			sandbox.RemoveStatusEffect(selectedPiece, effect.id)
 		}
-		if rg.Button(rl.NewRectangle(float32(iconPosX+35), float32(iconPosY), 40, 30), "++") {
+		if rg.Button(rl.NewRectangle(float32(iconPosX+38), float32(iconPosY), 40, 30), "++") {
 			sandbox.NewStatusEffect(selectedPiece, effect.id)
 		}
 	}
 
-	var posX = float32(rl.GetScreenWidth() - UiRightMenuWidth + UiMarginSmall)
-	var posY = float32(rl.GetScreenHeight() - UiMarginSmall - 40)
-	var width = float32(rl.GetScreenWidth() - int(posX) - UiMarginSmall)
-	var height float32 = 40
+	var posX = float32(rl.GetScreenWidth() - 130 - UiMargin)
+	var posY = float32(rl.GetScreenHeight() - UiMargin - UiButtonH)
+	var width = float32(130)
+	var height float32 = UiButtonH
 	if rg.Button(rl.NewRectangle(posX, posY, width, height), "Remove piece") {
 		sandbox.RemovePiece(selectedPiece)
 		s.selection.Deselect()
@@ -104,7 +104,7 @@ func (s *UiState) RenderCoordContextMenu() {
 	var coord, _ = s.selection.GetSelectedCoord()
 
 	for i, obt := range sandbox.obstacleTypes {
-		var iconPosX = float32(rl.GetScreenWidth()) - 90
+		var iconPosX = float32(rl.GetScreenWidth()) - 100
 		var iconPosY = float32(i*55 + UiMargin + UiMarginBig + UiButtonH)
 		rl.DrawTextureEx(obt.tex, rl.NewVector2(iconPosX, iconPosY), 0, 32.0/float32(obt.tex.Height), rl.White)
 
@@ -118,10 +118,13 @@ func (s *UiState) RenderCoordContextMenu() {
 		}
 	}
 
-	var posX = float32(rl.GetScreenWidth() - UiRightMenuWidth + UiMarginSmall)
-	var posY = float32(rl.GetScreenHeight() - UiMarginSmall - 40)
-	var width = float32(rl.GetScreenWidth() - int(posX) - UiMarginSmall)
-	var height float32 = 40
+	var posX = float32(rl.GetScreenWidth() - 130 - UiMargin)
+	var posY = float32(rl.GetScreenHeight() - UiMargin - UiButtonH)
+	var width = float32(130)
+	var height float32 = UiButtonH
+	if rg.Button(rl.NewRectangle(posX, posY-UiMarginSmall-UiButtonH, width, height), "Add tile") {
+		sandbox.NewTile(uint32(s.board), coord)
+	}
 	if rg.Button(rl.NewRectangle(posX, posY, width, height), "Remove tile") {
 		sandbox.RemoveTile(uint32(s.board), coord)
 	}
