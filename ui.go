@@ -16,21 +16,20 @@ const (
 	UiRightMenuWidth = 155
 )
 
-type UIState struct {
-	board            int32
-	tab              int32
-	color            int32
-	anyPieceSelected bool
-	piece            uint32
+type UiState struct {
+	selection Selection
+	board     int32
+	tab       int32
+	color     int32
 }
 
-func NewUIState() UIState {
-	return UIState{
+func NewUiState() UiState {
+	return UiState{
 		board: int32(1),
 	}
 }
 
-func (s *UIState) Render() {
+func (s *UiState) Render() {
 	if rg.Button(rl.NewRectangle(UiMargin, UiMargin, 200, UiButtonH), "Remove random") {
 		println("Clicked!")
 		if len(sandbox.pieces) > 0 {
@@ -43,32 +42,31 @@ func (s *UIState) Render() {
 
 	s.board = rg.ToggleGroup(rl.NewRectangle(float32(rl.GetScreenWidth()/2-(120*3+int(rg.GetStyle(rg.DEFAULT, rg.GROUP_PADDING)))/2), float32(rl.GetScreenHeight()-UiButtonH-UiMargin), 120, UiButtonH), "Heaven;Earth;Hell", s.board)
 
-	if selection.HasSelection() {
+	if s.selection.selectionType == SelectionTypePiece {
 		s.RenderPieceContextMenu()
 	} else {
 		s.tab = rg.ToggleGroup(rl.NewRectangle(float32(rl.GetScreenWidth()-UiMargin-2*UiButtonH-2*int(rg.GetStyle(rg.DEFAULT, rg.GROUP_PADDING))), UiMargin+5, UiButtonH, UiButtonH), "#149#;#157#;#97#", s.tab)
 
 		if s.tab == 0 {
 			s.RenderPiecesTab()
-		} else {
-			s.anyPieceSelected = false
+		} else if s.selection.selectionType == SelectionTypePieceType {
+			s.selection.Deselect()
 		}
 	}
 }
 
-func (s *UIState) RenderPiecesTab() {
+func (s *UiState) RenderPiecesTab() {
 	s.color = rg.ToggleSlider(rl.NewRectangle(float32(rl.GetScreenWidth()-UiMargin-130), 2*UiMargin+UiButtonH, 130, UiButtonH), "White;Black", s.color)
 
 	for i := 0; i < len(sandbox.pieceTypes); i++ {
-		if rg.Toggle(rl.NewRectangle(float32(rl.GetScreenWidth()-UiMargin-130), float32(3*UiMargin+2*UiButtonH+i*(UiMarginSmall+UiButtonH)), 130, UiButtonH), sandbox.GetPieceType(uint32(i)).name, s.anyPieceSelected && s.piece == uint32(i)) {
-			s.anyPieceSelected = true
-			s.piece = uint32(i)
+		if rg.Toggle(rl.NewRectangle(float32(rl.GetScreenWidth()-UiMargin-130), float32(3*UiMargin+2*UiButtonH+i*(UiMarginSmall+UiButtonH)), 130, UiButtonH), sandbox.GetPieceType(uint32(i)).name, s.selection.IsPieceTypeSelected(uint32(i))) {
+			s.selection.SelectPieceType(uint32(i))
 		}
 	}
 }
 
-func (s *UIState) RenderPieceContextMenu() {
-	var selectedPiece, _ = selection.GetSelectedPieceId()
+func (s *UiState) RenderPieceContextMenu() {
+	var selectedPiece, _ = s.selection.GetSelectedPieceId()
 
 	for i, effect := range sandbox.effectTypes {
 		var iconPosX = int32(rl.GetScreenWidth()) - 85
@@ -91,6 +89,6 @@ func (s *UIState) RenderPieceContextMenu() {
 	var height float32 = 40
 	if rg.Button(rl.NewRectangle(posX, posY, width, height), "Remove piece") {
 		sandbox.RemovePiece(selectedPiece)
-		selection.Deselect()
+		s.selection.Deselect()
 	}
 }

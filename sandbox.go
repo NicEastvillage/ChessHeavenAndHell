@@ -223,7 +223,7 @@ func (s *Sandbox) NewObstacle(coord Vec2, board uint32, typ uint32) *Obstacle {
 	return &s.obstacles[len(s.obstacles)-1]
 }
 
-func (s *Sandbox) Render(board uint32) {
+func (s *Sandbox) Render(board uint32, selection *Selection) {
 	for i := 0; i < len(s.tiles); i++ {
 		if s.tiles[i].board == board {
 			s.tiles[i].Render(s.boards[board].style)
@@ -246,7 +246,7 @@ func (s *Sandbox) Render(board uint32) {
 	}
 	for i := 0; i < len(s.pieces); i++ {
 		if s.pieces[i].board == board {
-			s.pieces[i].Render()
+			s.pieces[i].Render(selection)
 		}
 	}
 	for i := 0; i < len(s.pieces); i++ {

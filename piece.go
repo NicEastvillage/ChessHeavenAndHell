@@ -33,7 +33,7 @@ type Piece struct {
 	coord Vec2
 }
 
-func (p *Piece) Render() {
+func (p *Piece) Render(selection *Selection) {
 	var typ = sandbox.GetPieceType(p.typ)
 	var tex = typ.texWhite
 	if p.color == BLACK {
