@@ -33,3 +33,7 @@ func (s *Selection) GetSelectedPieceId() (uint32, bool) {
 	}
 	return s.id, true
 }
+
+func (s *Selection) HasSelection() bool {
+	return s.typ != SelectionTypeNone
+}
