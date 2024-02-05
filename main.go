@@ -75,11 +75,15 @@ func handleMouseInteraction(ui *UiState) {
 
 	if rl.IsMouseButtonPressed(rl.MouseButtonLeft) {
 		var coord = GetHoveredCoord()
-		var piece = sandbox.GetPieceAt(coord)
-		if piece == nil {
-			ui.selection.Deselect()
-		} else {
-			ui.selection.SelectPiece(piece.id)
+		if ui.tab == 0 {
+			var piece = sandbox.GetPieceAt(coord)
+			if piece == nil {
+				ui.selection.Deselect()
+			} else {
+				ui.selection.SelectPiece(piece.id)
+			}
+		} else if ui.tab == 1 {
+			ui.selection.SelectCoord(coord)
 		}
 	} else if id, ok := ui.selection.GetSelectedPieceId(); ok {
 		if rl.IsMouseButtonPressed(rl.MouseButtonRight) {

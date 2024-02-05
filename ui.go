@@ -47,9 +47,14 @@ func (s *UiState) Render() {
 	} else {
 		s.tab = rg.ToggleGroup(rl.NewRectangle(float32(rl.GetScreenWidth()-UiMargin-2*UiButtonH-2*int(rg.GetStyle(rg.DEFAULT, rg.GROUP_PADDING))), UiMargin+5, UiButtonH, UiButtonH), "#149#;#157#;#97#", s.tab)
 
-		if s.tab == 0 {
+		switch s.tab {
+		case 0:
 			s.RenderPiecesTab()
-		} else if s.selection.selectionType == SelectionTypePieceType {
+		}
+
+		if s.tab != 0 && s.selection.selectionType == SelectionTypePieceType {
+			s.selection.Deselect()
+		} else if s.tab != 1 && s.selection.selectionType == SelectionTypeCoord {
 			s.selection.Deselect()
 		}
 	}
