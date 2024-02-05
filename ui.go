@@ -108,10 +108,10 @@ func (s *UiState) RenderCoordContextMenu() {
 		var iconPosY = float32(i*55 + UiMargin + UiMarginBig + UiButtonH)
 		rl.DrawTextureEx(obt.tex, rl.NewVector2(iconPosX, iconPosY), 0, 32.0/float32(obt.tex.Height), rl.White)
 
-		var obCount = sandbox.GetObstacleCount(coord, obt.id)
+		var obCount = sandbox.GetObstacleCount(coord, uint32(s.board), obt.id)
 		rl.DrawText(fmt.Sprint(obCount), int32(iconPosX+10), int32(iconPosY+25), 16, rl.Black)
 		if rg.Button(rl.NewRectangle(iconPosX-40-5, iconPosY, 40, 30), "--") && obCount > 0 {
-			sandbox.RemoveObstacle(coord, obt.id)
+			sandbox.RemoveObstacle(coord, uint32(s.board), obt.id)
 		}
 		if rg.Button(rl.NewRectangle(iconPosX+32+5, iconPosY, 40, 30), "++") {
 			sandbox.NewObstacle(coord, uint32(s.board), obt.id)
