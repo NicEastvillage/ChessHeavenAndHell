@@ -28,7 +28,7 @@ func main() {
 	setupBoard(1, BoardStyleEarth, true)
 	setupBoard(2, BoardStyleHell, false)
 
-	var ui = NewUIState()
+	var ui = NewUiState()
 
 	for i := 0; i < 20; i++ {
 		var piece = sandbox.pieces[rand.Intn(len(sandbox.pieces))].id
@@ -49,24 +49,25 @@ func main() {
 		rl.BeginDrawing()
 		rl.ClearBackground(rl.RayWhite)
 
-		sandbox.Render(uint32(ui.board))
+		sandbox.Render(uint32(ui.board), &ui.selection)
 		ui.Render()
 
 		rl.EndDrawing()
 	}
 }
 
-func handleBoardInteraction(ui *UIState) {
+func handleBoardInteraction(ui *UiState) {
 	handleMouseInteraction(ui)
 
-	if pieceId, ok := selection.GetSelectedPieceId(); ok {
+	if pieceId, ok := ui.selection.GetSelectedPieceId(); ok {
 		if rl.IsKeyPressed(rl.KeyDelete) || rl.IsKeyPressed(rl.KeyBackspace) {
 			sandbox.RemovePiece(pieceId)
+			ui.selection.Deselect()
 		}
 	}
 }
 
-func handleMouseInteraction(ui *UIState) {
+func handleMouseInteraction(ui *UiState) {
 	// Don't handle mouse events when clicking inside the right hand side panel
 	if rl.GetMousePosition().X > float32(rl.GetScreenWidth()-UiRightMenuWidth) {
 		return
@@ -74,23 +75,26 @@ func handleMouseInteraction(ui *UIState) {
 
 	if rl.IsMouseButtonPressed(rl.MouseButtonLeft) {
 		var coord = GetHoveredCoord()
-		var piece = sandbox.GetPieceAt(coord)
-		if piece == nil {
-			selection.Deselect()
-		} else {
-			selection.SelectPiece(piece.id)
-			ui.anyPieceSelected = false
+		if ui.tab == 0 {
+			var piece = sandbox.GetPieceAt(coord)
+			if piece == nil {
+				ui.selection.Deselect()
+			} else {
+				ui.selection.SelectPiece(piece.id)
+			}
+		} else if ui.tab == 1 {
+			ui.selection.SelectCoord(coord)
 		}
-	} else if id, ok := selection.GetSelectedPieceId(); ok {
+	} else if id, ok := ui.selection.GetSelectedPieceId(); ok {
 		if rl.IsMouseButtonPressed(rl.MouseButtonRight) {
 			var coord = GetHoveredCoord()
 			var piece = sandbox.GetPiece(id)
 			piece.coord = coord
 		}
-	} else if ui.anyPieceSelected {
+	} else if id, ok := ui.selection.GetSelectedPieceTypeId(); ok {
 		if rl.IsMouseButtonPressed(rl.MouseButtonRight) {
 			var coord = GetHoveredCoord()
-			sandbox.NewPiece(ui.piece, PieceColor(ui.color), uint32(ui.board), coord)
+			sandbox.NewPiece(id, PieceColor(ui.color), uint32(ui.board), coord)
 		}
 	}
 }

@@ -155,16 +155,6 @@ func (s *Sandbox) GetStatusEffectType(id uint32) *StatusEffectType {
 	return &s.effectTypes[id]
 }
 
-func (s *Sandbox) GetStatusEffectCount(pieceId uint32, statusType uint32) int {
-	var count = 0
-	for _, effect := range sandbox.effects {
-		if effect.typ == statusType && effect.piece == pieceId {
-			count++
-		}
-	}
-	return count
-}
-
 func (s *Sandbox) GetStatusEffectTypeByName(name string) *StatusEffectType {
 	for i := 0; i < len(s.effectTypes); i++ {
 		if s.effectTypes[i].name == name {
@@ -189,6 +179,16 @@ func (s *Sandbox) RemoveStatusEffect(piece uint32, typ uint32) {
 			return
 		}
 	}
+}
+
+func (s *Sandbox) GetStatusEffectCount(pieceId uint32, statusType uint32) int {
+	var count = 0
+	for _, effect := range sandbox.effects {
+		if effect.typ == statusType && effect.piece == pieceId {
+			count++
+		}
+	}
+	return count
 }
 
 func (s *Sandbox) RegisterObstacleType(name string, tex rl.Texture2D) *ObstacleType {
@@ -223,7 +223,28 @@ func (s *Sandbox) NewObstacle(coord Vec2, board uint32, typ uint32) *Obstacle {
 	return &s.obstacles[len(s.obstacles)-1]
 }
 
-func (s *Sandbox) Render(board uint32) {
+func (s *Sandbox) GetObstacleCount(coord Vec2, board uint32, typ uint32) int {
+	var count = 0
+	for i := 0; i < len(s.obstacles); i++ {
+		if s.obstacles[i].typ == typ && s.obstacles[i].board == board && s.obstacles[i].coord == coord {
+			count++
+		}
+	}
+	return count
+}
+
+func (s *Sandbox) RemoveObstacle(coord Vec2, board uint32, typ uint32) bool {
+	for i := 0; i < len(s.obstacles); i++ {
+		if s.obstacles[i].typ == typ && s.obstacles[i].board == board && s.obstacles[i].coord == coord {
+			s.obstacles[i] = s.obstacles[len(s.obstacles)-1]
+			s.obstacles = s.obstacles[:len(s.obstacles)-1]
+			return true
+		}
+	}
+	return false
+}
+
+func (s *Sandbox) Render(board uint32, selection *Selection) {
 	for i := 0; i < len(s.tiles); i++ {
 		if s.tiles[i].board == board {
 			s.tiles[i].Render(s.boards[board].style)
@@ -234,7 +255,7 @@ func (s *Sandbox) Render(board uint32) {
 		if !obstacleHasBeenRenderedFlag[i] && s.obstacles[i].board == board {
 			var obstaclesOnThisCoord = make([]*Obstacle, 0)
 			for j := i; j < len(s.obstacles); j++ {
-				if !obstacleHasBeenRenderedFlag[j] && s.obstacles[i].coord == s.obstacles[j].coord && s.obstacles[i].board == board {
+				if !obstacleHasBeenRenderedFlag[j] && s.obstacles[i].coord == s.obstacles[j].coord && s.obstacles[j].board == board {
 					obstacleHasBeenRenderedFlag[j] = true
 					obstaclesOnThisCoord = append(obstaclesOnThisCoord, &s.obstacles[j])
 				}
@@ -246,7 +267,7 @@ func (s *Sandbox) Render(board uint32) {
 	}
 	for i := 0; i < len(s.pieces); i++ {
 		if s.pieces[i].board == board {
-			s.pieces[i].Render()
+			s.pieces[i].Render(selection)
 		}
 	}
 	for i := 0; i < len(s.pieces); i++ {
@@ -264,5 +285,9 @@ func (s *Sandbox) Render(board uint32) {
 				effectsToRender[j].Render(s.pieces[i].coord, j, len(effectsToRender))
 			}
 		}
+	}
+	if coord, ok := selection.GetSelectedCoord(); ok {
+		var pos = GetWorldOrigo().Add(coord.Scale(TileSize))
+		rl.DrawRectangleLines(int32(pos.x)+4, int32(pos.y)+4, TileSize-8, TileSize-8, rl.Red)
 	}
 }
