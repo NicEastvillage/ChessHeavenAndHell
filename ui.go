@@ -75,13 +75,29 @@ func (s *UiState) RenderPiecesTab() {
 func (s *UiState) RenderPieceContextMenu() {
 	var selectedPiece, _ = s.selection.GetSelectedPieceId()
 
-	for i, effect := range sandbox.effectTypes {
+	{
 		var iconPosX = int32(rl.GetScreenWidth()) - 100
-		var iconPosY = int32(i*55 + UiMargin + UiMarginBig + UiButtonH)
+		var iconPosY = int32(UiMargin + UiMarginBig + UiButtonH)
+		rl.DrawTexture(assets.texPieceScale, iconPosX, iconPosY, rl.White)
+
+		var pieceScale = sandbox.GetPiece(selectedPiece).scale
+		rl.DrawText(fmt.Sprint(pieceScale), iconPosX+7, iconPosY+29, 16, rl.Black)
+		if rg.Button(rl.NewRectangle(float32(iconPosX-52), float32(iconPosY), 40, 30), "--") && pieceScale > 1 {
+			sandbox.GetPiece(selectedPiece).scale--
+		}
+		if rg.Button(rl.NewRectangle(float32(iconPosX+38), float32(iconPosY), 40, 30), "++") {
+			sandbox.GetPiece(selectedPiece).scale++
+		}
+	}
+
+	for i := range sandbox.effectTypes {
+		var effect = &sandbox.effectTypes[i]
+		var iconPosX = int32(rl.GetScreenWidth()) - 100
+		var iconPosY = int32(i*55 + 55 + UiMargin + UiMarginBig + UiButtonH)
 		rl.DrawTexture(effect.tex, iconPosX, iconPosY, rl.White)
 
 		var effectCount = sandbox.GetStatusEffectCount(selectedPiece, effect.id)
-		rl.DrawText(fmt.Sprint(effectCount), iconPosX+7, iconPosY+25, 16, rl.Black)
+		rl.DrawText(fmt.Sprint(effectCount), iconPosX+7, iconPosY+29, 16, rl.Black)
 		if rg.Button(rl.NewRectangle(float32(iconPosX-52), float32(iconPosY), 40, 30), "--") && effectCount > 0 {
 			sandbox.RemoveStatusEffect(selectedPiece, effect.id)
 		}
@@ -109,7 +125,7 @@ func (s *UiState) RenderCoordContextMenu() {
 		rl.DrawTextureEx(obt.tex, rl.NewVector2(iconPosX, iconPosY), 0, 32.0/float32(obt.tex.Height), rl.White)
 
 		var obCount = sandbox.GetObstacleCount(coord, uint32(s.board), obt.id)
-		rl.DrawText(fmt.Sprint(obCount), int32(iconPosX+10), int32(iconPosY+25), 16, rl.Black)
+		rl.DrawText(fmt.Sprint(obCount), int32(iconPosX+10), int32(iconPosY+29), 16, rl.Black)
 		if rg.Button(rl.NewRectangle(iconPosX-40-5, iconPosY, 40, 30), "--") && obCount > 0 {
 			sandbox.RemoveObstacle(coord, uint32(s.board), obt.id)
 		}
