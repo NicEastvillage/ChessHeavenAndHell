@@ -31,6 +31,7 @@ type Piece struct {
 	color PieceColor
 	board uint32
 	coord Vec2
+	scale uint32
 }
 
 func (p *Piece) Render(selection *Selection) {
@@ -41,9 +42,9 @@ func (p *Piece) Render(selection *Selection) {
 	}
 
 	var pos = GetWorldOrigo().Add(p.coord.Scale(TileSize))
-	rl.DrawTextureEx(tex, pos.ToRlVec(), 0, TileSize/128., rl.White)
+	rl.DrawTextureEx(tex, pos.ToRlVec(), 0, float32(p.scale)*TileSize/128., rl.White)
 
 	if selection.IsPieceSelected(p.id) {
-		rl.DrawRectangleLines(int32(pos.x)+4, int32(pos.y)+4, TileSize-8, TileSize-8, rl.Blue)
+		rl.DrawRectangleLines(int32(pos.x)+4, int32(pos.y)+4, int32(TileSize*p.scale-8), int32(TileSize*p.scale-8), rl.Blue)
 	}
 }

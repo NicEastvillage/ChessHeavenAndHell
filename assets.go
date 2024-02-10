@@ -26,6 +26,8 @@ type AssetManager struct {
 	texEffectBlood rl.Texture2D
 	texEffectMedal rl.Texture2D
 	texEffectCurse rl.Texture2D
+
+	texPieceScale rl.Texture2D
 }
 
 func (am *AssetManager) LoadAll() {
@@ -50,6 +52,8 @@ func (am *AssetManager) LoadAll() {
 	am.texEffectBlood = rl.LoadTexture("Assets/se_blood.png")
 	am.texEffectMedal = rl.LoadTexture("Assets/se_medal.png")
 	am.texEffectCurse = rl.LoadTexture("Assets/se_curse.png")
+
+	am.texPieceScale = rl.LoadTexture("Assets/piece_scale.png")
 }
 
 func (am *AssetManager) UnloadAll() {
@@ -74,4 +78,6 @@ func (am *AssetManager) UnloadAll() {
 	rl.UnloadTexture(am.texEffectBlood)
 	rl.UnloadTexture(am.texEffectMedal)
 	rl.UnloadTexture(am.texEffectCurse)
+
+	rl.UnloadTexture(am.texPieceScale)
 }
