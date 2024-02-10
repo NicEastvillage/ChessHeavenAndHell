@@ -86,6 +86,7 @@ func (s *Sandbox) NewPiece(typ uint32, color PieceColor, board uint32, coord Vec
 		color: color,
 		board: board,
 		coord: coord,
+		scale: 1,
 	})
 	return &s.pieces[len(s.pieces)-1]
 }
@@ -136,6 +137,19 @@ func (s *Sandbox) GetPieceAt(coord Vec2) *Piece {
 	for i := 0; i < len(s.pieces); i++ {
 		if s.pieces[i].coord == coord {
 			return &s.pieces[i]
+		}
+	}
+	return nil
+}
+
+func (s *Sandbox) GetPieceAtVisual(coord Vec2) *Piece {
+	for i := 0; i < len(s.pieces); i++ {
+		for x := 0; x < int(s.pieces[i].scale); x++ {
+			for y := 0; y < int(s.pieces[i].scale); y++ {
+				if s.pieces[i].coord.Add(Vec2{x, y}) == coord {
+					return &s.pieces[i]
+				}
+			}
 		}
 	}
 	return nil
@@ -282,7 +296,7 @@ func (s *Sandbox) Render(board uint32, selection *Selection) {
 				return effectsToRender[a].typ > effectsToRender[b].typ
 			})
 			for j := 0; j < len(effectsToRender); j++ {
-				effectsToRender[j].Render(s.pieces[i].coord, j, len(effectsToRender))
+				effectsToRender[j].Render(s.pieces[i].coord, j, len(effectsToRender), s.pieces[i].scale)
 			}
 		}
 	}
