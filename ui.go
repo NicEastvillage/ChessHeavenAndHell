@@ -75,33 +75,28 @@ func (s *UiState) RenderPiecesTab() {
 func (s *UiState) RenderPieceContextMenu() {
 	var selectedPiece, _ = s.selection.GetSelectedPieceId()
 
-	{
-		var iconPosX = int32(rl.GetScreenWidth()) - 100
-		var iconPosY = int32(UiMargin + UiMarginBig + UiButtonH)
-		rl.DrawTexture(assets.texPieceScale, iconPosX, iconPosY, rl.White)
+	var spinnerX = float32(rl.GetScreenWidth() - 150)
+	var spinnerY = float32(UiMargin + UiMarginBig + UiButtonH)
 
+	{
 		var pieceScale = sandbox.GetPiece(selectedPiece).scale
-		rl.DrawText(fmt.Sprint(pieceScale), iconPosX+7, iconPosY+29, 16, rl.Black)
-		if rg.Button(rl.NewRectangle(float32(iconPosX-52), float32(iconPosY), 40, 30), "--") && pieceScale > 1 {
+		var change = SpinnerWithIcon(spinnerX, spinnerY, fmt.Sprint(pieceScale), assets.texPieceScale)
+		if change < 0 && pieceScale > 1 {
 			sandbox.GetPiece(selectedPiece).scale--
 		}
-		if rg.Button(rl.NewRectangle(float32(iconPosX+38), float32(iconPosY), 40, 30), "++") {
+		if change > 0 {
 			sandbox.GetPiece(selectedPiece).scale++
 		}
 	}
 
 	for i := range sandbox.effectTypes {
 		var effect = &sandbox.effectTypes[i]
-		var iconPosX = int32(rl.GetScreenWidth()) - 100
-		var iconPosY = int32(i*55 + 55 + UiMargin + UiMarginBig + UiButtonH)
-		rl.DrawTexture(effect.tex, iconPosX, iconPosY, rl.White)
-
 		var effectCount = sandbox.GetStatusEffectCount(selectedPiece, effect.id)
-		rl.DrawText(fmt.Sprint(effectCount), iconPosX+7, iconPosY+29, 16, rl.Black)
-		if rg.Button(rl.NewRectangle(float32(iconPosX-52), float32(iconPosY), 40, 30), "--") && effectCount > 0 {
+		var change = SpinnerWithIcon(spinnerX, spinnerY+float32(i*55)+55, fmt.Sprint(effectCount), effect.tex)
+		if change < 0 && effectCount > 0 {
 			sandbox.RemoveStatusEffect(selectedPiece, effect.id)
 		}
-		if rg.Button(rl.NewRectangle(float32(iconPosX+38), float32(iconPosY), 40, 30), "++") {
+		if change > 0 {
 			sandbox.NewStatusEffect(selectedPiece, effect.id)
 		}
 	}
@@ -119,17 +114,17 @@ func (s *UiState) RenderPieceContextMenu() {
 func (s *UiState) RenderCoordContextMenu() {
 	var coord, _ = s.selection.GetSelectedCoord()
 
-	for i, obt := range sandbox.obstacleTypes {
-		var iconPosX = float32(rl.GetScreenWidth()) - 100
-		var iconPosY = float32(i*55 + UiMargin + UiMarginBig + UiButtonH)
-		rl.DrawTextureEx(obt.tex, rl.NewVector2(iconPosX, iconPosY), 0, 32.0/float32(obt.tex.Height), rl.White)
+	var spinnerX = float32(rl.GetScreenWidth() - 150)
+	var spinnerY = float32(UiMargin + UiMarginBig + UiButtonH)
 
+	for i := range sandbox.obstacleTypes {
+		var obt = &sandbox.obstacleTypes[i]
 		var obCount = sandbox.GetObstacleCount(coord, uint32(s.board), obt.id)
-		rl.DrawText(fmt.Sprint(obCount), int32(iconPosX+10), int32(iconPosY+29), 16, rl.Black)
-		if rg.Button(rl.NewRectangle(iconPosX-40-5, iconPosY, 40, 30), "--") && obCount > 0 {
+		var change = SpinnerWithIcon(spinnerX, spinnerY+float32(i*55)+55, fmt.Sprint(obCount), obt.tex)
+		if change < 0 && obCount > 0 {
 			sandbox.RemoveObstacle(coord, uint32(s.board), obt.id)
 		}
-		if rg.Button(rl.NewRectangle(iconPosX+32+5, iconPosY, 40, 30), "++") {
+		if change > 0 {
 			sandbox.NewObstacle(coord, uint32(s.board), obt.id)
 		}
 	}
@@ -144,4 +139,25 @@ func (s *UiState) RenderCoordContextMenu() {
 	if rg.Button(rl.NewRectangle(posX, posY, width, height), "Remove tile") {
 		sandbox.RemoveTile(uint32(s.board), coord)
 	}
+}
+
+func SpinnerWithIcon(x float32, y float32, text string, tex rl.Texture2D) int {
+	const (
+		buttonW  = 40
+		buttonH  = 30
+		spacing  = UiMarginSmall
+		iconSize = 32
+	)
+
+	var texScale = iconSize / float32(tex.Height)
+	rl.DrawTextureEx(tex, rl.NewVector2(x+buttonW+spacing+iconSize/2-texScale*float32(tex.Width/2), y+buttonH/2-texScale*float32(tex.Height)/2-3), 0, texScale, rl.White)
+	rl.DrawText(text, int32(x+buttonW+spacing+13), int32(y+buttonH/2+iconSize/2-3), 16, rl.Black)
+	var res = 0
+	if rg.Button(rl.NewRectangle(x, y, buttonW, buttonH), "--") {
+		res--
+	}
+	if rg.Button(rl.NewRectangle(x+buttonW+iconSize+2*spacing, y, buttonW, buttonH), "++") {
+		res++
+	}
+	return res
 }

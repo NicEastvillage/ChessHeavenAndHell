@@ -144,8 +144,8 @@ func setupBoard(boardId uint32, style BoardStyle, withPieces bool) {
 	for x := 0; x < 8; x++ {
 		sandbox.NewPieceFromName(NamePawn, BLACK, boardId, Vec2{x, 1})
 	}
-	sandbox.NewPieceFromName(NameRook, WHITE, boardId, Vec2{0, 7}).scale = 2
-	sandbox.NewPieceFromName(NameKnight, WHITE, boardId, Vec2{1, 7}).scale = 3
+	sandbox.NewPieceFromName(NameRook, WHITE, boardId, Vec2{0, 7})
+	sandbox.NewPieceFromName(NameKnight, WHITE, boardId, Vec2{1, 7})
 	sandbox.NewPieceFromName(NameBishop, WHITE, boardId, Vec2{2, 7})
 	sandbox.NewPieceFromName(NameQueen, WHITE, boardId, Vec2{3, 7})
 	sandbox.NewPieceFromName(NameKing, WHITE, boardId, Vec2{4, 7})
