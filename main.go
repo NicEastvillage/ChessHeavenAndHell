@@ -106,6 +106,15 @@ func registerPieceTypes() {
 	sandbox.RegisterPieceType(NameRook, assets.texWhiteRook, assets.texBlackRook)
 	sandbox.RegisterPieceType(NameQueen, assets.texWhiteQueen, assets.texBlackQueen)
 	sandbox.RegisterPieceType(NameKing, assets.texWhiteKing, assets.texBlackKing)
+	sandbox.RegisterPieceType(NameBomber, assets.texWhiteBomber, assets.texBlackBomber)
+	sandbox.RegisterPieceType(NameLeopard, assets.texWhiteLeopard, assets.texBlackLeopard)
+	sandbox.RegisterPieceType(NameChecker, assets.texWhiteChecker, assets.texBlackChecker)
+	sandbox.RegisterPieceType(NameMountedArcher, assets.texWhiteMountedArcher, assets.texBlackMountedArcher)
+	sandbox.RegisterPieceType(NameWizard, assets.texWhiteWizard, assets.texBlackWizard)
+	sandbox.RegisterPieceType(NameArchbishop, assets.texWhiteArchbishop, assets.texBlackArchbishop)
+	sandbox.RegisterPieceType(NameFortress, assets.texWhiteFortress, assets.texBlackFortress)
+	sandbox.RegisterPieceType(NameScout, assets.texWhiteScout, assets.texBlackScout)
+	sandbox.RegisterPieceType(NameWarlock, assets.texWhiteWarlock, assets.texBlackWarlock)
 }
 
 func registerStatusEffectTypes() {

@@ -50,15 +50,15 @@ func (s *UiState) Render() {
 		s.selection.Deselect()
 	}
 
-	if s.selection.selectionType == SelectionTypePiece {
+	switch s.selection.selectionType {
+	case SelectionTypePiece:
 		s.RenderPieceContextMenu()
-	} else if s.selection.selectionType == SelectionTypeCoord {
+	case SelectionTypePieceType:
+		s.RenderPiecesTab()
+	case SelectionTypeCoord:
 		s.RenderCoordContextMenu()
-	} else if s.selection.selectionType == SelectionTypeNone {
-		switch s.tab {
-		case 0:
-			s.RenderPiecesTab()
-		}
+	default:
+		s.RenderPiecesTab()
 	}
 }
 

@@ -3,12 +3,21 @@ package main
 import rl "github.com/gen2brain/raylib-go/raylib"
 
 const (
-	NamePawn   = "Pawn"
-	NameKnight = "Knight"
-	NameBishop = "Bishop"
-	NameRook   = "Rook"
-	NameQueen  = "Queen"
-	NameKing   = "King"
+	NamePawn          = "Pawn"
+	NameKnight        = "Knight"
+	NameBishop        = "Bishop"
+	NameRook          = "Rook"
+	NameQueen         = "Queen"
+	NameKing          = "King"
+	NameBomber        = "Suicide Bomber"
+	NameLeopard       = "Leopard"
+	NameChecker       = "Checker"
+	NameMountedArcher = "Mounted Archer"
+	NameWizard        = "Wizard"
+	NameArchbishop    = "Archbishop"
+	NameFortress      = "Fortress"
+	NameScout         = "Scout"
+	NameWarlock       = "Warlock"
 )
 
 type PieceColor uint32
@@ -42,7 +51,9 @@ func (p *Piece) Render(selection *Selection) {
 	}
 
 	var pos = GetWorldOrigo().Add(p.coord.Scale(TileSize))
-	rl.DrawTextureEx(tex, pos.ToRlVec(), 0, float32(p.scale)*TileSize/128., rl.White)
+	var texScale = float32(TileSize) / float32(max(tex.Width, tex.Height))
+	var pieceCorner = pos.Add(ONEONE.Scale(TileSize / 2)).Sub(Vec2{int(texScale * float32(tex.Width) / 2), int(texScale * float32(tex.Height) / 2)})
+	rl.DrawTextureEx(tex, pieceCorner.ToRlVec(), 0, float32(p.scale)*texScale, rl.White)
 
 	if selection.IsPieceSelected(p.id) {
 		rl.DrawRectangleLines(int32(pos.x)+4, int32(pos.y)+4, int32(TileSize*p.scale-8), int32(TileSize*p.scale-8), rl.Blue)
