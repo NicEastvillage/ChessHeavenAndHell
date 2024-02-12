@@ -18,6 +18,7 @@ const (
 	NameFortress      = "Fortress"
 	NameScout         = "Scout"
 	NameWarlock       = "Warlock"
+	NameCelestial     = "Celestial"
 )
 
 type PieceColor uint32

@@ -35,17 +35,24 @@ type AssetManager struct {
 	texBlackFortress      rl.Texture2D
 	texBlackScout         rl.Texture2D
 	texBlackWarlock       rl.Texture2D
+	texAngel              rl.Texture2D
+	texImp                rl.Texture2D
 
 	texObstacleChaosOrb rl.Texture2D
 	texObstacleCoin     rl.Texture2D
 	texObstacleFire     rl.Texture2D
 	texObstacleIce      rl.Texture2D
 
-	texEffectBlood rl.Texture2D
-	texEffectMedal rl.Texture2D
-	texEffectCurse rl.Texture2D
-
-	texPieceScale rl.Texture2D
+	texEffectBlood       rl.Texture2D
+	texEffectMedal       rl.Texture2D
+	texEffectCurse       rl.Texture2D
+	texEffectForcedMove  rl.Texture2D
+	texEffectPaid2ndMove rl.Texture2D
+	texEffectPortalGun   rl.Texture2D
+	texEffectStonks      rl.Texture2D
+	texEffectStun        rl.Texture2D
+	texEffectWizardHat   rl.Texture2D
+	texPieceScale        rl.Texture2D
 }
 
 func (am *AssetManager) LoadAll() {
@@ -79,17 +86,24 @@ func (am *AssetManager) LoadAll() {
 	am.texBlackFortress = rl.LoadTexture("Assets/pieces/black_fortress.png")
 	am.texBlackScout = rl.LoadTexture("Assets/pieces/black_scout.png")
 	am.texBlackWarlock = rl.LoadTexture("Assets/pieces/black_warlock.png")
+	am.texAngel = rl.LoadTexture("Assets/pieces/angel.png")
+	am.texImp = rl.LoadTexture("Assets/pieces/imp.png")
 
-	am.texObstacleChaosOrb = rl.LoadTexture("Assets/obstacle_chaos_orb.png")
-	am.texObstacleCoin = rl.LoadTexture("Assets/obstacle_coin.png")
-	am.texObstacleFire = rl.LoadTexture("Assets/obstacle_fire.png")
-	am.texObstacleIce = rl.LoadTexture("Assets/obstacle_ice.png")
+	am.texObstacleChaosOrb = rl.LoadTexture("Assets/chaos_orb.png")
+	am.texObstacleCoin = rl.LoadTexture("Assets/coin.png")
+	am.texObstacleFire = rl.LoadTexture("Assets/fire.png")
+	am.texObstacleIce = rl.LoadTexture("Assets/ice.png")
 
-	am.texEffectBlood = rl.LoadTexture("Assets/se_blood.png")
-	am.texEffectMedal = rl.LoadTexture("Assets/se_medal.png")
-	am.texEffectCurse = rl.LoadTexture("Assets/se_curse.png")
-
-	am.texPieceScale = rl.LoadTexture("Assets/piece_scale.png")
+	am.texEffectBlood = rl.LoadTexture("Assetst/effects/blood.png")
+	am.texEffectMedal = rl.LoadTexture("Assets/effects/medal.png")
+	am.texEffectCurse = rl.LoadTexture("Assets/effects/curse.png")
+	am.texEffectForcedMove = rl.LoadTexture("Assets/effects/forced_move.png")
+	am.texEffectPaid2ndMove = rl.LoadTexture("Assets/effects/paid_2nd_move.png")
+	am.texEffectPortalGun = rl.LoadTexture("Assets/effects/portal_gun.png")
+	am.texEffectStonks = rl.LoadTexture("Assets/effects/stonks.png")
+	am.texEffectStun = rl.LoadTexture("Assets/effects/stun.png")
+	am.texEffectWizardHat = rl.LoadTexture("Assets/effects/wizard_hat.png")
+	am.texPieceScale = rl.LoadTexture("Assets/effects/piece_scale.png")
 }
 
 func (am *AssetManager) UnloadAll() {
@@ -123,6 +137,8 @@ func (am *AssetManager) UnloadAll() {
 	rl.UnloadTexture(am.texBlackFortress)
 	rl.UnloadTexture(am.texBlackScout)
 	rl.UnloadTexture(am.texBlackWarlock)
+	rl.UnloadTexture(am.texAngel)
+	rl.UnloadTexture(am.texImp)
 
 	rl.UnloadTexture(am.texObstacleChaosOrb)
 	rl.UnloadTexture(am.texObstacleCoin)
@@ -132,6 +148,11 @@ func (am *AssetManager) UnloadAll() {
 	rl.UnloadTexture(am.texEffectBlood)
 	rl.UnloadTexture(am.texEffectMedal)
 	rl.UnloadTexture(am.texEffectCurse)
-
+	rl.UnloadTexture(am.texEffectForcedMove)
+	rl.UnloadTexture(am.texEffectPaid2ndMove)
+	rl.UnloadTexture(am.texEffectPortalGun)
+	rl.UnloadTexture(am.texEffectStonks)
+	rl.UnloadTexture(am.texEffectStun)
+	rl.UnloadTexture(am.texEffectWizardHat)
 	rl.UnloadTexture(am.texPieceScale)
 }
