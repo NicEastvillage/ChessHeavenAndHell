@@ -3,9 +3,15 @@ package main
 import rl "github.com/gen2brain/raylib-go/raylib"
 
 const (
-	NameExperience = "Experience"
-	NameBloody     = "Bloody"
-	NameCurse      = "Curse"
+	NameExperience  = "Experience"
+	NameBloody      = "Bloody"
+	NameCurse       = "Curse"
+	NameForcedMove  = "Forced Move"
+	NamePaid2ndMove = "Paid 2nd Move"
+	NamePortalGun   = "Portal Gun"
+	NameStonks      = "Stonks"
+	NameStun        = "Stun"
+	NameWizardHat   = "Wizard Hat"
 )
 
 type StatusEffectType struct {
@@ -31,6 +37,7 @@ func (e *StatusEffect) Render(coord Vec2, index int, total int, scale uint32) {
 		step = LEFT.Scale(int(float32(scale) * (1 - 2*margin) * TileSize / float32(total-1)))
 	}
 	var effectCenter = effectRightMost.Add(step.Scale(index))
-	var corner = effectCenter.Sub(Vec2{int(typ.tex.Width / 2), int(typ.tex.Height / 2)}.Scale(int(scale)))
-	rl.DrawTextureEx(typ.tex, corner.ToRlVec(), 0, float32(scale), rl.White)
+	var texScale = float32(TileSize*0.4) / float32(max(typ.tex.Width, typ.tex.Height))
+	var corner = effectCenter.Sub(Vec2{int(texScale * float32(typ.tex.Width) / 2), int(texScale * float32(typ.tex.Height) / 2)})
+	rl.DrawTextureEx(typ.tex, corner.ToRlVec(), 0, float32(scale)*texScale, rl.White)
 }

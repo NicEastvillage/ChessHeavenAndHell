@@ -115,12 +115,19 @@ func registerPieceTypes() {
 	sandbox.RegisterPieceType(NameFortress, assets.texWhiteFortress, assets.texBlackFortress)
 	sandbox.RegisterPieceType(NameScout, assets.texWhiteScout, assets.texBlackScout)
 	sandbox.RegisterPieceType(NameWarlock, assets.texWhiteWarlock, assets.texBlackWarlock)
+	sandbox.RegisterPieceType(NameCelestial, assets.texAngel, assets.texImp)
 }
 
 func registerStatusEffectTypes() {
 	sandbox.RegisterEffectType(NameBloody, assets.texEffectBlood)
 	sandbox.RegisterEffectType(NameExperience, assets.texEffectMedal)
 	sandbox.RegisterEffectType(NameCurse, assets.texEffectCurse)
+	sandbox.RegisterEffectType(NameForcedMove, assets.texEffectForcedMove)
+	sandbox.RegisterEffectType(NamePaid2ndMove, assets.texEffectPaid2ndMove)
+	sandbox.RegisterEffectType(NamePortalGun, assets.texEffectPortalGun)
+	sandbox.RegisterEffectType(NameStonks, assets.texEffectStonks)
+	sandbox.RegisterEffectType(NameStun, assets.texEffectStun)
+	sandbox.RegisterEffectType(NameWizardHat, assets.texEffectWizardHat)
 }
 
 func registerObstacleTypes() {
