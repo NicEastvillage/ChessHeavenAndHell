@@ -40,25 +40,26 @@ func (s *UiState) Render(undo *UndoRedoSystem) {
 
 	s.board = rg.ToggleGroup(rl.NewRectangle(float32(rl.GetScreenWidth()/2-(120*3+int(rg.GetStyle(rg.DEFAULT, rg.GROUP_PADDING)))/2), float32(rl.GetScreenHeight()-UiButtonH-UiMargin), 120, UiButtonH), "Heaven;Earth;Hell", s.board)
 
+	var oldTab = s.tab
 	s.tab = rg.ToggleGroup(rl.NewRectangle(float32(rl.GetScreenWidth()-UiMargin-2*UiButtonH-2*int(rg.GetStyle(rg.DEFAULT, rg.GROUP_PADDING))), UiMargin+5, UiButtonH, UiButtonH), "#149#;#157#;#97#", s.tab)
-
-	if s.tab != 0 && s.selection.selectionType == SelectionTypePiece {
-		s.selection.Deselect()
-	} else if s.tab != 0 && s.selection.selectionType == SelectionTypePieceType {
-		s.selection.Deselect()
-	} else if s.tab != 1 && s.selection.selectionType == SelectionTypeCoord {
+	if oldTab != s.tab {
 		s.selection.Deselect()
 	}
 
 	switch s.selection.selectionType {
 	case SelectionTypePiece:
 		s.RenderPieceContextMenu(undo)
+		s.tab = 0
 	case SelectionTypePieceType:
 		s.RenderPiecesTab()
+		s.tab = 0
 	case SelectionTypeCoord:
 		s.RenderCoordContextMenu(undo)
+		s.tab = 1
 	default:
-		s.RenderPiecesTab()
+		if s.tab == 0 {
+			s.RenderPiecesTab()
+		}
 	}
 }
 
