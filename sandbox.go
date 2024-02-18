@@ -280,7 +280,9 @@ func (s *Sandbox) Render(board uint32, selection *Selection) {
 		}
 	}
 	for i := 0; i < len(s.pieces); i++ {
-		s.pieces[i].Render(selection, board)
+		if s.pieces[i].board == board {
+			s.pieces[i].Render(selection)
+		}
 	}
 	for i := 0; i < len(s.pieces); i++ {
 		if s.pieces[i].board == board {
@@ -301,5 +303,10 @@ func (s *Sandbox) Render(board uint32, selection *Selection) {
 	if coord, ok := selection.GetSelectedCoord(); ok {
 		var pos = GetWorldOrigo().Add(coord.Scale(TileSize))
 		rl.DrawRectangleLines(int32(pos.x)+4, int32(pos.y)+4, TileSize-8, TileSize-8, rl.Red)
+	}
+
+	var selectedId, hasSelection = selection.GetSelectedPieceId()
+	if hasSelection && s.pieces[selectedId].board != board {
+		s.pieces[selectedId].RenderCrossPlaneIndicator()
 	}
 }
