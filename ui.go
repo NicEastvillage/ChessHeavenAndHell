@@ -29,7 +29,7 @@ func NewUiState() UiState {
 	}
 }
 
-func (s *UiState) Render() {
+func (s *UiState) Render(undo *UndoRedoSystem) {
 	if rg.Button(rl.NewRectangle(UiMargin, UiMargin, 200, UiButtonH), "Remove random") {
 		println("Clicked!")
 		if len(sandbox.pieces) > 0 {

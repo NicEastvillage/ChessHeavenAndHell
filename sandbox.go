@@ -95,6 +95,13 @@ func (s *Sandbox) NewPieceFromName(typ string, color PieceColor, board uint32, c
 	return s.NewPiece(s.GetPieceTypeByName(typ).id, color, board, coord)
 }
 
+// AddPiece adds a piece with full details. It is up to the called to ensure that another piece with
+// the same id does not exist.
+func (s *Sandbox) AddPiece(piece Piece) *Piece {
+	s.pieces = append(s.pieces, piece)
+	return &s.pieces[len(s.pieces)-1]
+}
+
 func (s *Sandbox) GetPiece(id uint32) *Piece {
 	for i := 0; i < len(s.pieces); i++ {
 		if s.pieces[i].id == id {

@@ -28,6 +28,7 @@ func main() {
 	setupBoard(1, BoardStyleEarth, true)
 	setupBoard(2, BoardStyleHell, false)
 
+	var undo = NewUndoRedoSystem()
 	var ui = NewUiState()
 
 	for i := 0; i < 20; i++ {
@@ -44,20 +45,20 @@ func main() {
 
 	for !rl.WindowShouldClose() {
 
-		handleBoardInteraction(&ui)
+		handleBoardInteraction(&undo, &ui)
 
 		rl.BeginDrawing()
 		rl.ClearBackground(rl.RayWhite)
 
 		sandbox.Render(uint32(ui.board), &ui.selection)
-		ui.Render()
+		ui.Render(&undo)
 
 		rl.EndDrawing()
 	}
 }
 
-func handleBoardInteraction(ui *UiState) {
-	handleMouseInteraction(ui)
+func handleBoardInteraction(undo *UndoRedoSystem, ui *UiState) {
+	handleMouseInteraction(undo, ui)
 
 	if pieceId, ok := ui.selection.GetSelectedPieceId(); ok {
 		if rl.IsKeyPressed(rl.KeyDelete) || rl.IsKeyPressed(rl.KeyBackspace) {
@@ -65,9 +66,16 @@ func handleBoardInteraction(ui *UiState) {
 			ui.selection.Deselect()
 		}
 	}
+
+	var ctrlDown = rl.IsKeyDown(rl.KeyLeftControl) || rl.IsKeyDown(rl.KeyLeftControl)
+	if rl.IsKeyPressed(rl.KeyZ) && ctrlDown {
+		undo.Undo(&sandbox, ui)
+	} else if rl.IsKeyPressed(rl.KeyY) && ctrlDown {
+		undo.Redo(&sandbox, ui)
+	}
 }
 
-func handleMouseInteraction(ui *UiState) {
+func handleMouseInteraction(undo *UndoRedoSystem, ui *UiState) {
 	// Don't handle mouse events when clicking inside the right hand side panel
 	if rl.GetMousePosition().X > float32(rl.GetScreenWidth()-UiRightMenuWidth) {
 		return
@@ -94,7 +102,8 @@ func handleMouseInteraction(ui *UiState) {
 	} else if id, ok := ui.selection.GetSelectedPieceTypeId(); ok {
 		if rl.IsMouseButtonPressed(rl.MouseButtonRight) {
 			var coord = GetHoveredCoord()
-			sandbox.NewPiece(id, PieceColor(ui.color), uint32(ui.board), coord)
+			var cmd = NewCreatePieceCmd(&sandbox, id, PieceColor(ui.color), uint32(ui.board), coord)
+			undo.AppendDone(&cmd)
 		}
 	}
 }
