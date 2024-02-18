@@ -60,3 +60,9 @@ func (p *Piece) Render(selection *Selection) {
 		rl.DrawRectangleLines(int32(pos.x)+4, int32(pos.y)+4, int32(TileSize*p.scale-8), int32(TileSize*p.scale-8), rl.Blue)
 	}
 }
+
+func (p *Piece) RenderCrossPlaneIndicator() {
+	var pos = GetWorldOrigo().Add(p.coord.Scale(TileSize))
+	var offset = TileSize / 2
+	rl.DrawCircle(int32(pos.x+offset), int32(pos.y+offset), 12, rl.Blue)
+}

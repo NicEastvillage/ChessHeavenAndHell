@@ -76,8 +76,9 @@ func handleBoardInteraction(undo *UndoRedoSystem, ui *UiState) {
 }
 
 func handleMouseInteraction(undo *UndoRedoSystem, ui *UiState) {
-	// Don't handle mouse events when clicking inside the right hand side panel
-	if rl.GetMousePosition().X > float32(rl.GetScreenWidth()-UiRightMenuWidth) {
+	// Don't handle mouse events when clicking outside the play area
+	if rl.GetMousePosition().X > float32(rl.GetScreenWidth()-UiRightMenuWidth) ||
+		rl.GetMousePosition().Y > float32(rl.GetScreenHeight()-100) {
 		return
 	}
 
@@ -96,7 +97,7 @@ func handleMouseInteraction(undo *UndoRedoSystem, ui *UiState) {
 	} else if id, ok := ui.selection.GetSelectedPieceId(); ok {
 		if rl.IsMouseButtonPressed(rl.MouseButtonRight) {
 			var coord = GetHoveredCoord()
-			var cmd = NewMovePieceCmd(&sandbox, id, coord)
+			var cmd = NewMovePieceCmd(&sandbox, id, coord, uint32(ui.board))
 			undo.AppendDone(&cmd)
 		}
 	} else if id, ok := ui.selection.GetSelectedPieceTypeId(); ok {

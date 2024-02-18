@@ -95,32 +95,39 @@ func (cmd *DeletePieceCmd) undo(sb *Sandbox, ui *UiState) {
 }
 
 type MovePieceCmd struct {
-	piece  uint32
-	before Vec2
-	after  Vec2
+	piece       uint32
+	beforeCoord Vec2
+	beforeBoard uint32
+	afterCoord  Vec2
+	afterBoard  uint32
 }
 
-func NewMovePieceCmd(sb *Sandbox, id uint32, destination Vec2) MovePieceCmd {
+func NewMovePieceCmd(sb *Sandbox, id uint32, destCoord Vec2, destBoard uint32) MovePieceCmd {
 	var piece = sb.GetPiece(id)
 	var cmd = MovePieceCmd{
-		piece:  id,
-		before: piece.coord,
-		after:  destination,
+		piece:       id,
+		beforeCoord: piece.coord,
+		beforeBoard: piece.board,
+		afterCoord:  destCoord,
+		afterBoard:  destBoard,
 	}
-	piece.coord = destination
+	piece.coord = destCoord
+	piece.board = destBoard
 	return cmd
 }
 
 func (cmd *MovePieceCmd) redo(sb *Sandbox, ui *UiState) {
 	var piece = sb.GetPiece(cmd.piece)
-	piece.coord = cmd.after
+	piece.coord = cmd.afterCoord
+	piece.board = cmd.afterBoard
 	ui.board = int32(piece.board)
 	ui.selection.SelectPiece(cmd.piece)
 }
 
 func (cmd *MovePieceCmd) undo(sb *Sandbox, ui *UiState) {
 	var piece = sb.GetPiece(cmd.piece)
-	piece.coord = cmd.before
+	piece.coord = cmd.beforeCoord
+	piece.board = cmd.beforeBoard
 	ui.board = int32(piece.board)
 	ui.selection.SelectPiece(cmd.piece)
 }
