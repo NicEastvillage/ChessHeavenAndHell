@@ -48,6 +48,7 @@ func NewCreatePieceCmd(sb *Sandbox, typ uint32, color PieceColor, board uint32, 
 
 func (cmd *CreatePieceCmd) redo(sb *Sandbox, ui *UiState) {
 	sb.AddPiece(cmd.piece)
+	ui.board = int32(cmd.piece.board)
 	ui.selection.Deselect()
 }
 
@@ -56,6 +57,7 @@ func (cmd *CreatePieceCmd) undo(sb *Sandbox, ui *UiState) {
 		ui.selection.Deselect()
 	}
 	sb.RemovePiece(cmd.piece.id)
+	ui.board = int32(cmd.piece.board)
 	ui.selection.Deselect()
 }
 
@@ -80,6 +82,7 @@ func (cmd *DeletePieceCmd) redo(sb *Sandbox, ui *UiState) {
 		ui.selection.Deselect()
 	}
 	sb.RemovePiece(cmd.piece.id)
+	ui.board = int32(cmd.piece.board)
 }
 
 func (cmd *DeletePieceCmd) undo(sb *Sandbox, ui *UiState) {
@@ -87,6 +90,7 @@ func (cmd *DeletePieceCmd) undo(sb *Sandbox, ui *UiState) {
 	for _, effect := range cmd.effects {
 		sb.NewStatusEffect(cmd.piece.id, effect)
 	}
+	ui.board = int32(cmd.piece.board)
 	ui.selection.SelectPiece(cmd.piece.id)
 }
 
@@ -108,12 +112,16 @@ func NewMovePieceCmd(sb *Sandbox, id uint32, destination Vec2) MovePieceCmd {
 }
 
 func (cmd *MovePieceCmd) redo(sb *Sandbox, ui *UiState) {
-	sb.GetPiece(cmd.piece).coord = cmd.after
+	var piece = sb.GetPiece(cmd.piece)
+	piece.coord = cmd.after
+	ui.board = int32(piece.board)
 	ui.selection.SelectPiece(cmd.piece)
 }
 
 func (cmd *MovePieceCmd) undo(sb *Sandbox, ui *UiState) {
-	sb.GetPiece(cmd.piece).coord = cmd.before
+	var piece = sb.GetPiece(cmd.piece)
+	piece.coord = cmd.before
+	ui.board = int32(piece.board)
 	ui.selection.SelectPiece(cmd.piece)
 }
 
@@ -132,11 +140,13 @@ func NewCreateStatusEffectCmd(sb *Sandbox, piece uint32, effect uint32) CreateSt
 
 func (cmd *CreateStatusEffectCmd) redo(sb *Sandbox, ui *UiState) {
 	sb.NewStatusEffect(cmd.piece, cmd.effect)
+	ui.board = int32(sb.GetPiece(cmd.piece).board)
 	ui.selection.SelectPiece(cmd.piece)
 }
 
 func (cmd *CreateStatusEffectCmd) undo(sb *Sandbox, ui *UiState) {
 	sb.RemoveStatusEffect(cmd.piece, cmd.effect)
+	ui.board = int32(sb.GetPiece(cmd.piece).board)
 	ui.selection.SelectPiece(cmd.piece)
 }
 
@@ -155,11 +165,13 @@ func NewRemoveStatusEffectCmd(sb *Sandbox, piece uint32, effect uint32) RemoveSt
 
 func (cmd *RemoveStatusEffectCmd) redo(sb *Sandbox, ui *UiState) {
 	sb.RemoveStatusEffect(cmd.piece, cmd.effect)
+	ui.board = int32(sb.GetPiece(cmd.piece).board)
 	ui.selection.SelectPiece(cmd.piece)
 }
 
 func (cmd *RemoveStatusEffectCmd) undo(sb *Sandbox, ui *UiState) {
 	sb.NewStatusEffect(cmd.piece, cmd.effect)
+	ui.board = int32(sb.GetPiece(cmd.piece).board)
 	ui.selection.SelectPiece(cmd.piece)
 }
 
@@ -175,12 +187,16 @@ func NewIncreasePieceScaleCmd(sb *Sandbox, piece uint32) IncreasePieceScaleCmd {
 }
 
 func (cmd *IncreasePieceScaleCmd) redo(sb *Sandbox, ui *UiState) {
-	sb.GetPiece(cmd.piece).scale++
+	var piece = sb.GetPiece(cmd.piece)
+	piece.scale++
+	ui.board = int32(piece.board)
 	ui.selection.SelectPiece(cmd.piece)
 }
 
 func (cmd *IncreasePieceScaleCmd) undo(sb *Sandbox, ui *UiState) {
-	sb.GetPiece(cmd.piece).scale--
+	var piece = sb.GetPiece(cmd.piece)
+	piece.scale--
+	ui.board = int32(piece.board)
 	ui.selection.SelectPiece(cmd.piece)
 }
 
@@ -196,12 +212,16 @@ func NewDecreasePieceScaleCmd(sb *Sandbox, piece uint32) DecreasePieceScaleCmd {
 }
 
 func (cmd *DecreasePieceScaleCmd) redo(sb *Sandbox, ui *UiState) {
-	sb.GetPiece(cmd.piece).scale--
+	var piece = sb.GetPiece(cmd.piece)
+	piece.scale--
+	ui.board = int32(piece.board)
 	ui.selection.SelectPiece(cmd.piece)
 }
 
 func (cmd *DecreasePieceScaleCmd) undo(sb *Sandbox, ui *UiState) {
-	sb.GetPiece(cmd.piece).scale++
+	var piece = sb.GetPiece(cmd.piece)
+	piece.scale++
+	ui.board = int32(piece.board)
 	ui.selection.SelectPiece(cmd.piece)
 }
 
@@ -220,11 +240,13 @@ func NewAddTileCmd(sb *Sandbox, board uint32, coord Vec2) CreateTileCmd {
 
 func (cmd *CreateTileCmd) redo(sb *Sandbox, ui *UiState) {
 	sb.NewTile(cmd.board, cmd.coord)
+	ui.board = int32(cmd.board)
 	ui.selection.SelectCoord(cmd.coord)
 }
 
 func (cmd *CreateTileCmd) undo(sb *Sandbox, ui *UiState) {
 	sb.RemoveTile(cmd.board, cmd.coord)
+	ui.board = int32(cmd.board)
 	ui.selection.SelectCoord(cmd.coord)
 }
 
@@ -243,11 +265,13 @@ func NewRemoveTileCmd(sb *Sandbox, board uint32, coord Vec2) RemoveTileCmd {
 
 func (cmd *RemoveTileCmd) redo(sb *Sandbox, ui *UiState) {
 	sb.RemoveTile(cmd.board, cmd.coord)
+	ui.board = int32(cmd.board)
 	ui.selection.SelectCoord(cmd.coord)
 }
 
 func (cmd *RemoveTileCmd) undo(sb *Sandbox, ui *UiState) {
 	sb.NewTile(cmd.board, cmd.coord)
+	ui.board = int32(cmd.board)
 	ui.selection.SelectCoord(cmd.coord)
 }
 
@@ -268,11 +292,13 @@ func NewAddObstacleCmd(sb *Sandbox, coord Vec2, board uint32, obstacle uint32) A
 
 func (cmd *AddObstacleCmd) redo(sb *Sandbox, ui *UiState) {
 	sb.NewObstacle(cmd.coord, cmd.board, cmd.obstacle)
+	ui.board = int32(cmd.board)
 	ui.selection.SelectCoord(cmd.coord)
 }
 
 func (cmd *AddObstacleCmd) undo(sb *Sandbox, ui *UiState) {
 	sb.RemoveObstacle(cmd.coord, cmd.board, cmd.obstacle)
+	ui.board = int32(cmd.board)
 	ui.selection.SelectCoord(cmd.coord)
 }
 
@@ -293,10 +319,12 @@ func NewRemoveObstacleCmd(sb *Sandbox, coord Vec2, board uint32, obstacle uint32
 
 func (cmd *RemoveObstacleCmd) redo(sb *Sandbox, ui *UiState) {
 	sb.RemoveObstacle(cmd.coord, cmd.board, cmd.obstacle)
+	ui.board = int32(cmd.board)
 	ui.selection.SelectCoord(cmd.coord)
 }
 
 func (cmd *RemoveObstacleCmd) undo(sb *Sandbox, ui *UiState) {
 	sb.NewObstacle(cmd.coord, cmd.board, cmd.obstacle)
+	ui.board = int32(cmd.board)
 	ui.selection.SelectCoord(cmd.coord)
 }

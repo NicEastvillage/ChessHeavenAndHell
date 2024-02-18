@@ -84,7 +84,7 @@ func handleMouseInteraction(undo *UndoRedoSystem, ui *UiState) {
 	if rl.IsMouseButtonPressed(rl.MouseButtonLeft) {
 		var coord = GetHoveredCoord()
 		if ui.tab == 0 {
-			var piece = sandbox.GetPieceAtVisual(coord)
+			var piece = sandbox.GetPieceAtVisual(coord, uint32(ui.board))
 			if piece == nil {
 				ui.selection.Deselect()
 			} else {

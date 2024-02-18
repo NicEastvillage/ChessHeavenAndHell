@@ -140,20 +140,20 @@ func (s *Sandbox) RemoveEffectsFromPiece(pieceId uint32) {
 	s.effects = s.effects[:len(s.effects)-removedEffects]
 }
 
-func (s *Sandbox) GetPieceAt(coord Vec2) *Piece {
+func (s *Sandbox) GetPieceAt(coord Vec2, board uint32) *Piece {
 	for i := 0; i < len(s.pieces); i++ {
-		if s.pieces[i].coord == coord {
+		if s.pieces[i].board == board && s.pieces[i].coord == coord {
 			return &s.pieces[i]
 		}
 	}
 	return nil
 }
 
-func (s *Sandbox) GetPieceAtVisual(coord Vec2) *Piece {
+func (s *Sandbox) GetPieceAtVisual(coord Vec2, board uint32) *Piece {
 	for i := 0; i < len(s.pieces); i++ {
 		for x := 0; x < int(s.pieces[i].scale); x++ {
 			for y := 0; y < int(s.pieces[i].scale); y++ {
-				if s.pieces[i].coord.Add(Vec2{x, y}) == coord {
+				if s.pieces[i].board == board && s.pieces[i].coord.Add(Vec2{x, y}) == coord {
 					return &s.pieces[i]
 				}
 			}
