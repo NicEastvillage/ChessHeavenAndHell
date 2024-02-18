@@ -280,9 +280,7 @@ func (s *Sandbox) Render(board uint32, selection *Selection) {
 		}
 	}
 	for i := 0; i < len(s.pieces); i++ {
-		if s.pieces[i].board == board {
-			s.pieces[i].Render(selection)
-		}
+		s.pieces[i].Render(selection, board)
 	}
 	for i := 0; i < len(s.pieces); i++ {
 		if s.pieces[i].board == board {

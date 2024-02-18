@@ -44,14 +44,23 @@ type Piece struct {
 	scale uint32
 }
 
-func (p *Piece) Render(selection *Selection) {
+func (p *Piece) Render(selection *Selection, board uint32) {
+	var pos = GetWorldOrigo().Add(p.coord.Scale(TileSize))
+	if p.board != board {
+		if selection.IsPieceSelected(p.id) {
+			var offset = TileSize / 2
+			rl.DrawCircle(int32(pos.x+offset), int32(pos.y+offset), 12, rl.Blue)
+		}
+
+		return
+	}
+
 	var typ = sandbox.GetPieceType(p.typ)
 	var tex = typ.texWhite
 	if p.color == BLACK {
 		tex = typ.texBlack
 	}
 
-	var pos = GetWorldOrigo().Add(p.coord.Scale(TileSize))
 	var texScale = float32(TileSize) / float32(max(tex.Width, tex.Height))
 	var pieceCorner = pos.Add(ONEONE.Scale(TileSize / 2)).Sub(Vec2{int(texScale * float32(tex.Width) / 2), int(texScale * float32(tex.Height) / 2)})
 	rl.DrawTextureEx(tex, pieceCorner.ToRlVec(), 0, float32(p.scale)*texScale, rl.White)
