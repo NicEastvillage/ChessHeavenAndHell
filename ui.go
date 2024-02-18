@@ -29,7 +29,7 @@ func NewUiState() UiState {
 	}
 }
 
-func (s *UiState) Render() {
+func (s *UiState) Render(undo *UndoRedoSystem) {
 	if rg.Button(rl.NewRectangle(UiMargin, UiMargin, 200, UiButtonH), "Remove random") {
 		println("Clicked!")
 		if len(sandbox.pieces) > 0 {
@@ -38,27 +38,28 @@ func (s *UiState) Render() {
 		}
 	}
 
-	s.board = rg.ToggleGroup(rl.NewRectangle(float32(rl.GetScreenWidth()/2-(120*3+int(rg.GetStyle(rg.DEFAULT, rg.GROUP_PADDING)))/2), float32(rl.GetScreenHeight()-UiButtonH-UiMargin), 120, UiButtonH), "Heaven;Earth;Hell", s.board)
+	s.board = rg.ToggleGroup(rl.NewRectangle(float32(rl.GetScreenWidth()/2-(120*3+int(rg.GetStyle(rg.TOGGLE, rg.GROUP_PADDING)))/2), float32(rl.GetScreenHeight()-UiButtonH-UiMargin), 120, UiButtonH), "Heaven;Earth;Hell", s.board)
 
-	s.tab = rg.ToggleGroup(rl.NewRectangle(float32(rl.GetScreenWidth()-UiMargin-2*UiButtonH-2*int(rg.GetStyle(rg.DEFAULT, rg.GROUP_PADDING))), UiMargin+5, UiButtonH, UiButtonH), "#149#;#157#;#97#", s.tab)
-
-	if s.tab != 0 && s.selection.selectionType == SelectionTypePiece {
-		s.selection.Deselect()
-	} else if s.tab != 0 && s.selection.selectionType == SelectionTypePieceType {
-		s.selection.Deselect()
-	} else if s.tab != 1 && s.selection.selectionType == SelectionTypeCoord {
+	var oldTab = s.tab
+	s.tab = rg.ToggleGroup(rl.NewRectangle(float32(rl.GetScreenWidth()-UiMargin-2*UiButtonH-1*int(rg.GetStyle(rg.TOGGLE, rg.GROUP_PADDING))), UiMargin, UiButtonH, UiButtonH), "#149#;#97#", s.tab)
+	if oldTab != s.tab {
 		s.selection.Deselect()
 	}
 
 	switch s.selection.selectionType {
 	case SelectionTypePiece:
-		s.RenderPieceContextMenu()
+		s.RenderPieceContextMenu(undo)
+		s.tab = 0
 	case SelectionTypePieceType:
 		s.RenderPiecesTab()
+		s.tab = 0
 	case SelectionTypeCoord:
-		s.RenderCoordContextMenu()
+		s.RenderCoordContextMenu(undo)
+		s.tab = 1
 	default:
-		s.RenderPiecesTab()
+		if s.tab == 0 {
+			s.RenderPiecesTab()
+		}
 	}
 }
 
@@ -72,7 +73,7 @@ func (s *UiState) RenderPiecesTab() {
 	}
 }
 
-func (s *UiState) RenderPieceContextMenu() {
+func (s *UiState) RenderPieceContextMenu(undo *UndoRedoSystem) {
 	var selectedPiece, _ = s.selection.GetSelectedPieceId()
 
 	var spinnerX = float32(rl.GetScreenWidth() - 150)
@@ -82,10 +83,12 @@ func (s *UiState) RenderPieceContextMenu() {
 		var pieceScale = sandbox.GetPiece(selectedPiece).scale
 		var change = SpinnerWithIcon(spinnerX, spinnerY, fmt.Sprint(pieceScale), assets.texPieceScale)
 		if change < 0 && pieceScale > 1 {
-			sandbox.GetPiece(selectedPiece).scale--
+			var cmd = NewDecreasePieceScaleCmd(&sandbox, selectedPiece)
+			undo.AppendDone(&cmd)
 		}
 		if change > 0 {
-			sandbox.GetPiece(selectedPiece).scale++
+			var cmd = NewIncreasePieceScaleCmd(&sandbox, selectedPiece)
+			undo.AppendDone(&cmd)
 		}
 	}
 
@@ -94,10 +97,12 @@ func (s *UiState) RenderPieceContextMenu() {
 		var effectCount = sandbox.GetStatusEffectCount(selectedPiece, effect.id)
 		var change = SpinnerWithIcon(spinnerX, spinnerY+float32(i*55)+55, fmt.Sprint(effectCount), effect.tex)
 		if change < 0 && effectCount > 0 {
-			sandbox.RemoveStatusEffect(selectedPiece, effect.id)
+			var cmd = NewDeleteStatusEffectCmd(&sandbox, selectedPiece, effect.id)
+			undo.AppendDone(&cmd)
 		}
 		if change > 0 {
-			sandbox.NewStatusEffect(selectedPiece, effect.id)
+			var cmd = NewCreateStatusEffectCmd(&sandbox, selectedPiece, effect.id)
+			undo.AppendDone(&cmd)
 		}
 	}
 
@@ -106,12 +111,12 @@ func (s *UiState) RenderPieceContextMenu() {
 	var width = float32(130)
 	var height float32 = UiButtonH
 	if rg.Button(rl.NewRectangle(posX, posY, width, height), "Remove piece") {
-		sandbox.RemovePiece(selectedPiece)
-		s.selection.Deselect()
+		var cmd = NewDeletePieceCmd(&sandbox, s, selectedPiece)
+		undo.AppendDone(&cmd)
 	}
 }
 
-func (s *UiState) RenderCoordContextMenu() {
+func (s *UiState) RenderCoordContextMenu(undo *UndoRedoSystem) {
 	var coord, _ = s.selection.GetSelectedCoord()
 
 	var spinnerX = float32(rl.GetScreenWidth() - 150)
@@ -122,10 +127,12 @@ func (s *UiState) RenderCoordContextMenu() {
 		var obCount = sandbox.GetObstacleCount(coord, uint32(s.board), obt.id)
 		var change = SpinnerWithIcon(spinnerX, spinnerY+float32(i*55)+55, fmt.Sprint(obCount), obt.tex)
 		if change < 0 && obCount > 0 {
-			sandbox.RemoveObstacle(coord, uint32(s.board), obt.id)
+			var cmd = NewDeleteObstacleCmd(&sandbox, coord, uint32(s.board), obt.id)
+			undo.AppendDone(&cmd)
 		}
 		if change > 0 {
-			sandbox.NewObstacle(coord, uint32(s.board), obt.id)
+			var cmd = NewCreateObstacleCmd(&sandbox, coord, uint32(s.board), obt.id)
+			undo.AppendDone(&cmd)
 		}
 	}
 
@@ -134,10 +141,14 @@ func (s *UiState) RenderCoordContextMenu() {
 	var width = float32(130)
 	var height float32 = UiButtonH
 	if rg.Button(rl.NewRectangle(posX, posY-UiMarginSmall-UiButtonH, width, height), "Add tile") {
-		sandbox.NewTile(uint32(s.board), coord)
+		if sandbox.GetTile(uint32(s.board), coord) == nil {
+			var cmd = NewCreateTileCmd(&sandbox, uint32(s.board), coord)
+			undo.AppendDone(&cmd)
+		}
 	}
 	if rg.Button(rl.NewRectangle(posX, posY, width, height), "Remove tile") {
-		sandbox.RemoveTile(uint32(s.board), coord)
+		var cmd = NewDeleteTileCmd(&sandbox, uint32(s.board), coord)
+		undo.AppendDone(&cmd)
 	}
 }
 

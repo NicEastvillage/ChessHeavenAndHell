@@ -28,6 +28,7 @@ func main() {
 	setupBoard(1, BoardStyleEarth, true)
 	setupBoard(2, BoardStyleHell, false)
 
+	var undo = NewUndoRedoSystem()
 	var ui = NewUiState()
 
 	for i := 0; i < 20; i++ {
@@ -44,30 +45,37 @@ func main() {
 
 	for !rl.WindowShouldClose() {
 
-		handleBoardInteraction(&ui)
+		handleBoardInteraction(&undo, &ui)
 
 		rl.BeginDrawing()
 		rl.ClearBackground(rl.RayWhite)
 
 		sandbox.Render(uint32(ui.board), &ui.selection)
-		ui.Render()
+		ui.Render(&undo)
 
 		rl.EndDrawing()
 	}
 }
 
-func handleBoardInteraction(ui *UiState) {
-	handleMouseInteraction(ui)
+func handleBoardInteraction(undo *UndoRedoSystem, ui *UiState) {
+	handleMouseInteraction(undo, ui)
 
 	if pieceId, ok := ui.selection.GetSelectedPieceId(); ok {
 		if rl.IsKeyPressed(rl.KeyDelete) || rl.IsKeyPressed(rl.KeyBackspace) {
-			sandbox.RemovePiece(pieceId)
-			ui.selection.Deselect()
+			var cmd = NewDeletePieceCmd(&sandbox, ui, pieceId)
+			undo.AppendDone(&cmd)
 		}
+	}
+
+	var ctrlDown = rl.IsKeyDown(rl.KeyLeftControl) || rl.IsKeyDown(rl.KeyLeftControl)
+	if rl.IsKeyPressed(rl.KeyZ) && ctrlDown {
+		undo.Undo(&sandbox, ui)
+	} else if rl.IsKeyPressed(rl.KeyY) && ctrlDown {
+		undo.Redo(&sandbox, ui)
 	}
 }
 
-func handleMouseInteraction(ui *UiState) {
+func handleMouseInteraction(undo *UndoRedoSystem, ui *UiState) {
 	// Don't handle mouse events when clicking outside the play area
 	if rl.GetMousePosition().X > float32(rl.GetScreenWidth()-UiRightMenuWidth) ||
 		rl.GetMousePosition().Y > float32(rl.GetScreenHeight()-100) {
@@ -77,7 +85,7 @@ func handleMouseInteraction(ui *UiState) {
 	if rl.IsMouseButtonPressed(rl.MouseButtonLeft) {
 		var coord = GetHoveredCoord()
 		if ui.tab == 0 {
-			var piece = sandbox.GetPieceAtVisual(coord)
+			var piece = sandbox.GetPieceAtVisual(coord, uint32(ui.board))
 			if piece == nil {
 				ui.selection.Deselect()
 			} else {
@@ -89,14 +97,14 @@ func handleMouseInteraction(ui *UiState) {
 	} else if id, ok := ui.selection.GetSelectedPieceId(); ok {
 		if rl.IsMouseButtonPressed(rl.MouseButtonRight) {
 			var coord = GetHoveredCoord()
-			var piece = sandbox.GetPiece(id)
-			piece.coord = coord
-			piece.board = uint32(ui.board)
+			var cmd = NewMovePieceCmd(&sandbox, id, coord, uint32(ui.board))
+			undo.AppendDone(&cmd)
 		}
 	} else if id, ok := ui.selection.GetSelectedPieceTypeId(); ok {
 		if rl.IsMouseButtonPressed(rl.MouseButtonRight) {
 			var coord = GetHoveredCoord()
-			sandbox.NewPiece(id, PieceColor(ui.color), uint32(ui.board), coord)
+			var cmd = NewCreatePieceCmd(&sandbox, id, PieceColor(ui.color), uint32(ui.board), coord)
+			undo.AppendDone(&cmd)
 		}
 	}
 }

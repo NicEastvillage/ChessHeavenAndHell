@@ -95,6 +95,13 @@ func (s *Sandbox) NewPieceFromName(typ string, color PieceColor, board uint32, c
 	return s.NewPiece(s.GetPieceTypeByName(typ).id, color, board, coord)
 }
 
+// AddPiece adds a piece with full details. It is up to the called to ensure that another piece with
+// the same id does not exist.
+func (s *Sandbox) AddPiece(piece Piece) *Piece {
+	s.pieces = append(s.pieces, piece)
+	return &s.pieces[len(s.pieces)-1]
+}
+
 func (s *Sandbox) GetPiece(id uint32) *Piece {
 	for i := 0; i < len(s.pieces); i++ {
 		if s.pieces[i].id == id {
@@ -133,20 +140,20 @@ func (s *Sandbox) RemoveEffectsFromPiece(pieceId uint32) {
 	s.effects = s.effects[:len(s.effects)-removedEffects]
 }
 
-func (s *Sandbox) GetPieceAt(coord Vec2) *Piece {
+func (s *Sandbox) GetPieceAt(coord Vec2, board uint32) *Piece {
 	for i := 0; i < len(s.pieces); i++ {
-		if s.pieces[i].coord == coord {
+		if s.pieces[i].board == board && s.pieces[i].coord == coord {
 			return &s.pieces[i]
 		}
 	}
 	return nil
 }
 
-func (s *Sandbox) GetPieceAtVisual(coord Vec2) *Piece {
+func (s *Sandbox) GetPieceAtVisual(coord Vec2, board uint32) *Piece {
 	for i := 0; i < len(s.pieces); i++ {
 		for x := 0; x < int(s.pieces[i].scale); x++ {
 			for y := 0; y < int(s.pieces[i].scale); y++ {
-				if s.pieces[i].coord.Add(Vec2{x, y}) == coord {
+				if s.pieces[i].board == board && s.pieces[i].coord.Add(Vec2{x, y}) == coord {
 					return &s.pieces[i]
 				}
 			}
@@ -203,6 +210,16 @@ func (s *Sandbox) GetStatusEffectCount(pieceId uint32, statusType uint32) int {
 		}
 	}
 	return count
+}
+
+func (s *Sandbox) GetStatusEffectsOnPiece(pieceId uint32) []uint32 {
+	var effects = make([]uint32, 0)
+	for _, effect := range s.effects {
+		if effect.piece == pieceId {
+			effects = append(effects, effect.typ)
+		}
+	}
+	return effects
 }
 
 func (s *Sandbox) RegisterObstacleType(name string, tex rl.Texture2D) *ObstacleType {
