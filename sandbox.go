@@ -212,6 +212,16 @@ func (s *Sandbox) GetStatusEffectCount(pieceId uint32, statusType uint32) int {
 	return count
 }
 
+func (s *Sandbox) GetStatusEffectsOnPiece(pieceId uint32) []uint32 {
+	var effects = make([]uint32, 0)
+	for _, effect := range s.effects {
+		if effect.piece == pieceId {
+			effects = append(effects, effect.typ)
+		}
+	}
+	return effects
+}
+
 func (s *Sandbox) RegisterObstacleType(name string, tex rl.Texture2D) *ObstacleType {
 	// We assume obstacle types are never unregistered
 	s.obstacleTypes = append(s.obstacleTypes, ObstacleType{

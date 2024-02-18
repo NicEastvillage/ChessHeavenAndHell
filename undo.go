@@ -48,6 +48,7 @@ func NewCreatePieceCmd(sb *Sandbox, typ uint32, color PieceColor, board uint32, 
 
 func (cmd *CreatePieceCmd) redo(sb *Sandbox, ui *UiState) {
 	sb.AddPiece(cmd.piece)
+	ui.selection.Deselect()
 }
 
 func (cmd *CreatePieceCmd) undo(sb *Sandbox, ui *UiState) {
@@ -55,4 +56,247 @@ func (cmd *CreatePieceCmd) undo(sb *Sandbox, ui *UiState) {
 		ui.selection.Deselect()
 	}
 	sb.RemovePiece(cmd.piece.id)
+	ui.selection.Deselect()
+}
+
+type DeletePieceCmd struct {
+	piece   Piece
+	effects []uint32
+}
+
+func NewRemovePieceCmd(sb *Sandbox, ui *UiState, id uint32) DeletePieceCmd {
+	var cmd = DeletePieceCmd{
+		piece:   *sb.GetPiece(id),
+		effects: sb.GetStatusEffectsOnPiece(id),
+	}
+
+	sb.RemovePiece(id)
+	ui.selection.Deselect()
+	return cmd
+}
+
+func (cmd *DeletePieceCmd) redo(sb *Sandbox, ui *UiState) {
+	if id, ok := ui.selection.GetSelectedPieceId(); ok && id == cmd.piece.id {
+		ui.selection.Deselect()
+	}
+	sb.RemovePiece(cmd.piece.id)
+}
+
+func (cmd *DeletePieceCmd) undo(sb *Sandbox, ui *UiState) {
+	sb.AddPiece(cmd.piece)
+	for _, effect := range cmd.effects {
+		sb.NewStatusEffect(cmd.piece.id, effect)
+	}
+	ui.selection.SelectPiece(cmd.piece.id)
+}
+
+type MovePieceCmd struct {
+	piece  uint32
+	before Vec2
+	after  Vec2
+}
+
+func NewMovePieceCmd(sb *Sandbox, id uint32, destination Vec2) MovePieceCmd {
+	var piece = sb.GetPiece(id)
+	var cmd = MovePieceCmd{
+		piece:  id,
+		before: piece.coord,
+		after:  destination,
+	}
+	piece.coord = destination
+	return cmd
+}
+
+func (cmd *MovePieceCmd) redo(sb *Sandbox, ui *UiState) {
+	sb.GetPiece(cmd.piece).coord = cmd.after
+	ui.selection.SelectPiece(cmd.piece)
+}
+
+func (cmd *MovePieceCmd) undo(sb *Sandbox, ui *UiState) {
+	sb.GetPiece(cmd.piece).coord = cmd.before
+	ui.selection.SelectPiece(cmd.piece)
+}
+
+type CreateStatusEffectCmd struct {
+	piece  uint32
+	effect uint32
+}
+
+func NewCreateStatusEffectCmd(sb *Sandbox, piece uint32, effect uint32) CreateStatusEffectCmd {
+	sb.NewStatusEffect(piece, effect)
+	return CreateStatusEffectCmd{
+		piece:  piece,
+		effect: effect,
+	}
+}
+
+func (cmd *CreateStatusEffectCmd) redo(sb *Sandbox, ui *UiState) {
+	sb.NewStatusEffect(cmd.piece, cmd.effect)
+	ui.selection.SelectPiece(cmd.piece)
+}
+
+func (cmd *CreateStatusEffectCmd) undo(sb *Sandbox, ui *UiState) {
+	sb.RemoveStatusEffect(cmd.piece, cmd.effect)
+	ui.selection.SelectPiece(cmd.piece)
+}
+
+type RemoveStatusEffectCmd struct {
+	piece  uint32
+	effect uint32
+}
+
+func NewRemoveStatusEffectCmd(sb *Sandbox, piece uint32, effect uint32) RemoveStatusEffectCmd {
+	sb.RemoveStatusEffect(piece, effect)
+	return RemoveStatusEffectCmd{
+		piece:  piece,
+		effect: effect,
+	}
+}
+
+func (cmd *RemoveStatusEffectCmd) redo(sb *Sandbox, ui *UiState) {
+	sb.RemoveStatusEffect(cmd.piece, cmd.effect)
+	ui.selection.SelectPiece(cmd.piece)
+}
+
+func (cmd *RemoveStatusEffectCmd) undo(sb *Sandbox, ui *UiState) {
+	sb.NewStatusEffect(cmd.piece, cmd.effect)
+	ui.selection.SelectPiece(cmd.piece)
+}
+
+type IncreasePieceScaleCmd struct {
+	piece uint32
+}
+
+func NewIncreasePieceScaleCmd(sb *Sandbox, piece uint32) IncreasePieceScaleCmd {
+	sb.GetPiece(piece).scale++
+	return IncreasePieceScaleCmd{
+		piece: piece,
+	}
+}
+
+func (cmd *IncreasePieceScaleCmd) redo(sb *Sandbox, ui *UiState) {
+	sb.GetPiece(cmd.piece).scale++
+	ui.selection.SelectPiece(cmd.piece)
+}
+
+func (cmd *IncreasePieceScaleCmd) undo(sb *Sandbox, ui *UiState) {
+	sb.GetPiece(cmd.piece).scale--
+	ui.selection.SelectPiece(cmd.piece)
+}
+
+type DecreasePieceScaleCmd struct {
+	piece uint32
+}
+
+func NewDecreasePieceScaleCmd(sb *Sandbox, piece uint32) DecreasePieceScaleCmd {
+	sb.GetPiece(piece).scale--
+	return DecreasePieceScaleCmd{
+		piece: piece,
+	}
+}
+
+func (cmd *DecreasePieceScaleCmd) redo(sb *Sandbox, ui *UiState) {
+	sb.GetPiece(cmd.piece).scale--
+	ui.selection.SelectPiece(cmd.piece)
+}
+
+func (cmd *DecreasePieceScaleCmd) undo(sb *Sandbox, ui *UiState) {
+	sb.GetPiece(cmd.piece).scale++
+	ui.selection.SelectPiece(cmd.piece)
+}
+
+type CreateTileCmd struct {
+	board uint32
+	coord Vec2
+}
+
+func NewAddTileCmd(sb *Sandbox, board uint32, coord Vec2) CreateTileCmd {
+	sb.NewTile(board, coord)
+	return CreateTileCmd{
+		board: board,
+		coord: coord,
+	}
+}
+
+func (cmd *CreateTileCmd) redo(sb *Sandbox, ui *UiState) {
+	sb.NewTile(cmd.board, cmd.coord)
+	ui.selection.SelectCoord(cmd.coord)
+}
+
+func (cmd *CreateTileCmd) undo(sb *Sandbox, ui *UiState) {
+	sb.RemoveTile(cmd.board, cmd.coord)
+	ui.selection.SelectCoord(cmd.coord)
+}
+
+type RemoveTileCmd struct {
+	board uint32
+	coord Vec2
+}
+
+func NewRemoveTileCmd(sb *Sandbox, board uint32, coord Vec2) RemoveTileCmd {
+	sb.RemoveTile(board, coord)
+	return RemoveTileCmd{
+		board: board,
+		coord: coord,
+	}
+}
+
+func (cmd *RemoveTileCmd) redo(sb *Sandbox, ui *UiState) {
+	sb.RemoveTile(cmd.board, cmd.coord)
+	ui.selection.SelectCoord(cmd.coord)
+}
+
+func (cmd *RemoveTileCmd) undo(sb *Sandbox, ui *UiState) {
+	sb.NewTile(cmd.board, cmd.coord)
+	ui.selection.SelectCoord(cmd.coord)
+}
+
+type AddObstacleCmd struct {
+	coord    Vec2
+	board    uint32
+	obstacle uint32
+}
+
+func NewAddObstacleCmd(sb *Sandbox, coord Vec2, board uint32, obstacle uint32) AddObstacleCmd {
+	sb.NewObstacle(coord, board, obstacle)
+	return AddObstacleCmd{
+		obstacle: obstacle,
+		board:    board,
+		coord:    coord,
+	}
+}
+
+func (cmd *AddObstacleCmd) redo(sb *Sandbox, ui *UiState) {
+	sb.NewObstacle(cmd.coord, cmd.board, cmd.obstacle)
+	ui.selection.SelectCoord(cmd.coord)
+}
+
+func (cmd *AddObstacleCmd) undo(sb *Sandbox, ui *UiState) {
+	sb.RemoveObstacle(cmd.coord, cmd.board, cmd.obstacle)
+	ui.selection.SelectCoord(cmd.coord)
+}
+
+type RemoveObstacleCmd struct {
+	coord    Vec2
+	board    uint32
+	obstacle uint32
+}
+
+func NewRemoveObstacleCmd(sb *Sandbox, coord Vec2, board uint32, obstacle uint32) RemoveObstacleCmd {
+	sb.RemoveObstacle(coord, board, obstacle)
+	return RemoveObstacleCmd{
+		obstacle: obstacle,
+		board:    board,
+		coord:    coord,
+	}
+}
+
+func (cmd *RemoveObstacleCmd) redo(sb *Sandbox, ui *UiState) {
+	sb.RemoveObstacle(cmd.coord, cmd.board, cmd.obstacle)
+	ui.selection.SelectCoord(cmd.coord)
+}
+
+func (cmd *RemoveObstacleCmd) undo(sb *Sandbox, ui *UiState) {
+	sb.NewObstacle(cmd.coord, cmd.board, cmd.obstacle)
+	ui.selection.SelectCoord(cmd.coord)
 }

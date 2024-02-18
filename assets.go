@@ -89,10 +89,10 @@ func (am *AssetManager) LoadAll() {
 	am.texAngel = rl.LoadTexture("Assets/pieces/angel.png")
 	am.texImp = rl.LoadTexture("Assets/pieces/imp.png")
 
-	am.texObstacleChaosOrb = rl.LoadTexture("Assets/chaos_orb.png")
-	am.texObstacleCoin = rl.LoadTexture("Assets/coin.png")
-	am.texObstacleFire = rl.LoadTexture("Assets/fire.png")
-	am.texObstacleIce = rl.LoadTexture("Assets/ice.png")
+	am.texObstacleChaosOrb = rl.LoadTexture("Assets/obstacles/chaos_orb.png")
+	am.texObstacleCoin = rl.LoadTexture("Assets/obstacles/coin.png")
+	am.texObstacleFire = rl.LoadTexture("Assets/obstacles/fire.png")
+	am.texObstacleIce = rl.LoadTexture("Assets/obstacles/ice.png")
 
 	am.texEffectBlood = rl.LoadTexture("Assetst/effects/blood.png")
 	am.texEffectMedal = rl.LoadTexture("Assets/effects/medal.png")

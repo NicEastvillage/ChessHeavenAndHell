@@ -62,8 +62,8 @@ func handleBoardInteraction(undo *UndoRedoSystem, ui *UiState) {
 
 	if pieceId, ok := ui.selection.GetSelectedPieceId(); ok {
 		if rl.IsKeyPressed(rl.KeyDelete) || rl.IsKeyPressed(rl.KeyBackspace) {
-			sandbox.RemovePiece(pieceId)
-			ui.selection.Deselect()
+			var cmd = NewRemovePieceCmd(&sandbox, ui, pieceId)
+			undo.AppendDone(&cmd)
 		}
 	}
 
@@ -96,8 +96,8 @@ func handleMouseInteraction(undo *UndoRedoSystem, ui *UiState) {
 	} else if id, ok := ui.selection.GetSelectedPieceId(); ok {
 		if rl.IsMouseButtonPressed(rl.MouseButtonRight) {
 			var coord = GetHoveredCoord()
-			var piece = sandbox.GetPiece(id)
-			piece.coord = coord
+			var cmd = NewMovePieceCmd(&sandbox, id, coord)
+			undo.AppendDone(&cmd)
 		}
 	} else if id, ok := ui.selection.GetSelectedPieceTypeId(); ok {
 		if rl.IsMouseButtonPressed(rl.MouseButtonRight) {
