@@ -66,7 +66,7 @@ type DeletePieceCmd struct {
 	effects []uint32
 }
 
-func NewRemovePieceCmd(sb *Sandbox, ui *UiState, id uint32) DeletePieceCmd {
+func NewDeletePieceCmd(sb *Sandbox, ui *UiState, id uint32) DeletePieceCmd {
 	var cmd = DeletePieceCmd{
 		piece:   *sb.GetPiece(id),
 		effects: sb.GetStatusEffectsOnPiece(id),
@@ -157,26 +157,26 @@ func (cmd *CreateStatusEffectCmd) undo(sb *Sandbox, ui *UiState) {
 	ui.selection.SelectPiece(cmd.piece)
 }
 
-type RemoveStatusEffectCmd struct {
+type DeleteStatusEffectCmd struct {
 	piece  uint32
 	effect uint32
 }
 
-func NewRemoveStatusEffectCmd(sb *Sandbox, piece uint32, effect uint32) RemoveStatusEffectCmd {
+func NewDeleteStatusEffectCmd(sb *Sandbox, piece uint32, effect uint32) DeleteStatusEffectCmd {
 	sb.RemoveStatusEffect(piece, effect)
-	return RemoveStatusEffectCmd{
+	return DeleteStatusEffectCmd{
 		piece:  piece,
 		effect: effect,
 	}
 }
 
-func (cmd *RemoveStatusEffectCmd) redo(sb *Sandbox, ui *UiState) {
+func (cmd *DeleteStatusEffectCmd) redo(sb *Sandbox, ui *UiState) {
 	sb.RemoveStatusEffect(cmd.piece, cmd.effect)
 	ui.board = int32(sb.GetPiece(cmd.piece).board)
 	ui.selection.SelectPiece(cmd.piece)
 }
 
-func (cmd *RemoveStatusEffectCmd) undo(sb *Sandbox, ui *UiState) {
+func (cmd *DeleteStatusEffectCmd) undo(sb *Sandbox, ui *UiState) {
 	sb.NewStatusEffect(cmd.piece, cmd.effect)
 	ui.board = int32(sb.GetPiece(cmd.piece).board)
 	ui.selection.SelectPiece(cmd.piece)
@@ -237,7 +237,7 @@ type CreateTileCmd struct {
 	coord Vec2
 }
 
-func NewAddTileCmd(sb *Sandbox, board uint32, coord Vec2) CreateTileCmd {
+func NewCreateTileCmd(sb *Sandbox, board uint32, coord Vec2) CreateTileCmd {
 	sb.NewTile(board, coord)
 	return CreateTileCmd{
 		board: board,
@@ -257,80 +257,80 @@ func (cmd *CreateTileCmd) undo(sb *Sandbox, ui *UiState) {
 	ui.selection.SelectCoord(cmd.coord)
 }
 
-type RemoveTileCmd struct {
+type DeleteTileCmd struct {
 	board uint32
 	coord Vec2
 }
 
-func NewRemoveTileCmd(sb *Sandbox, board uint32, coord Vec2) RemoveTileCmd {
+func NewDeleteTileCmd(sb *Sandbox, board uint32, coord Vec2) DeleteTileCmd {
 	sb.RemoveTile(board, coord)
-	return RemoveTileCmd{
+	return DeleteTileCmd{
 		board: board,
 		coord: coord,
 	}
 }
 
-func (cmd *RemoveTileCmd) redo(sb *Sandbox, ui *UiState) {
+func (cmd *DeleteTileCmd) redo(sb *Sandbox, ui *UiState) {
 	sb.RemoveTile(cmd.board, cmd.coord)
 	ui.board = int32(cmd.board)
 	ui.selection.SelectCoord(cmd.coord)
 }
 
-func (cmd *RemoveTileCmd) undo(sb *Sandbox, ui *UiState) {
+func (cmd *DeleteTileCmd) undo(sb *Sandbox, ui *UiState) {
 	sb.NewTile(cmd.board, cmd.coord)
 	ui.board = int32(cmd.board)
 	ui.selection.SelectCoord(cmd.coord)
 }
 
-type AddObstacleCmd struct {
+type CreateObstacleCmd struct {
 	coord    Vec2
 	board    uint32
 	obstacle uint32
 }
 
-func NewAddObstacleCmd(sb *Sandbox, coord Vec2, board uint32, obstacle uint32) AddObstacleCmd {
+func NewCreateObstacleCmd(sb *Sandbox, coord Vec2, board uint32, obstacle uint32) CreateObstacleCmd {
 	sb.NewObstacle(coord, board, obstacle)
-	return AddObstacleCmd{
+	return CreateObstacleCmd{
 		obstacle: obstacle,
 		board:    board,
 		coord:    coord,
 	}
 }
 
-func (cmd *AddObstacleCmd) redo(sb *Sandbox, ui *UiState) {
+func (cmd *CreateObstacleCmd) redo(sb *Sandbox, ui *UiState) {
 	sb.NewObstacle(cmd.coord, cmd.board, cmd.obstacle)
 	ui.board = int32(cmd.board)
 	ui.selection.SelectCoord(cmd.coord)
 }
 
-func (cmd *AddObstacleCmd) undo(sb *Sandbox, ui *UiState) {
+func (cmd *CreateObstacleCmd) undo(sb *Sandbox, ui *UiState) {
 	sb.RemoveObstacle(cmd.coord, cmd.board, cmd.obstacle)
 	ui.board = int32(cmd.board)
 	ui.selection.SelectCoord(cmd.coord)
 }
 
-type RemoveObstacleCmd struct {
+type DeleteObstacleCmd struct {
 	coord    Vec2
 	board    uint32
 	obstacle uint32
 }
 
-func NewRemoveObstacleCmd(sb *Sandbox, coord Vec2, board uint32, obstacle uint32) RemoveObstacleCmd {
+func NewDeleteObstacleCmd(sb *Sandbox, coord Vec2, board uint32, obstacle uint32) DeleteObstacleCmd {
 	sb.RemoveObstacle(coord, board, obstacle)
-	return RemoveObstacleCmd{
+	return DeleteObstacleCmd{
 		obstacle: obstacle,
 		board:    board,
 		coord:    coord,
 	}
 }
 
-func (cmd *RemoveObstacleCmd) redo(sb *Sandbox, ui *UiState) {
+func (cmd *DeleteObstacleCmd) redo(sb *Sandbox, ui *UiState) {
 	sb.RemoveObstacle(cmd.coord, cmd.board, cmd.obstacle)
 	ui.board = int32(cmd.board)
 	ui.selection.SelectCoord(cmd.coord)
 }
 
-func (cmd *RemoveObstacleCmd) undo(sb *Sandbox, ui *UiState) {
+func (cmd *DeleteObstacleCmd) undo(sb *Sandbox, ui *UiState) {
 	sb.NewObstacle(cmd.coord, cmd.board, cmd.obstacle)
 	ui.board = int32(cmd.board)
 	ui.selection.SelectCoord(cmd.coord)

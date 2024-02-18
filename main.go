@@ -62,7 +62,7 @@ func handleBoardInteraction(undo *UndoRedoSystem, ui *UiState) {
 
 	if pieceId, ok := ui.selection.GetSelectedPieceId(); ok {
 		if rl.IsKeyPressed(rl.KeyDelete) || rl.IsKeyPressed(rl.KeyBackspace) {
-			var cmd = NewRemovePieceCmd(&sandbox, ui, pieceId)
+			var cmd = NewDeletePieceCmd(&sandbox, ui, pieceId)
 			undo.AppendDone(&cmd)
 		}
 	}

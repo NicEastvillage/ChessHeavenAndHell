@@ -97,7 +97,7 @@ func (s *UiState) RenderPieceContextMenu(undo *UndoRedoSystem) {
 		var effectCount = sandbox.GetStatusEffectCount(selectedPiece, effect.id)
 		var change = SpinnerWithIcon(spinnerX, spinnerY+float32(i*55)+55, fmt.Sprint(effectCount), effect.tex)
 		if change < 0 && effectCount > 0 {
-			var cmd = NewRemoveStatusEffectCmd(&sandbox, selectedPiece, effect.id)
+			var cmd = NewDeleteStatusEffectCmd(&sandbox, selectedPiece, effect.id)
 			undo.AppendDone(&cmd)
 		}
 		if change > 0 {
@@ -111,7 +111,7 @@ func (s *UiState) RenderPieceContextMenu(undo *UndoRedoSystem) {
 	var width = float32(130)
 	var height float32 = UiButtonH
 	if rg.Button(rl.NewRectangle(posX, posY, width, height), "Remove piece") {
-		var cmd = NewRemovePieceCmd(&sandbox, s, selectedPiece)
+		var cmd = NewDeletePieceCmd(&sandbox, s, selectedPiece)
 		undo.AppendDone(&cmd)
 	}
 }
@@ -127,11 +127,11 @@ func (s *UiState) RenderCoordContextMenu(undo *UndoRedoSystem) {
 		var obCount = sandbox.GetObstacleCount(coord, uint32(s.board), obt.id)
 		var change = SpinnerWithIcon(spinnerX, spinnerY+float32(i*55)+55, fmt.Sprint(obCount), obt.tex)
 		if change < 0 && obCount > 0 {
-			var cmd = NewRemoveObstacleCmd(&sandbox, coord, uint32(s.board), obt.id)
+			var cmd = NewDeleteObstacleCmd(&sandbox, coord, uint32(s.board), obt.id)
 			undo.AppendDone(&cmd)
 		}
 		if change > 0 {
-			var cmd = NewAddObstacleCmd(&sandbox, coord, uint32(s.board), obt.id)
+			var cmd = NewCreateObstacleCmd(&sandbox, coord, uint32(s.board), obt.id)
 			undo.AppendDone(&cmd)
 		}
 	}
@@ -142,12 +142,12 @@ func (s *UiState) RenderCoordContextMenu(undo *UndoRedoSystem) {
 	var height float32 = UiButtonH
 	if rg.Button(rl.NewRectangle(posX, posY-UiMarginSmall-UiButtonH, width, height), "Add tile") {
 		if sandbox.GetTile(uint32(s.board), coord) == nil {
-			var cmd = NewAddTileCmd(&sandbox, uint32(s.board), coord)
+			var cmd = NewCreateTileCmd(&sandbox, uint32(s.board), coord)
 			undo.AppendDone(&cmd)
 		}
 	}
 	if rg.Button(rl.NewRectangle(posX, posY, width, height), "Remove tile") {
-		var cmd = NewRemoveTileCmd(&sandbox, uint32(s.board), coord)
+		var cmd = NewDeleteTileCmd(&sandbox, uint32(s.board), coord)
 		undo.AppendDone(&cmd)
 	}
 }
