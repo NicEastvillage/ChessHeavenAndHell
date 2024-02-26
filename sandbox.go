@@ -28,6 +28,24 @@ func IsOffBoard(coord Vec2) bool {
 	return coord.x < 0 || coord.x > 8 || coord.y < 0 || coord.y > 8
 }
 
+func (s *Sandbox) FindUnoccupiedOffboardCoordForCapture() Vec2 {
+	for x := 9; x < 13; x++ {
+		for y := 0; y < 8; y++ {
+			if s.GetPieceAtVisual(Vec2{x, y}, OffBoard) == nil {
+				return Vec2{x, y}
+			}
+		}
+	}
+	for x := 2; x < 4; x++ {
+		for y := 0; y < 8; y++ {
+			if s.GetPieceAtVisual(Vec2{-x, y}, OffBoard) == nil {
+				return Vec2{-x, y}
+			}
+		}
+	}
+	return Vec2{x: 9, y: -1}
+}
+
 func (s *Sandbox) NewTile(board uint32, coord Vec2) *Tile {
 	s.tiles = append(s.tiles, Tile{board: board, coord: coord})
 	return &s.tiles[len(s.tiles)-1]

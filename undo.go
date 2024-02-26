@@ -37,20 +37,36 @@ func (s *UndoRedoSystem) AppendDone(undoable Undoable) {
 }
 
 type CreatePieceCmd struct {
-	piece Piece
+	piece             Piece
+	anyCaptured       bool
+	capturedPiece     uint32
+	captureAfterCoord Vec2
 }
 
 func NewCreatePieceCmd(sb *Sandbox, typ uint32, color PieceColor, board uint32, coord Vec2) CreatePieceCmd {
+	var cmd = CreatePieceCmd{}
 	if IsOffBoard(coord) {
 		board = OffBoard
 	}
-	return CreatePieceCmd{
-		piece: *sb.NewPiece(typ, color, board, coord),
+	var captured = sandbox.GetPieceAt(coord, board)
+	if captured != nil {
+		cmd.anyCaptured = true
+		cmd.capturedPiece = captured.id
+		cmd.captureAfterCoord = sb.FindUnoccupiedOffboardCoordForCapture()
+		captured.board = OffBoard
+		captured.coord = cmd.captureAfterCoord
 	}
+	cmd.piece = *sb.NewPiece(typ, color, board, coord)
+	return cmd
 }
 
 func (cmd *CreatePieceCmd) redo(sb *Sandbox, ui *UiState) {
 	sb.AddPiece(cmd.piece)
+	if cmd.anyCaptured {
+		var captured = sb.GetPiece(cmd.capturedPiece)
+		captured.board = OffBoard
+		captured.coord = cmd.captureAfterCoord
+	}
 	if cmd.piece.board != OffBoard {
 		ui.board = int32(cmd.piece.board)
 	}
@@ -62,6 +78,11 @@ func (cmd *CreatePieceCmd) undo(sb *Sandbox, ui *UiState) {
 		ui.selection.Deselect()
 	}
 	sb.RemovePiece(cmd.piece.id)
+	if cmd.anyCaptured {
+		var captured = sb.GetPiece(cmd.capturedPiece)
+		captured.board = cmd.piece.board
+		captured.coord = cmd.piece.coord
+	}
 	if cmd.piece.board != OffBoard {
 		ui.board = int32(cmd.piece.board)
 	}
@@ -106,29 +127,41 @@ func (cmd *DeletePieceCmd) undo(sb *Sandbox, ui *UiState) {
 }
 
 type MovePieceCmd struct {
-	piece       uint32
-	beforeCoord Vec2
-	beforeBoard uint32
-	afterCoord  Vec2
-	afterBoard  uint32
+	piece             uint32
+	beforeCoord       Vec2
+	beforeBoard       uint32
+	afterCoord        Vec2
+	afterBoard        uint32
+	anyCaptured       bool
+	capturedPiece     uint32
+	captureAfterCoord Vec2
 }
 
 func NewMovePieceCmd(sb *Sandbox, id uint32, destCoord Vec2, destBoard uint32) MovePieceCmd {
 	var piece = sb.GetPiece(id)
+	if piece.board == destBoard && piece.coord == destCoord {
+		panic("A piece cannot be moved to where it already is")
+	}
 	var cmd = MovePieceCmd{
 		piece:       id,
 		beforeCoord: piece.coord,
 		beforeBoard: piece.board,
-		afterCoord:  destCoord,
-		afterBoard:  destBoard,
 	}
+	if IsOffBoard(destCoord) {
+		destBoard = OffBoard
+	}
+	var captured = sandbox.GetPieceAt(destCoord, destBoard)
+	if captured != nil {
+		cmd.anyCaptured = true
+		cmd.capturedPiece = captured.id
+		cmd.captureAfterCoord = sb.FindUnoccupiedOffboardCoordForCapture()
+		captured.board = OffBoard
+		captured.coord = cmd.captureAfterCoord
+	}
+	cmd.afterBoard = destBoard
+	cmd.afterCoord = destCoord
 	piece.coord = destCoord
-	if !IsOffBoard(destCoord) {
-		piece.board = destBoard
-	} else {
-		piece.board = OffBoard
-		cmd.afterBoard = OffBoard
-	}
+	piece.board = destBoard
 	return cmd
 }
 
@@ -136,6 +169,11 @@ func (cmd *MovePieceCmd) redo(sb *Sandbox, ui *UiState) {
 	var piece = sb.GetPiece(cmd.piece)
 	piece.coord = cmd.afterCoord
 	piece.board = cmd.afterBoard
+	if cmd.anyCaptured {
+		var captured = sb.GetPiece(cmd.capturedPiece)
+		captured.board = OffBoard
+		captured.coord = cmd.captureAfterCoord
+	}
 	if piece.board != OffBoard {
 		ui.board = int32(piece.board)
 	}
@@ -146,6 +184,11 @@ func (cmd *MovePieceCmd) undo(sb *Sandbox, ui *UiState) {
 	var piece = sb.GetPiece(cmd.piece)
 	piece.coord = cmd.beforeCoord
 	piece.board = cmd.beforeBoard
+	if cmd.anyCaptured {
+		var captured = sb.GetPiece(cmd.capturedPiece)
+		captured.board = cmd.afterBoard
+		captured.coord = cmd.afterCoord
+	}
 	if piece.board != OffBoard {
 		ui.board = int32(piece.board)
 	}
