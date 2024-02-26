@@ -37,18 +37,39 @@ func (s *UndoRedoSystem) AppendDone(undoable Undoable) {
 }
 
 type CreatePieceCmd struct {
-	piece Piece
+	piece             Piece
+	anyCaptured       bool
+	capturedPiece     uint32
+	captureAfterCoord Vec2
 }
 
 func NewCreatePieceCmd(sb *Sandbox, typ uint32, color PieceColor, board uint32, coord Vec2) CreatePieceCmd {
-	return CreatePieceCmd{
-		piece: *sb.NewPiece(typ, color, board, coord),
+	var cmd = CreatePieceCmd{}
+	if IsOffBoard(coord) {
+		board = OffBoard
 	}
+	var captured = sandbox.GetPieceAt(coord, board)
+	if captured != nil {
+		cmd.anyCaptured = true
+		cmd.capturedPiece = captured.id
+		cmd.captureAfterCoord = sb.FindUnoccupiedOffboardCoordForCapture()
+		captured.board = OffBoard
+		captured.coord = cmd.captureAfterCoord
+	}
+	cmd.piece = *sb.NewPiece(typ, color, board, coord)
+	return cmd
 }
 
 func (cmd *CreatePieceCmd) redo(sb *Sandbox, ui *UiState) {
 	sb.AddPiece(cmd.piece)
-	ui.board = int32(cmd.piece.board)
+	if cmd.anyCaptured {
+		var captured = sb.GetPiece(cmd.capturedPiece)
+		captured.board = OffBoard
+		captured.coord = cmd.captureAfterCoord
+	}
+	if cmd.piece.board != OffBoard {
+		ui.board = int32(cmd.piece.board)
+	}
 	ui.selection.Deselect()
 }
 
@@ -57,7 +78,14 @@ func (cmd *CreatePieceCmd) undo(sb *Sandbox, ui *UiState) {
 		ui.selection.Deselect()
 	}
 	sb.RemovePiece(cmd.piece.id)
-	ui.board = int32(cmd.piece.board)
+	if cmd.anyCaptured {
+		var captured = sb.GetPiece(cmd.capturedPiece)
+		captured.board = cmd.piece.board
+		captured.coord = cmd.piece.coord
+	}
+	if cmd.piece.board != OffBoard {
+		ui.board = int32(cmd.piece.board)
+	}
 	ui.selection.Deselect()
 }
 
@@ -82,7 +110,9 @@ func (cmd *DeletePieceCmd) redo(sb *Sandbox, ui *UiState) {
 		ui.selection.Deselect()
 	}
 	sb.RemovePiece(cmd.piece.id)
-	ui.board = int32(cmd.piece.board)
+	if cmd.piece.board != OffBoard {
+		ui.board = int32(cmd.piece.board)
+	}
 }
 
 func (cmd *DeletePieceCmd) undo(sb *Sandbox, ui *UiState) {
@@ -90,27 +120,46 @@ func (cmd *DeletePieceCmd) undo(sb *Sandbox, ui *UiState) {
 	for _, effect := range cmd.effects {
 		sb.NewStatusEffect(cmd.piece.id, effect)
 	}
-	ui.board = int32(cmd.piece.board)
+	if cmd.piece.board != OffBoard {
+		ui.board = int32(cmd.piece.board)
+	}
 	ui.selection.SelectPiece(cmd.piece.id)
 }
 
 type MovePieceCmd struct {
-	piece       uint32
-	beforeCoord Vec2
-	beforeBoard uint32
-	afterCoord  Vec2
-	afterBoard  uint32
+	piece             uint32
+	beforeCoord       Vec2
+	beforeBoard       uint32
+	afterCoord        Vec2
+	afterBoard        uint32
+	anyCaptured       bool
+	capturedPiece     uint32
+	captureAfterCoord Vec2
 }
 
 func NewMovePieceCmd(sb *Sandbox, id uint32, destCoord Vec2, destBoard uint32) MovePieceCmd {
 	var piece = sb.GetPiece(id)
+	if piece.board == destBoard && piece.coord == destCoord {
+		panic("A piece cannot be moved to where it already is")
+	}
 	var cmd = MovePieceCmd{
 		piece:       id,
 		beforeCoord: piece.coord,
 		beforeBoard: piece.board,
-		afterCoord:  destCoord,
-		afterBoard:  destBoard,
 	}
+	if IsOffBoard(destCoord) {
+		destBoard = OffBoard
+	}
+	var captured = sandbox.GetPieceAt(destCoord, destBoard)
+	if captured != nil {
+		cmd.anyCaptured = true
+		cmd.capturedPiece = captured.id
+		cmd.captureAfterCoord = sb.FindUnoccupiedOffboardCoordForCapture()
+		captured.board = OffBoard
+		captured.coord = cmd.captureAfterCoord
+	}
+	cmd.afterBoard = destBoard
+	cmd.afterCoord = destCoord
 	piece.coord = destCoord
 	piece.board = destBoard
 	return cmd
@@ -120,7 +169,14 @@ func (cmd *MovePieceCmd) redo(sb *Sandbox, ui *UiState) {
 	var piece = sb.GetPiece(cmd.piece)
 	piece.coord = cmd.afterCoord
 	piece.board = cmd.afterBoard
-	ui.board = int32(piece.board)
+	if cmd.anyCaptured {
+		var captured = sb.GetPiece(cmd.capturedPiece)
+		captured.board = OffBoard
+		captured.coord = cmd.captureAfterCoord
+	}
+	if piece.board != OffBoard {
+		ui.board = int32(piece.board)
+	}
 	ui.selection.SelectPiece(cmd.piece)
 }
 
@@ -128,7 +184,14 @@ func (cmd *MovePieceCmd) undo(sb *Sandbox, ui *UiState) {
 	var piece = sb.GetPiece(cmd.piece)
 	piece.coord = cmd.beforeCoord
 	piece.board = cmd.beforeBoard
-	ui.board = int32(piece.board)
+	if cmd.anyCaptured {
+		var captured = sb.GetPiece(cmd.capturedPiece)
+		captured.board = cmd.afterBoard
+		captured.coord = cmd.afterCoord
+	}
+	if piece.board != OffBoard {
+		ui.board = int32(piece.board)
+	}
 	ui.selection.SelectPiece(cmd.piece)
 }
 
@@ -147,13 +210,19 @@ func NewCreateStatusEffectCmd(sb *Sandbox, piece uint32, effect uint32) CreateSt
 
 func (cmd *CreateStatusEffectCmd) redo(sb *Sandbox, ui *UiState) {
 	sb.NewStatusEffect(cmd.piece, cmd.effect)
-	ui.board = int32(sb.GetPiece(cmd.piece).board)
+	var piece = sb.GetPiece(cmd.piece)
+	if piece.board != OffBoard {
+		ui.board = int32(piece.board)
+	}
 	ui.selection.SelectPiece(cmd.piece)
 }
 
 func (cmd *CreateStatusEffectCmd) undo(sb *Sandbox, ui *UiState) {
 	sb.RemoveStatusEffect(cmd.piece, cmd.effect)
-	ui.board = int32(sb.GetPiece(cmd.piece).board)
+	var piece = sb.GetPiece(cmd.piece)
+	if piece.board != OffBoard {
+		ui.board = int32(piece.board)
+	}
 	ui.selection.SelectPiece(cmd.piece)
 }
 
@@ -172,13 +241,19 @@ func NewDeleteStatusEffectCmd(sb *Sandbox, piece uint32, effect uint32) DeleteSt
 
 func (cmd *DeleteStatusEffectCmd) redo(sb *Sandbox, ui *UiState) {
 	sb.RemoveStatusEffect(cmd.piece, cmd.effect)
-	ui.board = int32(sb.GetPiece(cmd.piece).board)
+	var piece = sb.GetPiece(cmd.piece)
+	if piece.board != OffBoard {
+		ui.board = int32(piece.board)
+	}
 	ui.selection.SelectPiece(cmd.piece)
 }
 
 func (cmd *DeleteStatusEffectCmd) undo(sb *Sandbox, ui *UiState) {
 	sb.NewStatusEffect(cmd.piece, cmd.effect)
-	ui.board = int32(sb.GetPiece(cmd.piece).board)
+	var piece = sb.GetPiece(cmd.piece)
+	if piece.board != OffBoard {
+		ui.board = int32(piece.board)
+	}
 	ui.selection.SelectPiece(cmd.piece)
 }
 
@@ -196,14 +271,18 @@ func NewIncreasePieceScaleCmd(sb *Sandbox, piece uint32) IncreasePieceScaleCmd {
 func (cmd *IncreasePieceScaleCmd) redo(sb *Sandbox, ui *UiState) {
 	var piece = sb.GetPiece(cmd.piece)
 	piece.scale++
-	ui.board = int32(piece.board)
+	if piece.board != OffBoard {
+		ui.board = int32(piece.board)
+	}
 	ui.selection.SelectPiece(cmd.piece)
 }
 
 func (cmd *IncreasePieceScaleCmd) undo(sb *Sandbox, ui *UiState) {
 	var piece = sb.GetPiece(cmd.piece)
 	piece.scale--
-	ui.board = int32(piece.board)
+	if piece.board != OffBoard {
+		ui.board = int32(piece.board)
+	}
 	ui.selection.SelectPiece(cmd.piece)
 }
 
@@ -221,14 +300,18 @@ func NewDecreasePieceScaleCmd(sb *Sandbox, piece uint32) DecreasePieceScaleCmd {
 func (cmd *DecreasePieceScaleCmd) redo(sb *Sandbox, ui *UiState) {
 	var piece = sb.GetPiece(cmd.piece)
 	piece.scale--
-	ui.board = int32(piece.board)
+	if piece.board != OffBoard {
+		ui.board = int32(piece.board)
+	}
 	ui.selection.SelectPiece(cmd.piece)
 }
 
 func (cmd *DecreasePieceScaleCmd) undo(sb *Sandbox, ui *UiState) {
 	var piece = sb.GetPiece(cmd.piece)
 	piece.scale++
-	ui.board = int32(piece.board)
+	if piece.board != OffBoard {
+		ui.board = int32(piece.board)
+	}
 	ui.selection.SelectPiece(cmd.piece)
 }
 

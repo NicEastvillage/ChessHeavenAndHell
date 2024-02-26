@@ -24,6 +24,28 @@ func (s *Sandbox) GetBoard(id uint32) *Board {
 	return &s.boards[id]
 }
 
+func IsOffBoard(coord Vec2) bool {
+	return coord.x < 0 || coord.x > 8 || coord.y < 0 || coord.y > 8
+}
+
+func (s *Sandbox) FindUnoccupiedOffboardCoordForCapture() Vec2 {
+	for x := 9; x < 13; x++ {
+		for y := 0; y < 8; y++ {
+			if s.GetPieceAtVisual(Vec2{x, y}, OffBoard) == nil {
+				return Vec2{x, y}
+			}
+		}
+	}
+	for x := 2; x < 4; x++ {
+		for y := 0; y < 8; y++ {
+			if s.GetPieceAtVisual(Vec2{-x, y}, OffBoard) == nil {
+				return Vec2{-x, y}
+			}
+		}
+	}
+	return Vec2{x: 9, y: -1}
+}
+
 func (s *Sandbox) NewTile(board uint32, coord Vec2) *Tile {
 	s.tiles = append(s.tiles, Tile{board: board, coord: coord})
 	return &s.tiles[len(s.tiles)-1]
@@ -153,7 +175,7 @@ func (s *Sandbox) GetPieceAtVisual(coord Vec2, board uint32) *Piece {
 	for i := 0; i < len(s.pieces); i++ {
 		for x := 0; x < int(s.pieces[i].scale); x++ {
 			for y := 0; y < int(s.pieces[i].scale); y++ {
-				if s.pieces[i].board == board && s.pieces[i].coord.Add(Vec2{x, y}) == coord {
+				if (s.pieces[i].board == board || s.pieces[i].board == OffBoard) && s.pieces[i].coord.Add(Vec2{x, y}) == coord {
 					return &s.pieces[i]
 				}
 			}
@@ -286,7 +308,7 @@ func (s *Sandbox) Render(board uint32, selection *Selection) {
 		if !obstacleHasBeenRenderedFlag[i] && s.obstacles[i].board == board {
 			var obstaclesOnThisCoord = make([]*Obstacle, 0)
 			for j := i; j < len(s.obstacles); j++ {
-				if !obstacleHasBeenRenderedFlag[j] && s.obstacles[i].coord == s.obstacles[j].coord && s.obstacles[j].board == board {
+				if !obstacleHasBeenRenderedFlag[j] && s.obstacles[i].coord == s.obstacles[j].coord && (s.obstacles[j].board == board || s.obstacles[j].board == OffBoard) {
 					obstacleHasBeenRenderedFlag[j] = true
 					obstaclesOnThisCoord = append(obstaclesOnThisCoord, &s.obstacles[j])
 				}
@@ -297,12 +319,12 @@ func (s *Sandbox) Render(board uint32, selection *Selection) {
 		}
 	}
 	for i := 0; i < len(s.pieces); i++ {
-		if s.pieces[i].board == board {
+		if s.pieces[i].board == board || s.pieces[i].board == OffBoard {
 			s.pieces[i].Render(selection)
 		}
 	}
 	for i := 0; i < len(s.pieces); i++ {
-		if s.pieces[i].board == board {
+		if s.pieces[i].board == board || s.pieces[i].board == OffBoard {
 			var effectsToRender = make([]*StatusEffect, 0)
 			for j := 0; j < len(s.effects); j++ {
 				if s.effects[j].piece == s.pieces[i].id {
@@ -323,7 +345,8 @@ func (s *Sandbox) Render(board uint32, selection *Selection) {
 	}
 
 	var selectedId, hasSelection = selection.GetSelectedPieceId()
-	if hasSelection && s.pieces[selectedId].board != board {
+	var selectedPiece = s.GetPiece(selectedId)
+	if hasSelection && selectedPiece.board != board && selectedPiece.board != OffBoard {
 		s.pieces[selectedId].RenderCrossPlaneIndicator()
 	}
 }
