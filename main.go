@@ -72,6 +72,24 @@ func handleBoardInteraction(undo *UndoRedoSystem, ui *UiState) {
 		undo.Undo(&sandbox, ui)
 	} else if rl.IsKeyPressed(rl.KeyY) && ctrlDown {
 		undo.Redo(&sandbox, ui)
+	} else if rl.IsKeyPressed(rl.KeyC) {
+		if id, ok := ui.selection.GetSelectedPieceId(); ok {
+			var piece = sandbox.GetPiece(id)
+			ui.clipboard.StorePiece(piece.typ, piece.color, piece.scale, sandbox.GetStatusEffectsOnPiece(id))
+		}
+	} else if rl.IsKeyPressed(rl.KeyV) {
+		if !ui.clipboard.isEmpty {
+			var coord = GetHoveredCoord()
+			var cmd = NewPastePieceCmd(&sandbox, ui, coord, uint32(ui.board))
+			undo.AppendDone(&cmd)
+		}
+	} else if rl.IsKeyPressed(rl.KeyX) {
+		if id, ok := ui.selection.GetSelectedPieceId(); ok {
+			var piece = sandbox.GetPiece(id)
+			ui.clipboard.StorePiece(piece.typ, piece.color, piece.scale, sandbox.GetStatusEffectsOnPiece(id))
+			var cmd = NewDeletePieceCmd(&sandbox, ui, id)
+			undo.AppendDone(&cmd)
+		}
 	}
 }
 

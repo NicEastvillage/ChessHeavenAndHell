@@ -418,3 +418,62 @@ func (cmd *DeleteObstacleCmd) undo(sb *Sandbox, ui *UiState) {
 	ui.board = int32(cmd.board)
 	ui.selection.SelectCoord(cmd.coord)
 }
+
+type PastePieceCmd struct {
+	piece             Piece
+	effects           []uint32
+	anyCaptured       bool
+	capturedPiece     uint32
+	captureAfterCoord Vec2
+}
+
+func NewPastePieceCmd(sb *Sandbox, ui *UiState, coord Vec2, board uint32) PastePieceCmd {
+	var cmd = PastePieceCmd{}
+	if IsOffBoard(coord) {
+		board = OffBoard
+	}
+	var captured = sandbox.GetPieceAt(coord, board)
+	if captured != nil {
+		cmd.anyCaptured = true
+		cmd.capturedPiece = captured.id
+		cmd.captureAfterCoord = sb.FindUnoccupiedOffboardCoordForCapture()
+		captured.board = OffBoard
+		captured.coord = cmd.captureAfterCoord
+	}
+	var piece = sb.NewPiece(ui.clipboard.typ, ui.clipboard.color, board, coord)
+	piece.scale = ui.clipboard.scale
+	cmd.piece = *piece
+	cmd.effects = make([]uint32, len(ui.clipboard.effects))
+	copy(cmd.effects, ui.clipboard.effects)
+	for _, effect := range cmd.effects {
+		sb.NewStatusEffect(piece.id, effect)
+	}
+	ui.selection.SelectPiece(cmd.piece.id)
+	return cmd
+}
+
+func (cmd *PastePieceCmd) redo(sb *Sandbox, ui *UiState) {
+	sb.AddPiece(cmd.piece)
+	for _, effect := range cmd.effects {
+		sb.NewStatusEffect(cmd.piece.id, effect)
+	}
+	if cmd.piece.board != OffBoard {
+		ui.board = int32(cmd.piece.board)
+	}
+	ui.selection.SelectPiece(cmd.piece.id)
+}
+
+func (cmd *PastePieceCmd) undo(sb *Sandbox, ui *UiState) {
+	if id, ok := ui.selection.GetSelectedPieceId(); ok && id == cmd.piece.id {
+		ui.selection.Deselect()
+	}
+	sb.RemovePiece(cmd.piece.id)
+	if cmd.anyCaptured {
+		var captured = sb.GetPiece(cmd.capturedPiece)
+		captured.board = cmd.piece.board
+		captured.coord = cmd.piece.coord
+	}
+	if cmd.piece.board != OffBoard {
+		ui.board = int32(cmd.piece.board)
+	}
+}
