@@ -347,6 +347,6 @@ func (s *Sandbox) Render(board uint32, selection *Selection) {
 	var selectedId, hasSelection = selection.GetSelectedPieceId()
 	var selectedPiece = s.GetPiece(selectedId)
 	if hasSelection && selectedPiece.board != board && selectedPiece.board != OffBoard {
-		s.pieces[selectedId].RenderCrossPlaneIndicator()
+		selectedPiece.RenderCrossPlaneIndicator()
 	}
 }

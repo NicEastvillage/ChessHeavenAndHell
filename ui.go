@@ -18,6 +18,7 @@ const (
 
 type UiState struct {
 	selection Selection
+	clipboard Clipboard
 	board     int32
 	tab       int32
 	color     int32
@@ -25,7 +26,9 @@ type UiState struct {
 
 func NewUiState() UiState {
 	return UiState{
-		board: int32(1),
+		selection: NewSelection(),
+		clipboard: NewClipboard(),
+		board:     int32(1),
 	}
 }
 

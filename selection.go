@@ -15,6 +15,10 @@ type Selection struct {
 	coord         Vec2
 }
 
+func NewSelection() Selection {
+	return Selection{}
+}
+
 func (s *Selection) Deselect() {
 	s.selectionType = SelectionTypeNone
 }
