@@ -427,7 +427,7 @@ type PastePieceCmd struct {
 	captureAfterCoord Vec2
 }
 
-func NewPastePieceCmd(sb *Sandbox, ui *UiState, coord Vec2, board uint32, typ uint32, color PieceColor, scale uint32, effects []uint32) PastePieceCmd {
+func NewPastePieceCmd(sb *Sandbox, ui *UiState, coord Vec2, board uint32) PastePieceCmd {
 	var cmd = PastePieceCmd{}
 	if IsOffBoard(coord) {
 		board = OffBoard
@@ -440,11 +440,11 @@ func NewPastePieceCmd(sb *Sandbox, ui *UiState, coord Vec2, board uint32, typ ui
 		captured.board = OffBoard
 		captured.coord = cmd.captureAfterCoord
 	}
-	var piece = sb.NewPiece(typ, color, board, coord)
-	piece.scale = scale
+	var piece = sb.NewPiece(ui.clipboard.typ, ui.clipboard.color, board, coord)
+	piece.scale = ui.clipboard.scale
 	cmd.piece = *piece
-	cmd.effects = make([]uint32, len(effects))
-	copy(cmd.effects, effects)
+	cmd.effects = make([]uint32, len(ui.clipboard.effects))
+	copy(cmd.effects, ui.clipboard.effects)
 	for _, effect := range cmd.effects {
 		sb.NewStatusEffect(piece.id, effect)
 	}
