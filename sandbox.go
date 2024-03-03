@@ -340,7 +340,7 @@ func (s *Sandbox) Render(board uint32, selection *Selection) {
 		}
 	}
 	if coord, ok := selection.GetSelectedCoord(); ok {
-		var pos = GetWorldOrigo().Add(coord.Scale(TileSize))
+		var pos = GetBoardOrigo().Add(coord.Scale(TileSize))
 		rl.DrawRectangleLines(int32(pos.x)+4, int32(pos.y)+4, TileSize-8, TileSize-8, rl.Red)
 	}
 

@@ -2,8 +2,6 @@ package main
 
 import (
 	"fmt"
-	"math/rand"
-
 	rg "github.com/gen2brain/raylib-go/raygui"
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
@@ -33,13 +31,6 @@ func NewUiState() UiState {
 }
 
 func (s *UiState) Render(undo *UndoRedoSystem) {
-	if rg.Button(rl.NewRectangle(UiMargin, UiMargin, 200, UiButtonH), "Remove random") {
-		println("Clicked!")
-		if len(sandbox.pieces) > 0 {
-			var id = sandbox.pieces[rand.Intn(len(sandbox.pieces))].id
-			sandbox.RemovePiece(id)
-		}
-	}
 
 	s.board = rg.ToggleGroup(rl.NewRectangle(float32(rl.GetScreenWidth()/2-(120*3+int(rg.GetStyle(rg.TOGGLE, rg.GROUP_PADDING)))/2), float32(rl.GetScreenHeight()-UiButtonH-UiMargin), 120, UiButtonH), "Heaven;Earth;Hell", s.board)
 

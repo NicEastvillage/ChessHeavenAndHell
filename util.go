@@ -14,13 +14,13 @@ func Absi(v int) int {
 	return 0
 }
 
-func GetWorldOrigo() Vec2 {
+func GetBoardOrigo() Vec2 {
 	return Vec2{rl.GetScreenWidth()/2 - 4*TileSize, rl.GetScreenHeight()/2 - 4*TileSize}
 }
 
 func GetHoveredCoord() Vec2 {
 	var mousef = rl.GetMousePosition()
-	var origof = GetWorldOrigo().ToRlVec()
+	var origof = GetBoardOrigo().ToRlVec()
 	var coordf = rl.Vector2Scale(rl.Vector2Subtract(mousef, origof), 1./TileSize)
 	return Vec2{x: int(math.Floor(float64(coordf.X))), y: int(math.Floor(float64(coordf.Y)))}
 }

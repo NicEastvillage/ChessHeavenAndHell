@@ -9,7 +9,7 @@ type Tile struct {
 
 func (t *Tile) Render(style BoardStyle) {
 	var color = colorAt(t.coord, style)
-	var pos = GetWorldOrigo().Add(t.coord.Scale(TileSize))
+	var pos = GetBoardOrigo().Add(t.coord.Scale(TileSize))
 	rl.DrawRectangle(int32(pos.x), int32(pos.y), TileSize, TileSize, color)
 }
 

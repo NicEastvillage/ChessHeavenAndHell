@@ -8,9 +8,14 @@ import (
 	rg "github.com/gen2brain/raylib-go/raygui"
 )
 
+const (
+	WindowWidth  = 1600
+	WindowHeight = 980
+)
+
 func main() {
 	rl.SetConfigFlags(rl.FlagWindowResizable)
-	rl.InitWindow(1600, 980, "Chess - Heaven and Hell")
+	rl.InitWindow(WindowWidth, WindowHeight, "Chess - Heaven and Hell")
 	defer rl.CloseWindow()
 
 	rl.SetTargetFPS(60)
@@ -43,14 +48,55 @@ func main() {
 		}
 	}
 
+	var origo = GetBoardOrigo()
+	var previewBoardRect = rl.NewRectangle(float32(origo.x-TileSize), float32(origo.y-TileSize), 10*TileSize, -10*TileSize)
+	var renderTexHeaven = rl.LoadRenderTexture(WindowWidth, WindowHeight)
+	var renderTexEarth = rl.LoadRenderTexture(WindowWidth, WindowHeight)
+	var renderTexHell = rl.LoadRenderTexture(WindowWidth, WindowHeight)
+
 	for !rl.WindowShouldClose() {
 
 		handleBoardInteraction(&undo, &ui)
+
+		if ui.board != 0 {
+			rl.BeginTextureMode(renderTexHeaven)
+			rl.ClearBackground(rl.RayWhite)
+			sandbox.Render(0, &ui.selection)
+			rl.EndTextureMode()
+		}
+		if ui.board != 1 {
+			rl.BeginTextureMode(renderTexEarth)
+			rl.ClearBackground(rl.RayWhite)
+			sandbox.Render(1, &ui.selection)
+			rl.EndTextureMode()
+		}
+		if ui.board != 2 {
+			rl.BeginTextureMode(renderTexHell)
+			rl.ClearBackground(rl.RayWhite)
+			sandbox.Render(2, &ui.selection)
+			rl.EndTextureMode()
+		}
 
 		rl.BeginDrawing()
 		rl.ClearBackground(rl.RayWhite)
 
 		sandbox.Render(uint32(ui.board), &ui.selection)
+
+		var previewPlacement1 = rl.NewRectangle(UiMargin, UiMargin, previewBoardRect.Width/3, -previewBoardRect.Height/3)
+		var previewPlacement2 = rl.NewRectangle(UiMargin, 2*UiMargin+previewPlacement1.Height, previewPlacement1.Width, previewPlacement1.Height)
+		if ui.board == 0 {
+			rl.DrawTexturePro(renderTexEarth.Texture, previewBoardRect, previewPlacement1, rl.NewVector2(0, 0), 0, rl.White)
+		} else {
+			rl.DrawTexturePro(renderTexHeaven.Texture, previewBoardRect, previewPlacement1, rl.NewVector2(0, 0), 0, rl.White)
+		}
+		rl.DrawRectangleLinesEx(previewPlacement1, 1, rl.Gray)
+		if ui.board == 2 {
+			rl.DrawTexturePro(renderTexEarth.Texture, previewBoardRect, previewPlacement2, rl.NewVector2(0, 0), 0, rl.White)
+		} else {
+			rl.DrawTexturePro(renderTexHell.Texture, previewBoardRect, previewPlacement2, rl.NewVector2(0, 0), 0, rl.White)
+		}
+		rl.DrawRectangleLinesEx(previewPlacement2, 1, rl.Gray)
+
 		ui.Render(&undo)
 
 		rl.EndDrawing()

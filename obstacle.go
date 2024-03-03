@@ -28,7 +28,7 @@ func (o *Obstacle) Render(index int, total int) {
 	const scale = 0.6
 	var typ = sandbox.GetObstacleType(o.typ)
 	var halfsize = Vec2{x: int(float32(typ.tex.Width) * scale / 2), y: int(float32(typ.tex.Height) * scale / 2)}
-	var tileCenter = GetWorldOrigo().Add(o.coord.Scale(TileSize)).Add(ONEONE.Scale(TileSize / 2))
+	var tileCenter = GetBoardOrigo().Add(o.coord.Scale(TileSize)).Add(ONEONE.Scale(TileSize / 2))
 	if total == 1 {
 		rl.DrawTextureEx(typ.tex, tileCenter.Sub(halfsize).ToRlVec(), 0, scale, rl.White)
 		return
