@@ -8,9 +8,14 @@ import (
 	rg "github.com/gen2brain/raylib-go/raygui"
 )
 
+const (
+	WindowWidth  = 1600
+	WindowHeight = 980
+)
+
 func main() {
 	rl.SetConfigFlags(rl.FlagWindowResizable)
-	rl.InitWindow(1600, 980, "Chess - Heaven and Hell")
+	rl.InitWindow(WindowWidth, WindowHeight, "Chess - Heaven and Hell")
 	defer rl.CloseWindow()
 
 	rl.SetTargetFPS(60)
@@ -45,14 +50,13 @@ func main() {
 
 	for !rl.WindowShouldClose() {
 
+		ui.Update()
 		handleBoardInteraction(&undo, &ui)
 
 		rl.BeginDrawing()
 		rl.ClearBackground(rl.RayWhite)
-
-		sandbox.Render(uint32(ui.board), &ui.selection)
+		sandbox.Render(uint32(ui.board), false, &ui.selection)
 		ui.Render(&undo)
-
 		rl.EndDrawing()
 	}
 }
@@ -96,7 +100,8 @@ func handleBoardInteraction(undo *UndoRedoSystem, ui *UiState) {
 func handleMouseInteraction(undo *UndoRedoSystem, ui *UiState) {
 	// Don't handle mouse events when clicking outside the play area
 	if rl.GetMousePosition().X > float32(rl.GetScreenWidth()-UiRightMenuWidth) ||
-		rl.GetMousePosition().Y > float32(rl.GetScreenHeight()-100) {
+		rl.GetMousePosition().Y > float32(rl.GetScreenHeight()-100) ||
+		rl.GetMousePosition().X < 300 {
 		return
 	}
 

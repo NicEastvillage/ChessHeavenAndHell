@@ -25,7 +25,7 @@ func (s *Sandbox) GetBoard(id uint32) *Board {
 }
 
 func IsOffBoard(coord Vec2) bool {
-	return coord.x < 0 || coord.x > 8 || coord.y < 0 || coord.y > 8
+	return coord.x < 0 || coord.x >= 8 || coord.y < 0 || coord.y >= 8
 }
 
 func (s *Sandbox) FindUnoccupiedOffboardCoordForCapture() Vec2 {
@@ -297,7 +297,7 @@ func (s *Sandbox) RemoveObstacle(coord Vec2, board uint32, typ uint32) bool {
 	return false
 }
 
-func (s *Sandbox) Render(board uint32, selection *Selection) {
+func (s *Sandbox) Render(board uint32, preview bool, selection *Selection) {
 	for i := 0; i < len(s.tiles); i++ {
 		if s.tiles[i].board == board {
 			s.tiles[i].Render(s.boards[board].style)
@@ -308,7 +308,7 @@ func (s *Sandbox) Render(board uint32, selection *Selection) {
 		if !obstacleHasBeenRenderedFlag[i] && s.obstacles[i].board == board {
 			var obstaclesOnThisCoord = make([]*Obstacle, 0)
 			for j := i; j < len(s.obstacles); j++ {
-				if !obstacleHasBeenRenderedFlag[j] && s.obstacles[i].coord == s.obstacles[j].coord && (s.obstacles[j].board == board || s.obstacles[j].board == OffBoard) {
+				if !obstacleHasBeenRenderedFlag[j] && s.obstacles[i].coord == s.obstacles[j].coord && (s.obstacles[j].board == board || (s.obstacles[j].board == OffBoard && !preview)) {
 					obstacleHasBeenRenderedFlag[j] = true
 					obstaclesOnThisCoord = append(obstaclesOnThisCoord, &s.obstacles[j])
 				}
@@ -319,12 +319,21 @@ func (s *Sandbox) Render(board uint32, selection *Selection) {
 		}
 	}
 	for i := 0; i < len(s.pieces); i++ {
-		if s.pieces[i].board == board || s.pieces[i].board == OffBoard {
-			s.pieces[i].Render(selection)
+		if s.pieces[i].board == board || (s.pieces[i].board == OffBoard && !preview) {
+			s.pieces[i].Render()
+			if selection.IsPieceSelected(s.pieces[i].id) {
+				var pos = GetBoardOrigo().Add(s.pieces[i].coord.Scale(TileSize))
+				var rect = rl.NewRectangle(float32(pos.x+4), float32(pos.y+4), float32(TileSize*s.pieces[i].scale-8), float32(TileSize*s.pieces[i].scale-8))
+				var thickness = 1
+				if preview {
+					thickness = 4
+				}
+				rl.DrawRectangleLinesEx(rect, float32(thickness), rl.Blue)
+			}
 		}
 	}
 	for i := 0; i < len(s.pieces); i++ {
-		if s.pieces[i].board == board || s.pieces[i].board == OffBoard {
+		if s.pieces[i].board == board || (s.pieces[i].board == OffBoard && !preview) {
 			var effectsToRender = make([]*StatusEffect, 0)
 			for j := 0; j < len(s.effects); j++ {
 				if s.effects[j].piece == s.pieces[i].id {
@@ -340,13 +349,18 @@ func (s *Sandbox) Render(board uint32, selection *Selection) {
 		}
 	}
 	if coord, ok := selection.GetSelectedCoord(); ok {
-		var pos = GetWorldOrigo().Add(coord.Scale(TileSize))
-		rl.DrawRectangleLines(int32(pos.x)+4, int32(pos.y)+4, TileSize-8, TileSize-8, rl.Red)
+		var pos = GetBoardOrigo().Add(coord.Scale(TileSize))
+		var rect = rl.NewRectangle(float32(pos.x+4), float32(pos.y+4), TileSize-8, TileSize-8)
+		var thickness = 1
+		if preview {
+			thickness = 4
+		}
+		rl.DrawRectangleLinesEx(rect, float32(thickness), rl.Red)
 	}
 
 	var selectedId, hasSelection = selection.GetSelectedPieceId()
 	var selectedPiece = s.GetPiece(selectedId)
-	if hasSelection && selectedPiece.board != board && selectedPiece.board != OffBoard {
+	if hasSelection && selectedPiece.board != board && !(selectedPiece.board == OffBoard && !preview) {
 		selectedPiece.RenderCrossPlaneIndicator()
 	}
 }

@@ -28,7 +28,7 @@ type StatusEffect struct {
 func (e *StatusEffect) Render(coord Vec2, index int, total int, scale uint32) {
 	const margin = 0.2
 	var typ = sandbox.GetStatusEffectType(e.typ)
-	var tilePos = GetWorldOrigo().Add(coord.Scale(TileSize))
+	var tilePos = GetBoardOrigo().Add(coord.Scale(TileSize))
 	var effectRightMost = tilePos.Add(ONEONE.Scale(int(float32(scale) * TileSize * (1 - margin))))
 	var step = ZEROZERO
 	if total == 1 {

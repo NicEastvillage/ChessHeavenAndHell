@@ -2,8 +2,6 @@ package main
 
 import (
 	"fmt"
-	"math/rand"
-
 	rg "github.com/gen2brain/raylib-go/raygui"
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
@@ -17,31 +15,53 @@ const (
 )
 
 type UiState struct {
-	selection Selection
-	clipboard Clipboard
-	board     int32
-	tab       int32
-	color     int32
+	selection       Selection
+	clipboard       Clipboard
+	board           int32
+	tab             int32
+	color           int32
+	renderTexHeaven rl.RenderTexture2D
+	renderTexEarth  rl.RenderTexture2D
+	renderTexHell   rl.RenderTexture2D
 }
 
 func NewUiState() UiState {
 	return UiState{
-		selection: NewSelection(),
-		clipboard: NewClipboard(),
-		board:     int32(1),
+		selection:       NewSelection(),
+		clipboard:       NewClipboard(),
+		board:           int32(1),
+		renderTexHeaven: rl.LoadRenderTexture(WindowWidth, WindowHeight),
+		renderTexEarth:  rl.LoadRenderTexture(WindowWidth, WindowHeight),
+		renderTexHell:   rl.LoadRenderTexture(WindowWidth, WindowHeight),
+	}
+}
+
+func (s *UiState) Update() {
+	if s.board != 0 {
+		rl.BeginTextureMode(s.renderTexHeaven)
+		rl.ClearBackground(rl.RayWhite)
+		sandbox.Render(0, true, &s.selection)
+		rl.EndTextureMode()
+	}
+	if s.board != 1 {
+		rl.BeginTextureMode(s.renderTexEarth)
+		rl.ClearBackground(rl.RayWhite)
+		sandbox.Render(1, true, &s.selection)
+		rl.EndTextureMode()
+	}
+	if s.board != 2 {
+		rl.BeginTextureMode(s.renderTexHell)
+		rl.ClearBackground(rl.RayWhite)
+		sandbox.Render(2, true, &s.selection)
+		rl.EndTextureMode()
 	}
 }
 
 func (s *UiState) Render(undo *UndoRedoSystem) {
-	if rg.Button(rl.NewRectangle(UiMargin, UiMargin, 200, UiButtonH), "Remove random") {
-		println("Clicked!")
-		if len(sandbox.pieces) > 0 {
-			var id = sandbox.pieces[rand.Intn(len(sandbox.pieces))].id
-			sandbox.RemovePiece(id)
-		}
-	}
 
-	s.board = rg.ToggleGroup(rl.NewRectangle(float32(rl.GetScreenWidth()/2-(120*3+int(rg.GetStyle(rg.TOGGLE, rg.GROUP_PADDING)))/2), float32(rl.GetScreenHeight()-UiButtonH-UiMargin), 120, UiButtonH), "Heaven;Earth;Hell", s.board)
+	s.RenderBoardPreview(0)
+	s.RenderBoardPreview(1)
+	s.RenderBoardPreview(2)
 
 	var oldTab = s.tab
 	s.tab = rg.ToggleGroup(rl.NewRectangle(float32(rl.GetScreenWidth()-UiMargin-2*UiButtonH-1*int(rg.GetStyle(rg.TOGGLE, rg.GROUP_PADDING))), UiMargin, UiButtonH, UiButtonH), "#149#;#97#", s.tab)
@@ -63,6 +83,33 @@ func (s *UiState) Render(undo *UndoRedoSystem) {
 		if s.tab == 0 {
 			s.RenderPiecesTab()
 		}
+	}
+}
+
+func (s *UiState) RenderBoardPreview(index int32) {
+	if s.board == index {
+		return
+	}
+
+	var origo = GetBoardOrigo()
+	var previewSourceRect = rl.NewRectangle(float32(origo.x-TileSize), float32(origo.y-TileSize), 10*TileSize, -10*TileSize)
+	var previewPlacement = rl.NewRectangle(UiMargin, UiMargin+float32(index)*(UiMargin+previewSourceRect.Width/3), previewSourceRect.Width/3, -previewSourceRect.Height/3)
+	var buttonPlacement = rl.NewRectangle(previewPlacement.X+1, previewPlacement.Y+1, previewPlacement.Width-2, previewPlacement.Height-2)
+
+	var previewTex = s.renderTexHeaven.Texture
+	switch index {
+	case 1:
+		previewTex = s.renderTexEarth.Texture
+	case 2:
+		previewTex = s.renderTexHell.Texture
+	}
+
+	if rg.Button(buttonPlacement, "") {
+		s.board = index
+	}
+	rl.DrawTexturePro(previewTex, previewSourceRect, previewPlacement, rl.NewVector2(0, 0), 0, rl.White)
+	if rl.CheckCollisionPointRec(rl.GetMousePosition(), previewPlacement) {
+		rl.DrawRectangleLinesEx(previewPlacement, 1, rl.GetColor(uint(rg.GetStyle(rg.BUTTON, rg.BORDER_COLOR_FOCUSED))))
 	}
 }
 
