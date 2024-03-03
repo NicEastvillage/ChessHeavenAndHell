@@ -48,57 +48,15 @@ func main() {
 		}
 	}
 
-	var origo = GetBoardOrigo()
-	var previewBoardRect = rl.NewRectangle(float32(origo.x-TileSize), float32(origo.y-TileSize), 10*TileSize, -10*TileSize)
-	var renderTexHeaven = rl.LoadRenderTexture(WindowWidth, WindowHeight)
-	var renderTexEarth = rl.LoadRenderTexture(WindowWidth, WindowHeight)
-	var renderTexHell = rl.LoadRenderTexture(WindowWidth, WindowHeight)
-
 	for !rl.WindowShouldClose() {
 
+		ui.Update()
 		handleBoardInteraction(&undo, &ui)
-
-		if ui.board != 0 {
-			rl.BeginTextureMode(renderTexHeaven)
-			rl.ClearBackground(rl.RayWhite)
-			sandbox.Render(0, &ui.selection)
-			rl.EndTextureMode()
-		}
-		if ui.board != 1 {
-			rl.BeginTextureMode(renderTexEarth)
-			rl.ClearBackground(rl.RayWhite)
-			sandbox.Render(1, &ui.selection)
-			rl.EndTextureMode()
-		}
-		if ui.board != 2 {
-			rl.BeginTextureMode(renderTexHell)
-			rl.ClearBackground(rl.RayWhite)
-			sandbox.Render(2, &ui.selection)
-			rl.EndTextureMode()
-		}
 
 		rl.BeginDrawing()
 		rl.ClearBackground(rl.RayWhite)
-
-		sandbox.Render(uint32(ui.board), &ui.selection)
-
-		var previewPlacement1 = rl.NewRectangle(UiMargin, UiMargin, previewBoardRect.Width/3, -previewBoardRect.Height/3)
-		var previewPlacement2 = rl.NewRectangle(UiMargin, 2*UiMargin+previewPlacement1.Height, previewPlacement1.Width, previewPlacement1.Height)
-		if ui.board == 0 {
-			rl.DrawTexturePro(renderTexEarth.Texture, previewBoardRect, previewPlacement1, rl.NewVector2(0, 0), 0, rl.White)
-		} else {
-			rl.DrawTexturePro(renderTexHeaven.Texture, previewBoardRect, previewPlacement1, rl.NewVector2(0, 0), 0, rl.White)
-		}
-		rl.DrawRectangleLinesEx(previewPlacement1, 1, rl.Gray)
-		if ui.board == 2 {
-			rl.DrawTexturePro(renderTexEarth.Texture, previewBoardRect, previewPlacement2, rl.NewVector2(0, 0), 0, rl.White)
-		} else {
-			rl.DrawTexturePro(renderTexHell.Texture, previewBoardRect, previewPlacement2, rl.NewVector2(0, 0), 0, rl.White)
-		}
-		rl.DrawRectangleLinesEx(previewPlacement2, 1, rl.Gray)
-
+		sandbox.Render(uint32(ui.board), false, &ui.selection)
 		ui.Render(&undo)
-
 		rl.EndDrawing()
 	}
 }
@@ -142,7 +100,8 @@ func handleBoardInteraction(undo *UndoRedoSystem, ui *UiState) {
 func handleMouseInteraction(undo *UndoRedoSystem, ui *UiState) {
 	// Don't handle mouse events when clicking outside the play area
 	if rl.GetMousePosition().X > float32(rl.GetScreenWidth()-UiRightMenuWidth) ||
-		rl.GetMousePosition().Y > float32(rl.GetScreenHeight()-100) {
+		rl.GetMousePosition().Y > float32(rl.GetScreenHeight()-100) ||
+		rl.GetMousePosition().X < 300 {
 		return
 	}
 

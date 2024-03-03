@@ -44,7 +44,7 @@ type Piece struct {
 	scale uint32
 }
 
-func (p *Piece) Render(selection *Selection) {
+func (p *Piece) Render() {
 	var typ = sandbox.GetPieceType(p.typ)
 	var tex = typ.texWhite
 	if p.color == BLACK {
@@ -55,10 +55,6 @@ func (p *Piece) Render(selection *Selection) {
 	var texScale = float32(TileSize) / float32(max(tex.Width, tex.Height))
 	var pieceCorner = pos.Add(ONEONE.Scale(TileSize / 2)).Sub(Vec2{int(texScale * float32(tex.Width) / 2), int(texScale * float32(tex.Height) / 2)})
 	rl.DrawTextureEx(tex, pieceCorner.ToRlVec(), 0, float32(p.scale)*texScale, rl.White)
-
-	if selection.IsPieceSelected(p.id) {
-		rl.DrawRectangleLines(int32(pos.x)+4, int32(pos.y)+4, int32(TileSize*p.scale-8), int32(TileSize*p.scale-8), rl.Blue)
-	}
 }
 
 func (p *Piece) RenderCrossPlaneIndicator() {
