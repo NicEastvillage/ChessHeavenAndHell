@@ -29,7 +29,7 @@ func IsOffBoard(coord Vec2) bool {
 }
 
 func (s *Sandbox) FindUnoccupiedOffboardCoordForCapture() Vec2 {
-	for x := 9; x < 13; x++ {
+	for x := 9; x < 12; x++ {
 		for y := 0; y < 8; y++ {
 			if s.GetPieceAtVisual(Vec2{x, y}, OffBoard) == nil {
 				return Vec2{x, y}
