@@ -61,6 +61,10 @@ func main() {
 	}
 }
 
+func IsCoordUnderUi(coord Vec2) bool {
+	return coord.x < -2 || coord.x >= 12 || coord.y < -2 || coord.y >= 10
+}
+
 func handleBoardInteraction(undo *UndoRedoSystem, ui *UiState) {
 	handleMouseInteraction(undo, ui)
 
@@ -84,8 +88,10 @@ func handleBoardInteraction(undo *UndoRedoSystem, ui *UiState) {
 	} else if rl.IsKeyPressed(rl.KeyV) {
 		if !ui.clipboard.isEmpty {
 			var coord = GetHoveredCoord()
-			var cmd = NewPastePieceCmd(&sandbox, ui, coord, uint32(ui.board))
-			undo.AppendDone(&cmd)
+			if !IsCoordUnderUi(coord) {
+				var cmd = NewPastePieceCmd(&sandbox, ui, coord, uint32(ui.board))
+				undo.AppendDone(&cmd)
+			}
 		}
 	} else if rl.IsKeyPressed(rl.KeyX) {
 		if id, ok := ui.selection.GetSelectedPieceId(); ok {
@@ -98,13 +104,6 @@ func handleBoardInteraction(undo *UndoRedoSystem, ui *UiState) {
 }
 
 func handleMouseInteraction(undo *UndoRedoSystem, ui *UiState) {
-	// Don't handle mouse events when clicking outside the play area
-	if rl.GetMousePosition().X > float32(rl.GetScreenWidth()-UiRightMenuWidth) ||
-		rl.GetMousePosition().Y > float32(rl.GetScreenHeight()-100) ||
-		rl.GetMousePosition().X < 300 {
-		return
-	}
-
 	if rl.IsMouseButtonPressed(rl.MouseButtonLeft) {
 		var coord = GetHoveredCoord()
 		if ui.tab == 0 {
@@ -120,14 +119,18 @@ func handleMouseInteraction(undo *UndoRedoSystem, ui *UiState) {
 	} else if id, ok := ui.selection.GetSelectedPieceId(); ok {
 		if rl.IsMouseButtonPressed(rl.MouseButtonRight) {
 			var coord = GetHoveredCoord()
-			var cmd = NewMovePieceCmd(&sandbox, id, coord, uint32(ui.board))
-			undo.AppendDone(&cmd)
+			if !IsCoordUnderUi(coord) {
+				var cmd = NewMovePieceCmd(&sandbox, id, coord, uint32(ui.board))
+				undo.AppendDone(&cmd)
+			}
 		}
 	} else if id, ok := ui.selection.GetSelectedPieceTypeId(); ok {
 		if rl.IsMouseButtonPressed(rl.MouseButtonRight) {
 			var coord = GetHoveredCoord()
-			var cmd = NewCreatePieceCmd(&sandbox, id, PieceColor(ui.color), uint32(ui.board), coord)
-			undo.AppendDone(&cmd)
+			if !IsCoordUnderUi(coord) {
+				var cmd = NewCreatePieceCmd(&sandbox, id, PieceColor(ui.color), uint32(ui.board), coord)
+				undo.AppendDone(&cmd)
+			}
 		}
 	}
 }
