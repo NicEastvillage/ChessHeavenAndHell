@@ -119,7 +119,8 @@ func handleMouseInteraction(undo *UndoRedoSystem, ui *UiState) {
 	} else if id, ok := ui.selection.GetSelectedPieceId(); ok {
 		if rl.IsMouseButtonPressed(rl.MouseButtonRight) {
 			var coord = GetHoveredCoord()
-			if !IsCoordUnderUi(coord) {
+			var piece = sandbox.GetPiece(id)
+			if !IsCoordUnderUi(coord) && (piece.coord != coord || piece.board != uint32(ui.board)) {
 				var cmd = NewMovePieceCmd(&sandbox, id, coord, uint32(ui.board))
 				undo.AppendDone(&cmd)
 			}
