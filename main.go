@@ -104,6 +104,10 @@ func handleBoardInteraction(undo *UndoRedoSystem, ui *UiState) {
 }
 
 func handleMouseInteraction(undo *UndoRedoSystem, ui *UiState) {
+	var coord = GetHoveredCoord()
+	if IsCoordUnderUi(coord) {
+		return
+	}
 	if rl.IsMouseButtonPressed(rl.MouseButtonLeft) {
 		var coord = GetHoveredCoord()
 		if ui.tab == 0 {
@@ -118,20 +122,16 @@ func handleMouseInteraction(undo *UndoRedoSystem, ui *UiState) {
 		}
 	} else if id, ok := ui.selection.GetSelectedPieceId(); ok {
 		if rl.IsMouseButtonPressed(rl.MouseButtonRight) {
-			var coord = GetHoveredCoord()
 			var piece = sandbox.GetPiece(id)
-			if !IsCoordUnderUi(coord) && (piece.coord != coord || piece.board != uint32(ui.board)) {
+			if piece.coord != coord || piece.board != uint32(ui.board) {
 				var cmd = NewMovePieceCmd(&sandbox, id, coord, uint32(ui.board))
 				undo.AppendDone(&cmd)
 			}
 		}
 	} else if id, ok := ui.selection.GetSelectedPieceTypeId(); ok {
 		if rl.IsMouseButtonPressed(rl.MouseButtonRight) {
-			var coord = GetHoveredCoord()
-			if !IsCoordUnderUi(coord) {
-				var cmd = NewCreatePieceCmd(&sandbox, id, PieceColor(ui.color), uint32(ui.board), coord)
-				undo.AppendDone(&cmd)
-			}
+			var cmd = NewCreatePieceCmd(&sandbox, id, PieceColor(ui.color), uint32(ui.board), coord)
+			undo.AppendDone(&cmd)
 		}
 	}
 }
