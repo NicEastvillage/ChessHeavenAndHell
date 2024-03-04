@@ -94,7 +94,7 @@ func (am *AssetManager) LoadAll() {
 	am.texObstacleFire = rl.LoadTexture("Assets/obstacles/fire.png")
 	am.texObstacleIce = rl.LoadTexture("Assets/obstacles/ice.png")
 
-	am.texEffectBlood = rl.LoadTexture("Assetst/effects/blood.png")
+	am.texEffectBlood = rl.LoadTexture("Assets/effects/blood.png")
 	am.texEffectMedal = rl.LoadTexture("Assets/effects/medal.png")
 	am.texEffectCurse = rl.LoadTexture("Assets/effects/curse.png")
 	am.texEffectForcedMove = rl.LoadTexture("Assets/effects/forced_move.png")
