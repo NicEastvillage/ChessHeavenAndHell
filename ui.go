@@ -36,10 +36,20 @@ func NewUiState() UiState {
 	}
 }
 
+func (s *UiState) Dispose() {
+	rl.UnloadRenderTexture(s.renderTexHeaven)
+	rl.UnloadRenderTexture(s.renderTexEarth)
+	rl.UnloadRenderTexture(s.renderTexHell)
+}
+
 func (s *UiState) Update() {
+	//var origo = GetBoardOrigo()
+	//var previewSourceOrigo = rl.NewVector2(float32(origo.x-TileSize), float32(origo.y-TileSize))
+
 	if s.board != 0 {
 		rl.BeginTextureMode(s.renderTexHeaven)
 		rl.ClearBackground(rl.RayWhite)
+		//rl.Translatef(previewSourceOrigo.X, previewSourceOrigo.Y, 0)
 		sandbox.Render(0, true, &s.selection)
 		rl.EndTextureMode()
 	}
@@ -91,11 +101,6 @@ func (s *UiState) RenderBoardPreview(index int32) {
 		return
 	}
 
-	var origo = GetBoardOrigo()
-	var previewSourceRect = rl.NewRectangle(float32(origo.x-TileSize), float32(origo.y-TileSize), 10*TileSize, -10*TileSize)
-	var previewPlacement = rl.NewRectangle(UiMargin, UiMargin+float32(index)*(UiMargin+previewSourceRect.Width/3), previewSourceRect.Width/3, -previewSourceRect.Height/3)
-	var buttonPlacement = rl.NewRectangle(previewPlacement.X+1, previewPlacement.Y+1, previewPlacement.Width-2, previewPlacement.Height-2)
-
 	var previewTex = s.renderTexHeaven.Texture
 	switch index {
 	case 1:
@@ -103,6 +108,12 @@ func (s *UiState) RenderBoardPreview(index int32) {
 	case 2:
 		previewTex = s.renderTexHell.Texture
 	}
+
+	var origo = GetBoardOrigo()
+	var previewSourceRect = rl.NewRectangle(float32(origo.x-TileSize), float32(origo.y-TileSize), 10*TileSize, -10*TileSize)
+	previewSourceRect.Y += float32(previewTex.Height - int32(rl.GetScreenHeight()))
+	var previewPlacement = rl.NewRectangle(UiMargin, UiMargin+float32(index)*(UiMargin+previewSourceRect.Width/3), previewSourceRect.Width/3, -previewSourceRect.Height/3)
+	var buttonPlacement = rl.NewRectangle(previewPlacement.X+1, previewPlacement.Y+1, previewPlacement.Width-2, previewPlacement.Height-2)
 
 	if rg.Button(buttonPlacement, "") {
 		s.board = index

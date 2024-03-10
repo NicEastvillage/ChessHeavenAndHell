@@ -35,6 +35,7 @@ func main() {
 
 	var undo = NewUndoRedoSystem()
 	var ui = NewUiState()
+	defer ui.Dispose()
 
 	for i := 0; i < 20; i++ {
 		var piece = sandbox.pieces[rand.Intn(len(sandbox.pieces))].id
