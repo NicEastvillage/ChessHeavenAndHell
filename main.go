@@ -69,23 +69,30 @@ func IsCoordUnderUi(coord Vec2) bool {
 func handleBoardInteraction(undo *UndoRedoSystem, ui *UiState) {
 	handleMouseInteraction(undo, ui)
 
+	var ctrlDown = rl.IsKeyDown(rl.KeyLeftControl) || rl.IsKeyDown(rl.KeyLeftControl)
+
 	if pieceId, ok := ui.selection.GetSelectedPieceId(); ok {
 		if rl.IsKeyPressed(rl.KeyDelete) || rl.IsKeyPressed(rl.KeyBackspace) {
 			var cmd = NewDeletePieceCmd(&sandbox, ui, pieceId)
 			undo.AppendDone(&cmd)
+		} else if rl.IsKeyPressed(rl.KeyC) {
+			var piece = sandbox.GetPiece(pieceId)
+			ui.clipboard.StorePiece(piece.typ, piece.color, piece.scale, sandbox.GetStatusEffectsOnPiece(pieceId))
+		} else if rl.IsKeyPressed(rl.KeyX) {
+			var piece = sandbox.GetPiece(pieceId)
+			ui.clipboard.StorePiece(piece.typ, piece.color, piece.scale, sandbox.GetStatusEffectsOnPiece(pieceId))
+			var cmd = NewDeletePieceCmd(&sandbox, ui, pieceId)
+			undo.AppendDone(&cmd)
+		} else if rl.IsKeyReleased(rl.KeyD) {
+			var cmd = NewDuplicatePieceCmd(&sandbox, ui, pieceId)
+			undo.AppendDone(&cmd)
 		}
 	}
 
-	var ctrlDown = rl.IsKeyDown(rl.KeyLeftControl) || rl.IsKeyDown(rl.KeyLeftControl)
 	if rl.IsKeyPressed(rl.KeyZ) && ctrlDown {
 		undo.Undo(&sandbox, ui)
 	} else if rl.IsKeyPressed(rl.KeyY) && ctrlDown {
 		undo.Redo(&sandbox, ui)
-	} else if rl.IsKeyPressed(rl.KeyC) {
-		if id, ok := ui.selection.GetSelectedPieceId(); ok {
-			var piece = sandbox.GetPiece(id)
-			ui.clipboard.StorePiece(piece.typ, piece.color, piece.scale, sandbox.GetStatusEffectsOnPiece(id))
-		}
 	} else if rl.IsKeyPressed(rl.KeyV) {
 		if !ui.clipboard.isEmpty {
 			var coord = GetHoveredCoord()
@@ -93,13 +100,6 @@ func handleBoardInteraction(undo *UndoRedoSystem, ui *UiState) {
 				var cmd = NewPastePieceCmd(&sandbox, ui, coord, uint32(ui.board))
 				undo.AppendDone(&cmd)
 			}
-		}
-	} else if rl.IsKeyPressed(rl.KeyX) {
-		if id, ok := ui.selection.GetSelectedPieceId(); ok {
-			var piece = sandbox.GetPiece(id)
-			ui.clipboard.StorePiece(piece.typ, piece.color, piece.scale, sandbox.GetStatusEffectsOnPiece(id))
-			var cmd = NewDeletePieceCmd(&sandbox, ui, id)
-			undo.AppendDone(&cmd)
 		}
 	}
 }

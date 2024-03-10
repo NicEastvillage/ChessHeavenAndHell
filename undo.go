@@ -477,3 +477,38 @@ func (cmd *PastePieceCmd) undo(sb *Sandbox, ui *UiState) {
 		ui.board = int32(cmd.piece.board)
 	}
 }
+
+type DuplicatePieceCmd struct {
+	originalId uint32
+	piece      Piece
+	effects    []uint32
+}
+
+func NewDuplicatePieceCmd(sb *Sandbox, ui *UiState, id uint32) DuplicatePieceCmd {
+	var original = sb.GetPiece(id)
+	var coord = sb.FindUnoccupiedOffboardCoordForCapture()
+	var piece = sb.NewPiece(original.typ, original.color, OffBoard, coord)
+	var effects = sb.GetStatusEffectsOnPiece(id)
+	for _, effect := range effects {
+		sb.NewStatusEffect(piece.id, effect)
+	}
+	ui.selection.SelectPiece(piece.id)
+	return DuplicatePieceCmd{
+		originalId: id,
+		piece:      *piece,
+		effects:    effects,
+	}
+}
+
+func (cmd *DuplicatePieceCmd) redo(sb *Sandbox, ui *UiState) {
+	sb.AddPiece(cmd.piece)
+	for _, effect := range cmd.effects {
+		sb.NewStatusEffect(cmd.piece.id, effect)
+	}
+	ui.selection.SelectPiece(cmd.piece.id)
+}
+
+func (cmd *DuplicatePieceCmd) undo(sb *Sandbox, ui *UiState) {
+	sb.RemovePiece(cmd.piece.id)
+	ui.selection.SelectPiece(cmd.originalId)
+}
