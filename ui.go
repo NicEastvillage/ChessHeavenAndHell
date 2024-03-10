@@ -148,34 +148,35 @@ func (s *UiState) RenderPiecesTab() {
 }
 
 func (s *UiState) RenderPieceContextMenu(undo *UndoRedoSystem) {
-	var selectedPiece, _ = s.selection.GetSelectedPieceId()
+	var selectedPieceId, _ = s.selection.GetSelectedPieceId()
+	piece := sandbox.GetPiece(selectedPieceId)
 
 	var spinnerX = float32(rl.GetScreenWidth() - 150)
 	var spinnerY = float32(UiMargin + UiMarginBig + UiButtonH)
 
 	{
-		var pieceScale = sandbox.GetPiece(selectedPiece).scale
+		var pieceScale = piece.scale
 		var change = SpinnerWithIcon(spinnerX, spinnerY, fmt.Sprint(pieceScale), assets.texPieceScale)
 		if change < 0 && pieceScale > 1 {
-			var cmd = NewDecreasePieceScaleCmd(&sandbox, selectedPiece)
+			var cmd = NewDecreasePieceScaleCmd(&sandbox, selectedPieceId)
 			undo.Append(&cmd)
 		}
 		if change > 0 {
-			var cmd = NewIncreasePieceScaleCmd(&sandbox, selectedPiece)
+			var cmd = NewIncreasePieceScaleCmd(&sandbox, selectedPieceId)
 			undo.Append(&cmd)
 		}
 	}
 
 	for i := range sandbox.effectTypes {
 		var effect = &sandbox.effectTypes[i]
-		var effectCount = sandbox.GetStatusEffectCount(selectedPiece, effect.id)
+		var effectCount = sandbox.GetStatusEffectCount(selectedPieceId, effect.id)
 		var change = SpinnerWithIcon(spinnerX, spinnerY+float32(i*55)+55, fmt.Sprint(effectCount), effect.tex)
 		if change < 0 && effectCount > 0 {
-			var cmd = NewDeleteStatusEffectCmd(&sandbox, selectedPiece, effect.id)
+			var cmd = NewDeleteStatusEffectCmd(&sandbox, selectedPieceId, effect.id)
 			undo.Append(&cmd)
 		}
 		if change > 0 {
-			var cmd = NewCreateStatusEffectCmd(&sandbox, selectedPiece, effect.id)
+			var cmd = NewCreateStatusEffectCmd(&sandbox, selectedPieceId, effect.id)
 			undo.Append(&cmd)
 		}
 	}
@@ -185,7 +186,14 @@ func (s *UiState) RenderPieceContextMenu(undo *UndoRedoSystem) {
 	var width = float32(130)
 	var height float32 = UiButtonH
 	if rg.Button(rl.NewRectangle(posX, posY, width, height), "Remove piece") {
-		var cmd = NewDeletePieceCmd(&sandbox, s, selectedPiece)
+		var cmd = NewDeletePieceCmd(&sandbox, s, selectedPieceId)
+		undo.Append(&cmd)
+	}
+
+	posY -= UiButtonH + UiMargin
+	if rg.Button(rl.NewRectangle(posX, posY, width, height), "Change color") {
+		var newColor = 1 - piece.color
+		var cmd = NewChangeColorOfPieceCmd(&sandbox, selectedPieceId, newColor)
 		undo.Append(&cmd)
 	}
 }
