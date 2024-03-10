@@ -69,37 +69,41 @@ func IsCoordUnderUi(coord Vec2) bool {
 func handleBoardInteraction(undo *UndoRedoSystem, ui *UiState) {
 	handleMouseInteraction(undo, ui)
 
+	var ctrlDown = rl.IsKeyDown(rl.KeyLeftControl) || rl.IsKeyDown(rl.KeyLeftControl)
+
 	if pieceId, ok := ui.selection.GetSelectedPieceId(); ok {
 		if rl.IsKeyPressed(rl.KeyDelete) || rl.IsKeyPressed(rl.KeyBackspace) {
 			var cmd = NewDeletePieceCmd(&sandbox, ui, pieceId)
-			undo.AppendDone(&cmd)
+			undo.Append(&cmd)
+		} else if rl.IsKeyPressed(rl.KeyC) && ctrlDown {
+			var piece = sandbox.GetPiece(pieceId)
+			ui.clipboard.StorePiece(piece.typ, piece.color, piece.scale, sandbox.GetStatusEffectsOnPiece(pieceId))
+		} else if rl.IsKeyPressed(rl.KeyX) && ctrlDown {
+			var piece = sandbox.GetPiece(pieceId)
+			ui.clipboard.StorePiece(piece.typ, piece.color, piece.scale, sandbox.GetStatusEffectsOnPiece(pieceId))
+			var cmd = NewDeletePieceCmd(&sandbox, ui, pieceId)
+			undo.Append(&cmd)
+		} else if rl.IsKeyReleased(rl.KeyD) && ctrlDown {
+			var cmd = NewDuplicatePieceCmd(&sandbox, ui, pieceId)
+			undo.Append(&cmd)
+		} else if rl.IsKeyPressed(rl.KeyC) {
+			var newColor = 1 - sandbox.GetPiece(pieceId).color
+			var cmd = NewChangeColorOfPieceCmd(&sandbox, pieceId, newColor)
+			undo.Append(&cmd)
 		}
 	}
 
-	var ctrlDown = rl.IsKeyDown(rl.KeyLeftControl) || rl.IsKeyDown(rl.KeyLeftControl)
 	if rl.IsKeyPressed(rl.KeyZ) && ctrlDown {
 		undo.Undo(&sandbox, ui)
 	} else if rl.IsKeyPressed(rl.KeyY) && ctrlDown {
 		undo.Redo(&sandbox, ui)
-	} else if rl.IsKeyPressed(rl.KeyC) {
-		if id, ok := ui.selection.GetSelectedPieceId(); ok {
-			var piece = sandbox.GetPiece(id)
-			ui.clipboard.StorePiece(piece.typ, piece.color, piece.scale, sandbox.GetStatusEffectsOnPiece(id))
-		}
-	} else if rl.IsKeyPressed(rl.KeyV) {
+	} else if rl.IsKeyPressed(rl.KeyV) && ctrlDown {
 		if !ui.clipboard.isEmpty {
 			var coord = GetHoveredCoord()
 			if !IsCoordUnderUi(coord) {
 				var cmd = NewPastePieceCmd(&sandbox, ui, coord, uint32(ui.board))
-				undo.AppendDone(&cmd)
+				undo.Append(&cmd)
 			}
-		}
-	} else if rl.IsKeyPressed(rl.KeyX) {
-		if id, ok := ui.selection.GetSelectedPieceId(); ok {
-			var piece = sandbox.GetPiece(id)
-			ui.clipboard.StorePiece(piece.typ, piece.color, piece.scale, sandbox.GetStatusEffectsOnPiece(id))
-			var cmd = NewDeletePieceCmd(&sandbox, ui, id)
-			undo.AppendDone(&cmd)
 		}
 	}
 }
@@ -126,13 +130,13 @@ func handleMouseInteraction(undo *UndoRedoSystem, ui *UiState) {
 			var piece = sandbox.GetPiece(id)
 			if piece.coord != coord || piece.board != uint32(ui.board) {
 				var cmd = NewMovePieceCmd(&sandbox, id, coord, uint32(ui.board))
-				undo.AppendDone(&cmd)
+				undo.Append(&cmd)
 			}
 		}
 	} else if id, ok := ui.selection.GetSelectedPieceTypeId(); ok {
 		if rl.IsMouseButtonPressed(rl.MouseButtonRight) {
 			var cmd = NewCreatePieceCmd(&sandbox, id, PieceColor(ui.color), uint32(ui.board), coord)
-			undo.AppendDone(&cmd)
+			undo.Append(&cmd)
 		}
 	}
 }

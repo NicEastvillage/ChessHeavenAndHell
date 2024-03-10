@@ -72,9 +72,19 @@ func (s *UiState) Render(undo *UndoRedoSystem) {
 	s.RenderBoardPreview(0)
 	s.RenderBoardPreview(1)
 	s.RenderBoardPreview(2)
+	if rl.IsKeyPressed(rl.KeyUp) && s.board > 0 {
+		s.board--
+	} else if rl.IsKeyPressed(rl.KeyDown) && s.board < 2 {
+		s.board++
+	} else if rl.IsKeyPressed(rl.KeyTab) {
+		s.board = (s.board + 1) % 3
+	}
 
 	var oldTab = s.tab
 	s.tab = rg.ToggleGroup(rl.NewRectangle(float32(rl.GetScreenWidth()-UiMargin-2*UiButtonH-1*int(rg.GetStyle(rg.TOGGLE, rg.GROUP_PADDING))), UiMargin, UiButtonH, UiButtonH), "#149#;#97#", s.tab)
+	if rl.IsKeyPressed(rl.KeyT) {
+		s.tab = 1 - s.tab
+	}
 	if oldTab != s.tab {
 		s.selection.Deselect()
 	}
@@ -126,6 +136,9 @@ func (s *UiState) RenderBoardPreview(index int32) {
 
 func (s *UiState) RenderPiecesTab() {
 	s.color = rg.ToggleSlider(rl.NewRectangle(float32(rl.GetScreenWidth()-UiMargin-130), 2*UiMargin+UiButtonH, 130, UiButtonH), "White;Black", s.color)
+	if rl.IsKeyPressed(rl.KeyC) {
+		s.color = 1 - s.color
+	}
 
 	for i := 0; i < len(sandbox.pieceTypes); i++ {
 		if rg.Toggle(rl.NewRectangle(float32(rl.GetScreenWidth()-UiMargin-130), float32(3*UiMargin+2*UiButtonH+i*(UiMarginSmall+UiButtonH)), 130, UiButtonH), sandbox.GetPieceType(uint32(i)).name, s.selection.IsPieceTypeSelected(uint32(i))) {
@@ -135,35 +148,36 @@ func (s *UiState) RenderPiecesTab() {
 }
 
 func (s *UiState) RenderPieceContextMenu(undo *UndoRedoSystem) {
-	var selectedPiece, _ = s.selection.GetSelectedPieceId()
+	var selectedPieceId, _ = s.selection.GetSelectedPieceId()
+	piece := sandbox.GetPiece(selectedPieceId)
 
 	var spinnerX = float32(rl.GetScreenWidth() - 150)
 	var spinnerY = float32(UiMargin + UiMarginBig + UiButtonH)
 
 	{
-		var pieceScale = sandbox.GetPiece(selectedPiece).scale
+		var pieceScale = piece.scale
 		var change = SpinnerWithIcon(spinnerX, spinnerY, fmt.Sprint(pieceScale), assets.texPieceScale)
 		if change < 0 && pieceScale > 1 {
-			var cmd = NewDecreasePieceScaleCmd(&sandbox, selectedPiece)
-			undo.AppendDone(&cmd)
+			var cmd = NewDecreasePieceScaleCmd(&sandbox, selectedPieceId)
+			undo.Append(&cmd)
 		}
 		if change > 0 {
-			var cmd = NewIncreasePieceScaleCmd(&sandbox, selectedPiece)
-			undo.AppendDone(&cmd)
+			var cmd = NewIncreasePieceScaleCmd(&sandbox, selectedPieceId)
+			undo.Append(&cmd)
 		}
 	}
 
 	for i := range sandbox.effectTypes {
 		var effect = &sandbox.effectTypes[i]
-		var effectCount = sandbox.GetStatusEffectCount(selectedPiece, effect.id)
+		var effectCount = sandbox.GetStatusEffectCount(selectedPieceId, effect.id)
 		var change = SpinnerWithIcon(spinnerX, spinnerY+float32(i*55)+55, fmt.Sprint(effectCount), effect.tex)
 		if change < 0 && effectCount > 0 {
-			var cmd = NewDeleteStatusEffectCmd(&sandbox, selectedPiece, effect.id)
-			undo.AppendDone(&cmd)
+			var cmd = NewDeleteStatusEffectCmd(&sandbox, selectedPieceId, effect.id)
+			undo.Append(&cmd)
 		}
 		if change > 0 {
-			var cmd = NewCreateStatusEffectCmd(&sandbox, selectedPiece, effect.id)
-			undo.AppendDone(&cmd)
+			var cmd = NewCreateStatusEffectCmd(&sandbox, selectedPieceId, effect.id)
+			undo.Append(&cmd)
 		}
 	}
 
@@ -172,8 +186,15 @@ func (s *UiState) RenderPieceContextMenu(undo *UndoRedoSystem) {
 	var width = float32(130)
 	var height float32 = UiButtonH
 	if rg.Button(rl.NewRectangle(posX, posY, width, height), "Remove piece") {
-		var cmd = NewDeletePieceCmd(&sandbox, s, selectedPiece)
-		undo.AppendDone(&cmd)
+		var cmd = NewDeletePieceCmd(&sandbox, s, selectedPieceId)
+		undo.Append(&cmd)
+	}
+
+	posY -= UiButtonH + UiMargin
+	if rg.Button(rl.NewRectangle(posX, posY, width, height), "Change color") {
+		var newColor = 1 - piece.color
+		var cmd = NewChangeColorOfPieceCmd(&sandbox, selectedPieceId, newColor)
+		undo.Append(&cmd)
 	}
 }
 
@@ -189,11 +210,11 @@ func (s *UiState) RenderCoordContextMenu(undo *UndoRedoSystem) {
 		var change = SpinnerWithIcon(spinnerX, spinnerY+float32(i*55)+55, fmt.Sprint(obCount), obt.tex)
 		if change < 0 && obCount > 0 {
 			var cmd = NewDeleteObstacleCmd(&sandbox, coord, uint32(s.board), obt.id)
-			undo.AppendDone(&cmd)
+			undo.Append(&cmd)
 		}
 		if change > 0 {
 			var cmd = NewCreateObstacleCmd(&sandbox, coord, uint32(s.board), obt.id)
-			undo.AppendDone(&cmd)
+			undo.Append(&cmd)
 		}
 	}
 
@@ -204,12 +225,12 @@ func (s *UiState) RenderCoordContextMenu(undo *UndoRedoSystem) {
 	if rg.Button(rl.NewRectangle(posX, posY-UiMarginSmall-UiButtonH, width, height), "Add tile") {
 		if sandbox.GetTile(uint32(s.board), coord) == nil {
 			var cmd = NewCreateTileCmd(&sandbox, uint32(s.board), coord)
-			undo.AppendDone(&cmd)
+			undo.Append(&cmd)
 		}
 	}
 	if rg.Button(rl.NewRectangle(posX, posY, width, height), "Remove tile") {
 		var cmd = NewDeleteTileCmd(&sandbox, uint32(s.board), coord)
-		undo.AppendDone(&cmd)
+		undo.Append(&cmd)
 	}
 }
 
