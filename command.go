@@ -476,3 +476,30 @@ func (cmd *DuplicatePieceCmd) undo(sb *Sandbox, ui *UiState) {
 	sb.RemovePiece(cmd.piece.id)
 	ui.selection.SelectPiece(cmd.originalId)
 }
+
+type ChangeColorOfPieceCmd struct {
+	piece  uint32
+	before PieceColor
+	after  PieceColor
+}
+
+func NewChangeColorOfPieceCmd(sb *Sandbox, id uint32, color PieceColor) ChangeColorOfPieceCmd {
+	piece := sb.GetPiece(id)
+	var before = piece.color
+	piece.color = color
+	return ChangeColorOfPieceCmd{
+		piece:  id,
+		before: before,
+		after:  color,
+	}
+}
+
+func (cmd *ChangeColorOfPieceCmd) redo(sb *Sandbox, ui *UiState) {
+	sb.GetPiece(cmd.piece).color = cmd.after
+	ui.selection.SelectPiece(cmd.piece)
+}
+
+func (cmd *ChangeColorOfPieceCmd) undo(sb *Sandbox, ui *UiState) {
+	sb.GetPiece(cmd.piece).color = cmd.before
+	ui.selection.SelectPiece(cmd.piece)
+}

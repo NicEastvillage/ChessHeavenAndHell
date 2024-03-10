@@ -75,16 +75,20 @@ func handleBoardInteraction(undo *UndoRedoSystem, ui *UiState) {
 		if rl.IsKeyPressed(rl.KeyDelete) || rl.IsKeyPressed(rl.KeyBackspace) {
 			var cmd = NewDeletePieceCmd(&sandbox, ui, pieceId)
 			undo.Append(&cmd)
-		} else if rl.IsKeyPressed(rl.KeyC) {
+		} else if rl.IsKeyPressed(rl.KeyC) && ctrlDown {
 			var piece = sandbox.GetPiece(pieceId)
 			ui.clipboard.StorePiece(piece.typ, piece.color, piece.scale, sandbox.GetStatusEffectsOnPiece(pieceId))
-		} else if rl.IsKeyPressed(rl.KeyX) {
+		} else if rl.IsKeyPressed(rl.KeyX) && ctrlDown {
 			var piece = sandbox.GetPiece(pieceId)
 			ui.clipboard.StorePiece(piece.typ, piece.color, piece.scale, sandbox.GetStatusEffectsOnPiece(pieceId))
 			var cmd = NewDeletePieceCmd(&sandbox, ui, pieceId)
 			undo.Append(&cmd)
-		} else if rl.IsKeyReleased(rl.KeyD) {
+		} else if rl.IsKeyReleased(rl.KeyD) && ctrlDown {
 			var cmd = NewDuplicatePieceCmd(&sandbox, ui, pieceId)
+			undo.Append(&cmd)
+		} else if rl.IsKeyPressed(rl.KeyC) {
+			var newColor = 1 - sandbox.GetPiece(pieceId).color
+			var cmd = NewChangeColorOfPieceCmd(&sandbox, pieceId, newColor)
 			undo.Append(&cmd)
 		}
 	}
@@ -93,7 +97,7 @@ func handleBoardInteraction(undo *UndoRedoSystem, ui *UiState) {
 		undo.Undo(&sandbox, ui)
 	} else if rl.IsKeyPressed(rl.KeyY) && ctrlDown {
 		undo.Redo(&sandbox, ui)
-	} else if rl.IsKeyPressed(rl.KeyV) {
+	} else if rl.IsKeyPressed(rl.KeyV) && ctrlDown {
 		if !ui.clipboard.isEmpty {
 			var coord = GetHoveredCoord()
 			if !IsCoordUnderUi(coord) {
