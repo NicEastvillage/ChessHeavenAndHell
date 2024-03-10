@@ -72,9 +72,19 @@ func (s *UiState) Render(undo *UndoRedoSystem) {
 	s.RenderBoardPreview(0)
 	s.RenderBoardPreview(1)
 	s.RenderBoardPreview(2)
+	if rl.IsKeyPressed(rl.KeyUp) && s.board > 0 {
+		s.board--
+	} else if rl.IsKeyPressed(rl.KeyDown) && s.board < 2 {
+		s.board++
+	} else if rl.IsKeyPressed(rl.KeyTab) {
+		s.board = (s.board + 1) % 3
+	}
 
 	var oldTab = s.tab
 	s.tab = rg.ToggleGroup(rl.NewRectangle(float32(rl.GetScreenWidth()-UiMargin-2*UiButtonH-1*int(rg.GetStyle(rg.TOGGLE, rg.GROUP_PADDING))), UiMargin, UiButtonH, UiButtonH), "#149#;#97#", s.tab)
+	if rl.IsKeyPressed(rl.KeyT) {
+		s.tab = 1 - s.tab
+	}
 	if oldTab != s.tab {
 		s.selection.Deselect()
 	}
@@ -126,6 +136,9 @@ func (s *UiState) RenderBoardPreview(index int32) {
 
 func (s *UiState) RenderPiecesTab() {
 	s.color = rg.ToggleSlider(rl.NewRectangle(float32(rl.GetScreenWidth()-UiMargin-130), 2*UiMargin+UiButtonH, 130, UiButtonH), "White;Black", s.color)
+	if rl.IsKeyPressed(rl.KeyC) {
+		s.color = 1 - s.color
+	}
 
 	for i := 0; i < len(sandbox.pieceTypes); i++ {
 		if rg.Toggle(rl.NewRectangle(float32(rl.GetScreenWidth()-UiMargin-130), float32(3*UiMargin+2*UiButtonH+i*(UiMarginSmall+UiButtonH)), 130, UiButtonH), sandbox.GetPieceType(uint32(i)).name, s.selection.IsPieceTypeSelected(uint32(i))) {
