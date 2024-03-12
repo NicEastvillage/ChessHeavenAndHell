@@ -56,7 +56,9 @@ func main() {
 
 		rl.BeginDrawing()
 		rl.ClearBackground(rl.RayWhite)
-		sandbox.Render(uint32(ui.board), false, &ui.selection)
+		if !ui.showShop {
+			sandbox.Render(uint32(ui.board), false, &ui.selection)
+		}
 		ui.Render(&undo)
 		rl.EndDrawing()
 	}
