@@ -54,6 +54,10 @@ func (s *UiState) Update() {
 	//var origo = GetBoardOrigo()
 	//var previewSourceOrigo = rl.NewVector2(float32(origo.x-TileSize), float32(origo.y-TileSize))
 
+	if s.showShop {
+		s.selection.Deselect()
+	}
+
 	if s.board != 0 || s.showShop {
 		rl.BeginTextureMode(s.renderTexHeaven)
 		rl.ClearBackground(rl.RayWhite)

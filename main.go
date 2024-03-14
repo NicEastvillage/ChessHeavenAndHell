@@ -73,7 +73,7 @@ func handleBoardInteraction(undo *UndoRedoSystem, ui *UiState) {
 
 	var ctrlDown = rl.IsKeyDown(rl.KeyLeftControl) || rl.IsKeyDown(rl.KeyLeftControl)
 
-	if pieceId, ok := ui.selection.GetSelectedPieceId(); ok {
+	if pieceId, ok := ui.selection.GetSelectedPieceId(); ok && !ui.showShop {
 		if rl.IsKeyPressed(rl.KeyDelete) || rl.IsKeyPressed(rl.KeyBackspace) {
 			var cmd = NewDeletePieceCmd(&sandbox, ui, pieceId)
 			undo.Append(&cmd)
@@ -100,7 +100,7 @@ func handleBoardInteraction(undo *UndoRedoSystem, ui *UiState) {
 	} else if rl.IsKeyPressed(rl.KeyY) && ctrlDown {
 		undo.Redo(&sandbox, ui)
 	} else if rl.IsKeyPressed(rl.KeyV) && ctrlDown {
-		if !ui.clipboard.isEmpty {
+		if !ui.clipboard.isEmpty && !ui.showShop {
 			var coord = GetHoveredCoord()
 			if !IsCoordUnderUi(coord) {
 				var cmd = NewPastePieceCmd(&sandbox, ui, coord, uint32(ui.board))
@@ -111,6 +111,10 @@ func handleBoardInteraction(undo *UndoRedoSystem, ui *UiState) {
 }
 
 func handleMouseInteraction(undo *UndoRedoSystem, ui *UiState) {
+	if ui.showShop {
+		return
+	}
+
 	var coord = GetHoveredCoord()
 	if IsCoordUnderUi(coord) {
 		return
