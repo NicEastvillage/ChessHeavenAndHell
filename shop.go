@@ -30,7 +30,7 @@ func NewShop() Shop {
 	shop.AddEntry(6, "Curse a non-royal piece.")
 	shop.AddEntry(12, "Spawn new Rook anywhere on your back rank.")
 	shop.AddEntry(12, "Get two actions next turn.")
-	shop.AddEntry(6, "Move a piece t anywhere on the same plane.")
+	shop.AddEntry(6, "Move a piece to anywhere on the same plane.")
 	shop.AddEntry(6, "Freeze a 2x2 area.")
 	shop.AddEntry(2, "Forgive a piece for its sins.")
 	shop.AddEntry(8, "Spawn new Knight anywhere on your back rank.")
