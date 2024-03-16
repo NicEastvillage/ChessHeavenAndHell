@@ -1,8 +1,6 @@
 package main
 
-import (
-	"math/rand"
-)
+import "math/rand"
 
 type ShopEntry struct {
 	id            uint32
@@ -37,7 +35,7 @@ func NewShop() Shop {
 	shop.AddEntry(2, "Forgive a piece for its sins.")
 	shop.AddEntry(8, "Spawn new Knight anywhere on your back rank.")
 	shop.AddEntry(10, "Spawn new Bishop anywhere on your back rank.")
-	shop.Shuffle()
+	rand.Shuffle(len(shop.entries), func(i, j int) { shop.entries[i], shop.entries[j] = shop.entries[j], shop.entries[i] })
 	return shop
 }
 
@@ -59,6 +57,11 @@ func (s *Shop) BlackMoney() *int {
 	return &s.money[1]
 }
 
-func (s *Shop) Shuffle() {
-	rand.Shuffle(len(s.entries), func(i, j int) { s.entries[i], s.entries[j] = s.entries[j], s.entries[i] })
+func (s *Shop) GetEntry(id uint32) *ShopEntry {
+	for i := 0; i < len(s.entries); i++ {
+		if s.entries[i].id == id {
+			return &s.entries[i]
+		}
+	}
+	return nil
 }

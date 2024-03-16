@@ -1,5 +1,7 @@
 package main
 
+import "math/rand"
+
 type CreatePieceCmd struct {
 	piece             Piece
 	anyCaptured       bool
@@ -35,6 +37,7 @@ func (cmd *CreatePieceCmd) redo(sb *Sandbox, ui *UiState) {
 		ui.board = int32(cmd.piece.board)
 	}
 	ui.selection.Deselect()
+	ui.showShop = false
 }
 
 func (cmd *CreatePieceCmd) undo(sb *Sandbox, ui *UiState) {
@@ -51,6 +54,7 @@ func (cmd *CreatePieceCmd) undo(sb *Sandbox, ui *UiState) {
 		ui.board = int32(cmd.piece.board)
 	}
 	ui.selection.Deselect()
+	ui.showShop = false
 }
 
 type DeletePieceCmd struct {
@@ -77,6 +81,7 @@ func (cmd *DeletePieceCmd) redo(sb *Sandbox, ui *UiState) {
 	if cmd.piece.board != OffBoard {
 		ui.board = int32(cmd.piece.board)
 	}
+	ui.showShop = false
 }
 
 func (cmd *DeletePieceCmd) undo(sb *Sandbox, ui *UiState) {
@@ -88,6 +93,7 @@ func (cmd *DeletePieceCmd) undo(sb *Sandbox, ui *UiState) {
 		ui.board = int32(cmd.piece.board)
 	}
 	ui.selection.SelectPiece(cmd.piece.id)
+	ui.showShop = false
 }
 
 type MovePieceCmd struct {
@@ -142,6 +148,7 @@ func (cmd *MovePieceCmd) redo(sb *Sandbox, ui *UiState) {
 		ui.board = int32(piece.board)
 	}
 	ui.selection.SelectPiece(cmd.piece)
+	ui.showShop = false
 }
 
 func (cmd *MovePieceCmd) undo(sb *Sandbox, ui *UiState) {
@@ -157,6 +164,7 @@ func (cmd *MovePieceCmd) undo(sb *Sandbox, ui *UiState) {
 		ui.board = int32(piece.board)
 	}
 	ui.selection.SelectPiece(cmd.piece)
+	ui.showShop = false
 }
 
 type CreateStatusEffectCmd struct {
@@ -179,6 +187,7 @@ func (cmd *CreateStatusEffectCmd) redo(sb *Sandbox, ui *UiState) {
 		ui.board = int32(piece.board)
 	}
 	ui.selection.SelectPiece(cmd.piece)
+	ui.showShop = false
 }
 
 func (cmd *CreateStatusEffectCmd) undo(sb *Sandbox, ui *UiState) {
@@ -188,6 +197,7 @@ func (cmd *CreateStatusEffectCmd) undo(sb *Sandbox, ui *UiState) {
 		ui.board = int32(piece.board)
 	}
 	ui.selection.SelectPiece(cmd.piece)
+	ui.showShop = false
 }
 
 type DeleteStatusEffectCmd struct {
@@ -210,6 +220,7 @@ func (cmd *DeleteStatusEffectCmd) redo(sb *Sandbox, ui *UiState) {
 		ui.board = int32(piece.board)
 	}
 	ui.selection.SelectPiece(cmd.piece)
+	ui.showShop = false
 }
 
 func (cmd *DeleteStatusEffectCmd) undo(sb *Sandbox, ui *UiState) {
@@ -219,6 +230,7 @@ func (cmd *DeleteStatusEffectCmd) undo(sb *Sandbox, ui *UiState) {
 		ui.board = int32(piece.board)
 	}
 	ui.selection.SelectPiece(cmd.piece)
+	ui.showShop = false
 }
 
 type IncreasePieceScaleCmd struct {
@@ -239,6 +251,7 @@ func (cmd *IncreasePieceScaleCmd) redo(sb *Sandbox, ui *UiState) {
 		ui.board = int32(piece.board)
 	}
 	ui.selection.SelectPiece(cmd.piece)
+	ui.showShop = false
 }
 
 func (cmd *IncreasePieceScaleCmd) undo(sb *Sandbox, ui *UiState) {
@@ -248,6 +261,7 @@ func (cmd *IncreasePieceScaleCmd) undo(sb *Sandbox, ui *UiState) {
 		ui.board = int32(piece.board)
 	}
 	ui.selection.SelectPiece(cmd.piece)
+	ui.showShop = false
 }
 
 type DecreasePieceScaleCmd struct {
@@ -268,6 +282,7 @@ func (cmd *DecreasePieceScaleCmd) redo(sb *Sandbox, ui *UiState) {
 		ui.board = int32(piece.board)
 	}
 	ui.selection.SelectPiece(cmd.piece)
+	ui.showShop = false
 }
 
 func (cmd *DecreasePieceScaleCmd) undo(sb *Sandbox, ui *UiState) {
@@ -277,6 +292,7 @@ func (cmd *DecreasePieceScaleCmd) undo(sb *Sandbox, ui *UiState) {
 		ui.board = int32(piece.board)
 	}
 	ui.selection.SelectPiece(cmd.piece)
+	ui.showShop = false
 }
 
 type CreateTileCmd struct {
@@ -296,12 +312,14 @@ func (cmd *CreateTileCmd) redo(sb *Sandbox, ui *UiState) {
 	sb.NewTile(cmd.board, cmd.coord)
 	ui.board = int32(cmd.board)
 	ui.selection.SelectCoord(cmd.coord)
+	ui.showShop = false
 }
 
 func (cmd *CreateTileCmd) undo(sb *Sandbox, ui *UiState) {
 	sb.RemoveTile(cmd.board, cmd.coord)
 	ui.board = int32(cmd.board)
 	ui.selection.SelectCoord(cmd.coord)
+	ui.showShop = false
 }
 
 type DeleteTileCmd struct {
@@ -321,12 +339,14 @@ func (cmd *DeleteTileCmd) redo(sb *Sandbox, ui *UiState) {
 	sb.RemoveTile(cmd.board, cmd.coord)
 	ui.board = int32(cmd.board)
 	ui.selection.SelectCoord(cmd.coord)
+	ui.showShop = false
 }
 
 func (cmd *DeleteTileCmd) undo(sb *Sandbox, ui *UiState) {
 	sb.NewTile(cmd.board, cmd.coord)
 	ui.board = int32(cmd.board)
 	ui.selection.SelectCoord(cmd.coord)
+	ui.showShop = false
 }
 
 type CreateObstacleCmd struct {
@@ -348,12 +368,14 @@ func (cmd *CreateObstacleCmd) redo(sb *Sandbox, ui *UiState) {
 	sb.NewObstacle(cmd.coord, cmd.board, cmd.obstacle)
 	ui.board = int32(cmd.board)
 	ui.selection.SelectCoord(cmd.coord)
+	ui.showShop = false
 }
 
 func (cmd *CreateObstacleCmd) undo(sb *Sandbox, ui *UiState) {
 	sb.RemoveObstacle(cmd.coord, cmd.board, cmd.obstacle)
 	ui.board = int32(cmd.board)
 	ui.selection.SelectCoord(cmd.coord)
+	ui.showShop = false
 }
 
 type DeleteObstacleCmd struct {
@@ -375,12 +397,14 @@ func (cmd *DeleteObstacleCmd) redo(sb *Sandbox, ui *UiState) {
 	sb.RemoveObstacle(cmd.coord, cmd.board, cmd.obstacle)
 	ui.board = int32(cmd.board)
 	ui.selection.SelectCoord(cmd.coord)
+	ui.showShop = false
 }
 
 func (cmd *DeleteObstacleCmd) undo(sb *Sandbox, ui *UiState) {
 	sb.NewObstacle(cmd.coord, cmd.board, cmd.obstacle)
 	ui.board = int32(cmd.board)
 	ui.selection.SelectCoord(cmd.coord)
+	ui.showShop = false
 }
 
 type PastePieceCmd struct {
@@ -425,6 +449,7 @@ func (cmd *PastePieceCmd) redo(sb *Sandbox, ui *UiState) {
 		ui.board = int32(cmd.piece.board)
 	}
 	ui.selection.SelectPiece(cmd.piece.id)
+	ui.showShop = false
 }
 
 func (cmd *PastePieceCmd) undo(sb *Sandbox, ui *UiState) {
@@ -440,6 +465,7 @@ func (cmd *PastePieceCmd) undo(sb *Sandbox, ui *UiState) {
 	if cmd.piece.board != OffBoard {
 		ui.board = int32(cmd.piece.board)
 	}
+	ui.showShop = false
 }
 
 type DuplicatePieceCmd struct {
@@ -470,11 +496,13 @@ func (cmd *DuplicatePieceCmd) redo(sb *Sandbox, ui *UiState) {
 		sb.NewStatusEffect(cmd.piece.id, effect)
 	}
 	ui.selection.SelectPiece(cmd.piece.id)
+	ui.showShop = false
 }
 
 func (cmd *DuplicatePieceCmd) undo(sb *Sandbox, ui *UiState) {
 	sb.RemovePiece(cmd.piece.id)
 	ui.selection.SelectPiece(cmd.originalId)
+	ui.showShop = false
 }
 
 type ChangeColorOfPieceCmd struct {
@@ -497,9 +525,166 @@ func NewChangeColorOfPieceCmd(sb *Sandbox, id uint32, color PieceColor) ChangeCo
 func (cmd *ChangeColorOfPieceCmd) redo(sb *Sandbox, ui *UiState) {
 	sb.GetPiece(cmd.piece).color = cmd.after
 	ui.selection.SelectPiece(cmd.piece)
+	ui.showShop = false
 }
 
 func (cmd *ChangeColorOfPieceCmd) undo(sb *Sandbox, ui *UiState) {
 	sb.GetPiece(cmd.piece).color = cmd.before
 	ui.selection.SelectPiece(cmd.piece)
+	ui.showShop = false
+}
+
+type ChangeMoneyAmountCmd struct {
+	whiteBefore int
+	whiteAfter  int
+	blackBefore int
+	blackAfter  int
+}
+
+func NewChangeMoneyAmountCmd(ui *UiState, whiteNewAmount int, blackNewAmount int) ChangeMoneyAmountCmd {
+	var whiteBefore = ui.shop.money[0]
+	var blackBefore = ui.shop.money[1]
+	ui.shop.money[0] = whiteNewAmount
+	ui.shop.money[1] = blackNewAmount
+	return ChangeMoneyAmountCmd{
+		whiteBefore: whiteBefore,
+		whiteAfter:  whiteNewAmount,
+		blackBefore: blackBefore,
+		blackAfter:  blackNewAmount,
+	}
+}
+
+func (cmd *ChangeMoneyAmountCmd) redo(sb *Sandbox, ui *UiState) {
+	ui.shop.money[0] = cmd.whiteAfter
+	ui.shop.money[1] = cmd.blackAfter
+}
+
+func (cmd *ChangeMoneyAmountCmd) undo(sb *Sandbox, ui *UiState) {
+	ui.shop.money[0] = cmd.whiteBefore
+	ui.shop.money[1] = cmd.blackBefore
+}
+
+type ChangeShopUnlockCountCmd struct {
+	before int
+	after  int
+}
+
+func NewChangeShopUnlockCountCmd(ui *UiState, newCount int) ChangeShopUnlockCountCmd {
+	var before = ui.shop.unlockedCount
+	ui.shop.unlockedCount = newCount
+	return ChangeShopUnlockCountCmd{
+		before: before,
+		after:  newCount,
+	}
+}
+
+func (cmd *ChangeShopUnlockCountCmd) redo(sb *Sandbox, ui *UiState) {
+	ui.shop.unlockedCount = cmd.after
+	ui.showShop = true
+}
+
+func (cmd *ChangeShopUnlockCountCmd) undo(sb *Sandbox, ui *UiState) {
+	ui.shop.unlockedCount = cmd.before
+	ui.showShop = true
+}
+
+type ShuffleShopCmd struct {
+	swaps []int
+}
+
+func NewShuffleShopCmd(shop *Shop) ShuffleShopCmd {
+	// Fisher-Yates shuffle, but we store which indices we roll, so we can undo it
+	var swaps = make([]int, 0)
+	for i := len(shop.entries) - 1; i >= 1; i-- {
+		var j = rand.Intn(i + 1)
+		swaps = append(swaps, j)
+		shop.entries[i], shop.entries[j] = shop.entries[j], shop.entries[i]
+	}
+	return ShuffleShopCmd{
+		swaps: swaps,
+	}
+}
+
+func (cmd *ShuffleShopCmd) redo(sb *Sandbox, ui *UiState) {
+	for i := len(ui.shop.entries) - 1; i >= 1; i-- {
+		var j = cmd.swaps[len(ui.shop.entries)-1-i]
+		ui.shop.entries[i], ui.shop.entries[j] = ui.shop.entries[j], ui.shop.entries[i]
+	}
+	ui.showShop = true
+}
+
+func (cmd *ShuffleShopCmd) undo(sb *Sandbox, ui *UiState) {
+	for i := 1; i < len(ui.shop.entries); i++ {
+		var j = cmd.swaps[len(ui.shop.entries)-1-i]
+		ui.shop.entries[i], ui.shop.entries[j] = ui.shop.entries[j], ui.shop.entries[i]
+	}
+	ui.showShop = true
+}
+
+type ChangeShopEntryPriceCmd struct {
+	entry       uint32
+	priceBefore int
+	priceAfter  int
+}
+
+func NewChangeShopEntryPriceCmd(shop *Shop, entry uint32, newPrice int) ChangeShopEntryPriceCmd {
+	var e = shop.GetEntry(entry)
+	var priceBefore = e.price
+	e.price = newPrice
+	return ChangeShopEntryPriceCmd{
+		entry:       entry,
+		priceBefore: priceBefore,
+		priceAfter:  newPrice,
+	}
+}
+
+func (cmd *ChangeShopEntryPriceCmd) redo(sb *Sandbox, ui *UiState) {
+	ui.shop.GetEntry(cmd.entry).price = cmd.priceAfter
+	ui.showShop = true
+}
+
+func (cmd *ChangeShopEntryPriceCmd) undo(sb *Sandbox, ui *UiState) {
+	ui.shop.GetEntry(cmd.entry).price = cmd.priceBefore
+	ui.showShop = true
+}
+
+type QuickBuyCmd struct {
+	player uint32
+	entry  uint32
+	unlock bool
+}
+
+func NewQuickBuyCmd(shop *Shop, player uint32, entry uint32) QuickBuyCmd {
+	var e = shop.GetEntry(entry)
+	shop.money[player] -= e.price
+	e.price++
+	var unlock = shop.unlockedCount < len(shop.entries)
+	if unlock {
+		shop.unlockedCount++
+	}
+	return QuickBuyCmd{
+		player: player,
+		entry:  entry,
+		unlock: unlock,
+	}
+}
+
+func (cmd *QuickBuyCmd) redo(sb *Sandbox, ui *UiState) {
+	var e = ui.shop.GetEntry(cmd.entry)
+	ui.shop.money[cmd.player] -= e.price
+	e.price++
+	if cmd.unlock {
+		ui.shop.unlockedCount++
+	}
+	ui.showShop = true
+}
+
+func (cmd *QuickBuyCmd) undo(sb *Sandbox, ui *UiState) {
+	if cmd.unlock {
+		ui.shop.unlockedCount--
+	}
+	var e = ui.shop.GetEntry(cmd.entry)
+	e.price--
+	ui.shop.money[cmd.player] += e.price
+	ui.showShop = true
 }

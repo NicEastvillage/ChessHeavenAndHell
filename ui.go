@@ -92,12 +92,12 @@ func (s *UiState) Render(undo *UndoRedoSystem) {
 		s.board = (s.board + 1) % 3
 	}
 
-	s.RenderMoneyWidget()
+	s.RenderMoneyWidget(undo)
 	if rl.IsKeyPressed(rl.KeyS) {
 		s.showShop = !s.showShop
 	}
 	if s.showShop {
-		s.RenderShop()
+		s.RenderShop(undo)
 		return
 	}
 
@@ -275,7 +275,7 @@ func SpinnerWithIcon(x float32, y float32, text string, tex rl.Texture2D) int {
 	return res
 }
 
-func (s *UiState) RenderShop() {
+func (s *UiState) RenderShop(undo *UndoRedoSystem) {
 	const fontSize = 20
 	const unlockButtonW = 88
 	const incButtonH = 30
@@ -286,23 +286,23 @@ func (s *UiState) RenderShop() {
 		var entry = &s.shop.entries[i]
 		var posX = posX
 		if rg.Button(rl.NewRectangle(posX, posY, UiButtonH, incButtonH), "$W") {
-			*s.shop.WhiteMoney() -= entry.price
-			entry.price++
-			s.shop.unlockedCount++
+			var cmd = NewQuickBuyCmd(&s.shop, 0, entry.id)
+			undo.Append(&cmd)
 		}
 		posX += UiButtonH + UiMarginSmall
 		if rg.Button(rl.NewRectangle(posX, posY, UiButtonH, incButtonH), "$B") {
-			*s.shop.BlackMoney() -= entry.price
-			entry.price++
-			s.shop.unlockedCount++
+			var cmd = NewQuickBuyCmd(&s.shop, 1, entry.id)
+			undo.Append(&cmd)
 		}
 		posX += UiButtonH + UiMarginSmall
 		if rg.Button(rl.NewRectangle(posX, posY, UiButtonH, incButtonH), "++") {
-			entry.price++
+			var cmd = NewChangeShopEntryPriceCmd(&s.shop, entry.id, entry.price+1)
+			undo.Append(&cmd)
 		}
 		posX += UiButtonH + UiMarginSmall
 		if rg.Button(rl.NewRectangle(posX, posY, UiButtonH, incButtonH), "--") && entry.price > 0 {
-			entry.price--
+			var cmd = NewChangeShopEntryPriceCmd(&s.shop, entry.id, entry.price-1)
+			undo.Append(&cmd)
 		}
 		posX += UiButtonH + UiMargin
 		var text = fmt.Sprint(entry.price, ": ", entry.description)
@@ -315,17 +315,20 @@ func (s *UiState) RenderShop() {
 	}
 	posY += UiMarginSmall
 	if rg.Button(rl.NewRectangle(posX, posY, unlockButtonW, UiButtonH), "Unlock") && s.shop.unlockedCount < len(s.shop.entries) {
-		s.shop.unlockedCount++
+		var cmd = NewChangeShopUnlockCountCmd(s, s.shop.unlockedCount+1)
+		undo.Append(&cmd)
 	}
 	if rg.Button(rl.NewRectangle(posX+unlockButtonW+UiMarginSmall, posY, unlockButtonW, UiButtonH), "Lock") && s.shop.unlockedCount > 0 {
-		s.shop.unlockedCount--
+		var cmd = NewChangeShopUnlockCountCmd(s, s.shop.unlockedCount-1)
+		undo.Append(&cmd)
 	}
 	if rg.Button(rl.NewRectangle(posX+2*unlockButtonW+2*UiMarginSmall, posY, unlockButtonW, UiButtonH), "Shuffle") {
-		s.shop.Shuffle()
+		var cmd = NewShuffleShopCmd(&s.shop)
+		undo.Append(&cmd)
 	}
 }
 
-func (s *UiState) RenderMoneyWidget() {
+func (s *UiState) RenderMoneyWidget(undo *UndoRedoSystem) {
 	const fontSize = 20
 	const unlockButtonW = 88
 	const incButtonH = 30
@@ -334,25 +337,29 @@ func (s *UiState) RenderMoneyWidget() {
 
 	// Row 1 (White)
 	if rg.Button(rl.NewRectangle(posX, posY, UiButtonH, incButtonH), "++") {
-		*s.shop.WhiteMoney()++
+		var cmd = NewChangeMoneyAmountCmd(s, *s.shop.WhiteMoney()+1, *s.shop.BlackMoney())
+		undo.Append(&cmd)
 	}
 	if rg.Button(rl.NewRectangle(posX+UiButtonH+UiMarginSmall, posY, UiButtonH, incButtonH), "--") {
-		*s.shop.WhiteMoney()--
+		var cmd = NewChangeMoneyAmountCmd(s, *s.shop.WhiteMoney()-1, *s.shop.BlackMoney())
+		undo.Append(&cmd)
 	}
 	rl.DrawText(fmt.Sprint("White money: ", *s.shop.WhiteMoney()), int32(posX+2*UiButtonH+UiMarginSmall+UiMargin), int32(posY+incButtonH/2-fontSize/2), fontSize, rl.Black)
 	s.showShop = rg.Toggle(rl.NewRectangle(posX+UiShopWidth-unlockButtonW, posY, unlockButtonW, UiButtonH), "Shop", s.showShop)
 	if rg.Button(rl.NewRectangle(posX+UiShopWidth-2*unlockButtonW-UiMarginSmall, posY, unlockButtonW, UiButtonH), "++Both") {
-		*s.shop.WhiteMoney()++
-		*s.shop.BlackMoney()++
+		var cmd = NewChangeMoneyAmountCmd(s, *s.shop.WhiteMoney()+1, *s.shop.BlackMoney()+1)
+		undo.Append(&cmd)
 	}
 	posY += incButtonH + UiMarginSmall
 
 	// Row 2 (Black)
 	if rg.Button(rl.NewRectangle(posX, posY, UiButtonH, incButtonH), "++") {
-		*s.shop.BlackMoney()++
+		var cmd = NewChangeMoneyAmountCmd(s, *s.shop.WhiteMoney(), *s.shop.BlackMoney()+1)
+		undo.Append(&cmd)
 	}
 	if rg.Button(rl.NewRectangle(posX+UiButtonH+UiMarginSmall, posY, UiButtonH, incButtonH), "--") {
-		*s.shop.BlackMoney()--
+		var cmd = NewChangeMoneyAmountCmd(s, *s.shop.WhiteMoney(), *s.shop.BlackMoney()-1)
+		undo.Append(&cmd)
 	}
 	rl.DrawText(fmt.Sprint("Black money: ", *s.shop.BlackMoney()), int32(posX+2*UiButtonH+UiMarginSmall+UiMargin), int32(posY+incButtonH/2-fontSize/2), fontSize, rl.Black)
 	posY += incButtonH + UiMarginSmall
