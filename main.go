@@ -75,23 +75,19 @@ func handleBoardInteraction(undo *UndoRedoSystem, ui *UiState) {
 
 	if pieceId, ok := ui.selection.GetSelectedPieceId(); ok && !ui.showShop {
 		if rl.IsKeyPressed(rl.KeyDelete) || rl.IsKeyPressed(rl.KeyBackspace) {
-			var cmd = NewDeletePieceCmd(&sandbox, ui, pieceId)
-			undo.Append(&cmd)
+			undo.Append(NewDeletePieceCmd(&sandbox, ui, pieceId))
 		} else if rl.IsKeyPressed(rl.KeyC) && ctrlDown {
 			var piece = sandbox.GetPiece(pieceId)
 			ui.clipboard.StorePiece(piece.typ, piece.color, piece.scale, sandbox.GetStatusEffectsOnPiece(pieceId))
 		} else if rl.IsKeyPressed(rl.KeyX) && ctrlDown {
 			var piece = sandbox.GetPiece(pieceId)
 			ui.clipboard.StorePiece(piece.typ, piece.color, piece.scale, sandbox.GetStatusEffectsOnPiece(pieceId))
-			var cmd = NewDeletePieceCmd(&sandbox, ui, pieceId)
-			undo.Append(&cmd)
+			undo.Append(NewDeletePieceCmd(&sandbox, ui, pieceId))
 		} else if rl.IsKeyReleased(rl.KeyD) && ctrlDown {
-			var cmd = NewDuplicatePieceCmd(&sandbox, ui, pieceId)
-			undo.Append(&cmd)
+			undo.Append(NewDuplicatePieceCmd(&sandbox, ui, pieceId))
 		} else if rl.IsKeyPressed(rl.KeyC) {
 			var newColor = 1 - sandbox.GetPiece(pieceId).color
-			var cmd = NewChangeColorOfPieceCmd(&sandbox, pieceId, newColor)
-			undo.Append(&cmd)
+			undo.Append(NewChangeColorOfPieceCmd(&sandbox, pieceId, newColor))
 		}
 	}
 
@@ -103,8 +99,7 @@ func handleBoardInteraction(undo *UndoRedoSystem, ui *UiState) {
 		if !ui.clipboard.isEmpty && !ui.showShop {
 			var coord = GetHoveredCoord()
 			if !IsCoordUnderUi(coord) {
-				var cmd = NewPastePieceCmd(&sandbox, ui, coord, uint32(ui.board))
-				undo.Append(&cmd)
+				undo.Append(NewPastePieceCmd(&sandbox, ui, coord, uint32(ui.board)))
 			}
 		}
 	}
@@ -135,14 +130,12 @@ func handleMouseInteraction(undo *UndoRedoSystem, ui *UiState) {
 		if rl.IsMouseButtonPressed(rl.MouseButtonRight) {
 			var piece = sandbox.GetPiece(id)
 			if piece.coord != coord || piece.board != uint32(ui.board) {
-				var cmd = NewMovePieceCmd(&sandbox, id, coord, uint32(ui.board))
-				undo.Append(&cmd)
+				undo.Append(NewMovePieceCmd(&sandbox, id, coord, uint32(ui.board)))
 			}
 		}
 	} else if id, ok := ui.selection.GetSelectedPieceTypeId(); ok {
 		if rl.IsMouseButtonPressed(rl.MouseButtonRight) {
-			var cmd = NewCreatePieceCmd(&sandbox, id, PieceColor(ui.color), uint32(ui.board), coord)
-			undo.Append(&cmd)
+			undo.Append(NewCreatePieceCmd(&sandbox, id, PieceColor(ui.color), uint32(ui.board), coord))
 		}
 	}
 }

@@ -9,7 +9,7 @@ type CreatePieceCmd struct {
 	captureAfterCoord Vec2
 }
 
-func NewCreatePieceCmd(sb *Sandbox, typ uint32, color PieceColor, board uint32, coord Vec2) CreatePieceCmd {
+func NewCreatePieceCmd(sb *Sandbox, typ uint32, color PieceColor, board uint32, coord Vec2) *CreatePieceCmd {
 	var cmd = CreatePieceCmd{}
 	if IsOffBoard(coord) {
 		board = OffBoard
@@ -23,7 +23,7 @@ func NewCreatePieceCmd(sb *Sandbox, typ uint32, color PieceColor, board uint32, 
 		captured.coord = cmd.captureAfterCoord
 	}
 	cmd.piece = *sb.NewPiece(typ, color, board, coord)
-	return cmd
+	return &cmd
 }
 
 func (cmd *CreatePieceCmd) redo(sb *Sandbox, ui *UiState) {
@@ -62,7 +62,7 @@ type DeletePieceCmd struct {
 	effects []uint32
 }
 
-func NewDeletePieceCmd(sb *Sandbox, ui *UiState, id uint32) DeletePieceCmd {
+func NewDeletePieceCmd(sb *Sandbox, ui *UiState, id uint32) *DeletePieceCmd {
 	var cmd = DeletePieceCmd{
 		piece:   *sb.GetPiece(id),
 		effects: sb.GetStatusEffectsOnPiece(id),
@@ -70,7 +70,7 @@ func NewDeletePieceCmd(sb *Sandbox, ui *UiState, id uint32) DeletePieceCmd {
 
 	sb.RemovePiece(id)
 	ui.selection.Deselect()
-	return cmd
+	return &cmd
 }
 
 func (cmd *DeletePieceCmd) redo(sb *Sandbox, ui *UiState) {
@@ -107,7 +107,7 @@ type MovePieceCmd struct {
 	captureAfterCoord Vec2
 }
 
-func NewMovePieceCmd(sb *Sandbox, id uint32, destCoord Vec2, destBoard uint32) MovePieceCmd {
+func NewMovePieceCmd(sb *Sandbox, id uint32, destCoord Vec2, destBoard uint32) *MovePieceCmd {
 	var piece = sb.GetPiece(id)
 	if piece.board == destBoard && piece.coord == destCoord {
 		panic("A piece cannot be moved to where it already is")
@@ -132,7 +132,7 @@ func NewMovePieceCmd(sb *Sandbox, id uint32, destCoord Vec2, destBoard uint32) M
 	cmd.afterCoord = destCoord
 	piece.coord = destCoord
 	piece.board = destBoard
-	return cmd
+	return &cmd
 }
 
 func (cmd *MovePieceCmd) redo(sb *Sandbox, ui *UiState) {
@@ -172,9 +172,9 @@ type CreateStatusEffectCmd struct {
 	effect uint32
 }
 
-func NewCreateStatusEffectCmd(sb *Sandbox, piece uint32, effect uint32) CreateStatusEffectCmd {
+func NewCreateStatusEffectCmd(sb *Sandbox, piece uint32, effect uint32) *CreateStatusEffectCmd {
 	sb.NewStatusEffect(piece, effect)
-	return CreateStatusEffectCmd{
+	return &CreateStatusEffectCmd{
 		piece:  piece,
 		effect: effect,
 	}
@@ -205,9 +205,9 @@ type DeleteStatusEffectCmd struct {
 	effect uint32
 }
 
-func NewDeleteStatusEffectCmd(sb *Sandbox, piece uint32, effect uint32) DeleteStatusEffectCmd {
+func NewDeleteStatusEffectCmd(sb *Sandbox, piece uint32, effect uint32) *DeleteStatusEffectCmd {
 	sb.RemoveStatusEffect(piece, effect)
-	return DeleteStatusEffectCmd{
+	return &DeleteStatusEffectCmd{
 		piece:  piece,
 		effect: effect,
 	}
@@ -237,9 +237,9 @@ type IncreasePieceScaleCmd struct {
 	piece uint32
 }
 
-func NewIncreasePieceScaleCmd(sb *Sandbox, piece uint32) IncreasePieceScaleCmd {
+func NewIncreasePieceScaleCmd(sb *Sandbox, piece uint32) *IncreasePieceScaleCmd {
 	sb.GetPiece(piece).scale++
-	return IncreasePieceScaleCmd{
+	return &IncreasePieceScaleCmd{
 		piece: piece,
 	}
 }
@@ -268,9 +268,9 @@ type DecreasePieceScaleCmd struct {
 	piece uint32
 }
 
-func NewDecreasePieceScaleCmd(sb *Sandbox, piece uint32) DecreasePieceScaleCmd {
+func NewDecreasePieceScaleCmd(sb *Sandbox, piece uint32) *DecreasePieceScaleCmd {
 	sb.GetPiece(piece).scale--
-	return DecreasePieceScaleCmd{
+	return &DecreasePieceScaleCmd{
 		piece: piece,
 	}
 }
@@ -300,9 +300,9 @@ type CreateTileCmd struct {
 	coord Vec2
 }
 
-func NewCreateTileCmd(sb *Sandbox, board uint32, coord Vec2) CreateTileCmd {
+func NewCreateTileCmd(sb *Sandbox, board uint32, coord Vec2) *CreateTileCmd {
 	sb.NewTile(board, coord)
-	return CreateTileCmd{
+	return &CreateTileCmd{
 		board: board,
 		coord: coord,
 	}
@@ -327,9 +327,9 @@ type DeleteTileCmd struct {
 	coord Vec2
 }
 
-func NewDeleteTileCmd(sb *Sandbox, board uint32, coord Vec2) DeleteTileCmd {
+func NewDeleteTileCmd(sb *Sandbox, board uint32, coord Vec2) *DeleteTileCmd {
 	sb.RemoveTile(board, coord)
-	return DeleteTileCmd{
+	return &DeleteTileCmd{
 		board: board,
 		coord: coord,
 	}
@@ -355,9 +355,9 @@ type CreateObstacleCmd struct {
 	obstacle uint32
 }
 
-func NewCreateObstacleCmd(sb *Sandbox, coord Vec2, board uint32, obstacle uint32) CreateObstacleCmd {
+func NewCreateObstacleCmd(sb *Sandbox, coord Vec2, board uint32, obstacle uint32) *CreateObstacleCmd {
 	sb.NewObstacle(coord, board, obstacle)
-	return CreateObstacleCmd{
+	return &CreateObstacleCmd{
 		obstacle: obstacle,
 		board:    board,
 		coord:    coord,
@@ -384,9 +384,9 @@ type DeleteObstacleCmd struct {
 	obstacle uint32
 }
 
-func NewDeleteObstacleCmd(sb *Sandbox, coord Vec2, board uint32, obstacle uint32) DeleteObstacleCmd {
+func NewDeleteObstacleCmd(sb *Sandbox, coord Vec2, board uint32, obstacle uint32) *DeleteObstacleCmd {
 	sb.RemoveObstacle(coord, board, obstacle)
-	return DeleteObstacleCmd{
+	return &DeleteObstacleCmd{
 		obstacle: obstacle,
 		board:    board,
 		coord:    coord,
@@ -415,7 +415,7 @@ type PastePieceCmd struct {
 	captureAfterCoord Vec2
 }
 
-func NewPastePieceCmd(sb *Sandbox, ui *UiState, coord Vec2, board uint32) PastePieceCmd {
+func NewPastePieceCmd(sb *Sandbox, ui *UiState, coord Vec2, board uint32) *PastePieceCmd {
 	var cmd = PastePieceCmd{}
 	if IsOffBoard(coord) {
 		board = OffBoard
@@ -437,7 +437,7 @@ func NewPastePieceCmd(sb *Sandbox, ui *UiState, coord Vec2, board uint32) PasteP
 		sb.NewStatusEffect(piece.id, effect)
 	}
 	ui.selection.SelectPiece(cmd.piece.id)
-	return cmd
+	return &cmd
 }
 
 func (cmd *PastePieceCmd) redo(sb *Sandbox, ui *UiState) {
@@ -474,7 +474,7 @@ type DuplicatePieceCmd struct {
 	effects    []uint32
 }
 
-func NewDuplicatePieceCmd(sb *Sandbox, ui *UiState, id uint32) DuplicatePieceCmd {
+func NewDuplicatePieceCmd(sb *Sandbox, ui *UiState, id uint32) *DuplicatePieceCmd {
 	var original = sb.GetPiece(id)
 	var coord = sb.FindUnoccupiedOffBoardCoord()
 	var piece = sb.NewPiece(original.typ, original.color, OffBoard, coord)
@@ -483,7 +483,7 @@ func NewDuplicatePieceCmd(sb *Sandbox, ui *UiState, id uint32) DuplicatePieceCmd
 		sb.NewStatusEffect(piece.id, effect)
 	}
 	ui.selection.SelectPiece(piece.id)
-	return DuplicatePieceCmd{
+	return &DuplicatePieceCmd{
 		originalId: id,
 		piece:      *piece,
 		effects:    effects,
@@ -511,11 +511,11 @@ type ChangeColorOfPieceCmd struct {
 	after  PieceColor
 }
 
-func NewChangeColorOfPieceCmd(sb *Sandbox, id uint32, color PieceColor) ChangeColorOfPieceCmd {
+func NewChangeColorOfPieceCmd(sb *Sandbox, id uint32, color PieceColor) *ChangeColorOfPieceCmd {
 	piece := sb.GetPiece(id)
 	var before = piece.color
 	piece.color = color
-	return ChangeColorOfPieceCmd{
+	return &ChangeColorOfPieceCmd{
 		piece:  id,
 		before: before,
 		after:  color,
@@ -541,12 +541,12 @@ type ChangeMoneyAmountCmd struct {
 	blackAfter  int
 }
 
-func NewChangeMoneyAmountCmd(ui *UiState, whiteNewAmount int, blackNewAmount int) ChangeMoneyAmountCmd {
+func NewChangeMoneyAmountCmd(ui *UiState, whiteNewAmount int, blackNewAmount int) *ChangeMoneyAmountCmd {
 	var whiteBefore = ui.shop.money[0]
 	var blackBefore = ui.shop.money[1]
 	ui.shop.money[0] = whiteNewAmount
 	ui.shop.money[1] = blackNewAmount
-	return ChangeMoneyAmountCmd{
+	return &ChangeMoneyAmountCmd{
 		whiteBefore: whiteBefore,
 		whiteAfter:  whiteNewAmount,
 		blackBefore: blackBefore,
@@ -569,10 +569,10 @@ type ChangeShopUnlockCountCmd struct {
 	after  int
 }
 
-func NewChangeShopUnlockCountCmd(ui *UiState, newCount int) ChangeShopUnlockCountCmd {
+func NewChangeShopUnlockCountCmd(ui *UiState, newCount int) *ChangeShopUnlockCountCmd {
 	var before = ui.shop.unlockedCount
 	ui.shop.unlockedCount = newCount
-	return ChangeShopUnlockCountCmd{
+	return &ChangeShopUnlockCountCmd{
 		before: before,
 		after:  newCount,
 	}
@@ -592,7 +592,7 @@ type ShuffleShopCmd struct {
 	swaps []int
 }
 
-func NewShuffleShopCmd(shop *Shop) ShuffleShopCmd {
+func NewShuffleShopCmd(shop *Shop) *ShuffleShopCmd {
 	// Fisher-Yates shuffle, but we store which indices we roll, so we can undo it
 	var swaps = make([]int, 0)
 	for i := len(shop.entries) - 1; i >= 1; i-- {
@@ -600,7 +600,7 @@ func NewShuffleShopCmd(shop *Shop) ShuffleShopCmd {
 		swaps = append(swaps, j)
 		shop.entries[i], shop.entries[j] = shop.entries[j], shop.entries[i]
 	}
-	return ShuffleShopCmd{
+	return &ShuffleShopCmd{
 		swaps: swaps,
 	}
 }
@@ -627,11 +627,11 @@ type ChangeShopEntryPriceCmd struct {
 	priceAfter  int
 }
 
-func NewChangeShopEntryPriceCmd(shop *Shop, entry uint32, newPrice int) ChangeShopEntryPriceCmd {
+func NewChangeShopEntryPriceCmd(shop *Shop, entry uint32, newPrice int) *ChangeShopEntryPriceCmd {
 	var e = shop.GetEntry(entry)
 	var priceBefore = e.price
 	e.price = newPrice
-	return ChangeShopEntryPriceCmd{
+	return &ChangeShopEntryPriceCmd{
 		entry:       entry,
 		priceBefore: priceBefore,
 		priceAfter:  newPrice,
@@ -654,7 +654,7 @@ type QuickBuyCmd struct {
 	unlock bool
 }
 
-func NewQuickBuyCmd(shop *Shop, player uint32, entry uint32) QuickBuyCmd {
+func NewQuickBuyCmd(shop *Shop, player uint32, entry uint32) *QuickBuyCmd {
 	var e = shop.GetEntry(entry)
 	shop.money[player] -= e.price
 	e.price++
@@ -662,7 +662,7 @@ func NewQuickBuyCmd(shop *Shop, player uint32, entry uint32) QuickBuyCmd {
 	if unlock {
 		shop.unlockedCount++
 	}
-	return QuickBuyCmd{
+	return &QuickBuyCmd{
 		player: player,
 		entry:  entry,
 		unlock: unlock,

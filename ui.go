@@ -180,12 +180,10 @@ func (s *UiState) RenderPieceContextMenu(undo *UndoRedoSystem) {
 		var pieceScale = piece.scale
 		var change = SpinnerWithIcon(spinnerX, spinnerY, fmt.Sprint(pieceScale), assets.texPieceScale)
 		if change < 0 && pieceScale > 1 {
-			var cmd = NewDecreasePieceScaleCmd(&sandbox, selectedPieceId)
-			undo.Append(&cmd)
+			undo.Append(NewDecreasePieceScaleCmd(&sandbox, selectedPieceId))
 		}
 		if change > 0 {
-			var cmd = NewIncreasePieceScaleCmd(&sandbox, selectedPieceId)
-			undo.Append(&cmd)
+			undo.Append(NewIncreasePieceScaleCmd(&sandbox, selectedPieceId))
 		}
 	}
 
@@ -194,12 +192,10 @@ func (s *UiState) RenderPieceContextMenu(undo *UndoRedoSystem) {
 		var effectCount = sandbox.GetStatusEffectCount(selectedPieceId, effect.id)
 		var change = SpinnerWithIcon(spinnerX, spinnerY+float32(i*55)+55, fmt.Sprint(effectCount), effect.tex)
 		if change < 0 && effectCount > 0 {
-			var cmd = NewDeleteStatusEffectCmd(&sandbox, selectedPieceId, effect.id)
-			undo.Append(&cmd)
+			undo.Append(NewDeleteStatusEffectCmd(&sandbox, selectedPieceId, effect.id))
 		}
 		if change > 0 {
-			var cmd = NewCreateStatusEffectCmd(&sandbox, selectedPieceId, effect.id)
-			undo.Append(&cmd)
+			undo.Append(NewCreateStatusEffectCmd(&sandbox, selectedPieceId, effect.id))
 		}
 	}
 
@@ -208,15 +204,13 @@ func (s *UiState) RenderPieceContextMenu(undo *UndoRedoSystem) {
 	var width = float32(UiButtonW)
 	var height float32 = UiButtonH
 	if rg.Button(rl.NewRectangle(posX, posY, width, height), "Remove piece") {
-		var cmd = NewDeletePieceCmd(&sandbox, s, selectedPieceId)
-		undo.Append(&cmd)
+		undo.Append(NewDeletePieceCmd(&sandbox, s, selectedPieceId))
 	}
 
 	posY -= UiButtonH + UiMargin
 	if rg.Button(rl.NewRectangle(posX, posY, width, height), "Change color") {
 		var newColor = 1 - piece.color
-		var cmd = NewChangeColorOfPieceCmd(&sandbox, selectedPieceId, newColor)
-		undo.Append(&cmd)
+		undo.Append(NewChangeColorOfPieceCmd(&sandbox, selectedPieceId, newColor))
 	}
 }
 
@@ -231,12 +225,10 @@ func (s *UiState) RenderCoordContextMenu(undo *UndoRedoSystem) {
 		var obCount = sandbox.GetObstacleCount(coord, uint32(s.board), obt.id)
 		var change = SpinnerWithIcon(spinnerX, spinnerY+float32(i*55)+55, fmt.Sprint(obCount), obt.tex)
 		if change < 0 && obCount > 0 {
-			var cmd = NewDeleteObstacleCmd(&sandbox, coord, uint32(s.board), obt.id)
-			undo.Append(&cmd)
+			undo.Append(NewDeleteObstacleCmd(&sandbox, coord, uint32(s.board), obt.id))
 		}
 		if change > 0 {
-			var cmd = NewCreateObstacleCmd(&sandbox, coord, uint32(s.board), obt.id)
-			undo.Append(&cmd)
+			undo.Append(NewCreateObstacleCmd(&sandbox, coord, uint32(s.board), obt.id))
 		}
 	}
 
@@ -246,13 +238,11 @@ func (s *UiState) RenderCoordContextMenu(undo *UndoRedoSystem) {
 	var height float32 = UiButtonH
 	if rg.Button(rl.NewRectangle(posX, posY-UiMarginSmall-UiButtonH, width, height), "Add tile") {
 		if sandbox.GetTile(uint32(s.board), coord) == nil {
-			var cmd = NewCreateTileCmd(&sandbox, uint32(s.board), coord)
-			undo.Append(&cmd)
+			undo.Append(NewCreateTileCmd(&sandbox, uint32(s.board), coord))
 		}
 	}
 	if rg.Button(rl.NewRectangle(posX, posY, width, height), "Remove tile") {
-		var cmd = NewDeleteTileCmd(&sandbox, uint32(s.board), coord)
-		undo.Append(&cmd)
+		undo.Append(NewDeleteTileCmd(&sandbox, uint32(s.board), coord))
 	}
 }
 
@@ -286,23 +276,19 @@ func (s *UiState) RenderShop(undo *UndoRedoSystem) {
 		var entry = &s.shop.entries[i]
 		var posX = posX
 		if rg.Button(rl.NewRectangle(posX, posY, UiButtonH, incButtonH), "$W") {
-			var cmd = NewQuickBuyCmd(&s.shop, 0, entry.id)
-			undo.Append(&cmd)
+			undo.Append(NewQuickBuyCmd(&s.shop, 0, entry.id))
 		}
 		posX += UiButtonH + UiMarginSmall
 		if rg.Button(rl.NewRectangle(posX, posY, UiButtonH, incButtonH), "$B") {
-			var cmd = NewQuickBuyCmd(&s.shop, 1, entry.id)
-			undo.Append(&cmd)
+			undo.Append(NewQuickBuyCmd(&s.shop, 1, entry.id))
 		}
 		posX += UiButtonH + UiMarginSmall
 		if rg.Button(rl.NewRectangle(posX, posY, UiButtonH, incButtonH), "++") {
-			var cmd = NewChangeShopEntryPriceCmd(&s.shop, entry.id, entry.price+1)
-			undo.Append(&cmd)
+			undo.Append(NewChangeShopEntryPriceCmd(&s.shop, entry.id, entry.price+1))
 		}
 		posX += UiButtonH + UiMarginSmall
 		if rg.Button(rl.NewRectangle(posX, posY, UiButtonH, incButtonH), "--") && entry.price > 0 {
-			var cmd = NewChangeShopEntryPriceCmd(&s.shop, entry.id, entry.price-1)
-			undo.Append(&cmd)
+			undo.Append(NewChangeShopEntryPriceCmd(&s.shop, entry.id, entry.price-1))
 		}
 		posX += UiButtonH + UiMargin
 		var text = fmt.Sprint(entry.price, ": ", entry.description)
@@ -315,16 +301,13 @@ func (s *UiState) RenderShop(undo *UndoRedoSystem) {
 	}
 	posY += UiMarginSmall
 	if rg.Button(rl.NewRectangle(posX, posY, unlockButtonW, UiButtonH), "Unlock") && s.shop.unlockedCount < len(s.shop.entries) {
-		var cmd = NewChangeShopUnlockCountCmd(s, s.shop.unlockedCount+1)
-		undo.Append(&cmd)
+		undo.Append(NewChangeShopUnlockCountCmd(s, s.shop.unlockedCount+1))
 	}
 	if rg.Button(rl.NewRectangle(posX+unlockButtonW+UiMarginSmall, posY, unlockButtonW, UiButtonH), "Lock") && s.shop.unlockedCount > 0 {
-		var cmd = NewChangeShopUnlockCountCmd(s, s.shop.unlockedCount-1)
-		undo.Append(&cmd)
+		undo.Append(NewChangeShopUnlockCountCmd(s, s.shop.unlockedCount-1))
 	}
 	if rg.Button(rl.NewRectangle(posX+2*unlockButtonW+2*UiMarginSmall, posY, unlockButtonW, UiButtonH), "Shuffle") {
-		var cmd = NewShuffleShopCmd(&s.shop)
-		undo.Append(&cmd)
+		undo.Append(NewShuffleShopCmd(&s.shop))
 	}
 }
 
@@ -337,29 +320,24 @@ func (s *UiState) RenderMoneyWidget(undo *UndoRedoSystem) {
 
 	// Row 1 (White)
 	if rg.Button(rl.NewRectangle(posX, posY, UiButtonH, incButtonH), "++") {
-		var cmd = NewChangeMoneyAmountCmd(s, *s.shop.WhiteMoney()+1, *s.shop.BlackMoney())
-		undo.Append(&cmd)
+		undo.Append(NewChangeMoneyAmountCmd(s, *s.shop.WhiteMoney()+1, *s.shop.BlackMoney()))
 	}
 	if rg.Button(rl.NewRectangle(posX+UiButtonH+UiMarginSmall, posY, UiButtonH, incButtonH), "--") {
-		var cmd = NewChangeMoneyAmountCmd(s, *s.shop.WhiteMoney()-1, *s.shop.BlackMoney())
-		undo.Append(&cmd)
+		undo.Append(NewChangeMoneyAmountCmd(s, *s.shop.WhiteMoney()-1, *s.shop.BlackMoney()))
 	}
 	rl.DrawText(fmt.Sprint("White money: ", *s.shop.WhiteMoney()), int32(posX+2*UiButtonH+UiMarginSmall+UiMargin), int32(posY+incButtonH/2-fontSize/2), fontSize, rl.Black)
 	s.showShop = rg.Toggle(rl.NewRectangle(posX+UiShopWidth-unlockButtonW, posY, unlockButtonW, UiButtonH), "Shop", s.showShop)
 	if rg.Button(rl.NewRectangle(posX+UiShopWidth-2*unlockButtonW-UiMarginSmall, posY, unlockButtonW, UiButtonH), "++Both") {
-		var cmd = NewChangeMoneyAmountCmd(s, *s.shop.WhiteMoney()+1, *s.shop.BlackMoney()+1)
-		undo.Append(&cmd)
+		undo.Append(NewChangeMoneyAmountCmd(s, *s.shop.WhiteMoney()+1, *s.shop.BlackMoney()+1))
 	}
 	posY += incButtonH + UiMarginSmall
 
 	// Row 2 (Black)
 	if rg.Button(rl.NewRectangle(posX, posY, UiButtonH, incButtonH), "++") {
-		var cmd = NewChangeMoneyAmountCmd(s, *s.shop.WhiteMoney(), *s.shop.BlackMoney()+1)
-		undo.Append(&cmd)
+		undo.Append(NewChangeMoneyAmountCmd(s, *s.shop.WhiteMoney(), *s.shop.BlackMoney()+1))
 	}
 	if rg.Button(rl.NewRectangle(posX+UiButtonH+UiMarginSmall, posY, UiButtonH, incButtonH), "--") {
-		var cmd = NewChangeMoneyAmountCmd(s, *s.shop.WhiteMoney(), *s.shop.BlackMoney()-1)
-		undo.Append(&cmd)
+		undo.Append(NewChangeMoneyAmountCmd(s, *s.shop.WhiteMoney(), *s.shop.BlackMoney()-1))
 	}
 	rl.DrawText(fmt.Sprint("Black money: ", *s.shop.BlackMoney()), int32(posX+2*UiButtonH+UiMarginSmall+UiMargin), int32(posY+incButtonH/2-fontSize/2), fontSize, rl.Black)
 	posY += incButtonH + UiMarginSmall
