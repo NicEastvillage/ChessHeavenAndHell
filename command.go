@@ -37,7 +37,7 @@ func (cmd *CreatePieceCmd) redo(sb *Sandbox, ui *UiState) {
 		ui.board = int32(cmd.piece.board)
 	}
 	ui.selection.Deselect()
-	ui.showShop = false
+	ui.tab = TabBoard
 }
 
 func (cmd *CreatePieceCmd) undo(sb *Sandbox, ui *UiState) {
@@ -54,7 +54,7 @@ func (cmd *CreatePieceCmd) undo(sb *Sandbox, ui *UiState) {
 		ui.board = int32(cmd.piece.board)
 	}
 	ui.selection.Deselect()
-	ui.showShop = false
+	ui.tab = TabBoard
 }
 
 type DeletePieceCmd struct {
@@ -81,7 +81,7 @@ func (cmd *DeletePieceCmd) redo(sb *Sandbox, ui *UiState) {
 	if cmd.piece.board != OffBoard {
 		ui.board = int32(cmd.piece.board)
 	}
-	ui.showShop = false
+	ui.tab = TabBoard
 }
 
 func (cmd *DeletePieceCmd) undo(sb *Sandbox, ui *UiState) {
@@ -93,7 +93,7 @@ func (cmd *DeletePieceCmd) undo(sb *Sandbox, ui *UiState) {
 		ui.board = int32(cmd.piece.board)
 	}
 	ui.selection.SelectPiece(cmd.piece.id)
-	ui.showShop = false
+	ui.tab = TabBoard
 }
 
 type MovePieceCmd struct {
@@ -148,7 +148,7 @@ func (cmd *MovePieceCmd) redo(sb *Sandbox, ui *UiState) {
 		ui.board = int32(piece.board)
 	}
 	ui.selection.SelectPiece(cmd.piece)
-	ui.showShop = false
+	ui.tab = TabBoard
 }
 
 func (cmd *MovePieceCmd) undo(sb *Sandbox, ui *UiState) {
@@ -164,7 +164,7 @@ func (cmd *MovePieceCmd) undo(sb *Sandbox, ui *UiState) {
 		ui.board = int32(piece.board)
 	}
 	ui.selection.SelectPiece(cmd.piece)
-	ui.showShop = false
+	ui.tab = TabBoard
 }
 
 type CreateStatusEffectCmd struct {
@@ -187,7 +187,7 @@ func (cmd *CreateStatusEffectCmd) redo(sb *Sandbox, ui *UiState) {
 		ui.board = int32(piece.board)
 	}
 	ui.selection.SelectPiece(cmd.piece)
-	ui.showShop = false
+	ui.tab = TabBoard
 }
 
 func (cmd *CreateStatusEffectCmd) undo(sb *Sandbox, ui *UiState) {
@@ -197,7 +197,7 @@ func (cmd *CreateStatusEffectCmd) undo(sb *Sandbox, ui *UiState) {
 		ui.board = int32(piece.board)
 	}
 	ui.selection.SelectPiece(cmd.piece)
-	ui.showShop = false
+	ui.tab = TabBoard
 }
 
 type DeleteStatusEffectCmd struct {
@@ -220,7 +220,7 @@ func (cmd *DeleteStatusEffectCmd) redo(sb *Sandbox, ui *UiState) {
 		ui.board = int32(piece.board)
 	}
 	ui.selection.SelectPiece(cmd.piece)
-	ui.showShop = false
+	ui.tab = TabBoard
 }
 
 func (cmd *DeleteStatusEffectCmd) undo(sb *Sandbox, ui *UiState) {
@@ -230,7 +230,7 @@ func (cmd *DeleteStatusEffectCmd) undo(sb *Sandbox, ui *UiState) {
 		ui.board = int32(piece.board)
 	}
 	ui.selection.SelectPiece(cmd.piece)
-	ui.showShop = false
+	ui.tab = TabBoard
 }
 
 type IncreasePieceScaleCmd struct {
@@ -251,7 +251,7 @@ func (cmd *IncreasePieceScaleCmd) redo(sb *Sandbox, ui *UiState) {
 		ui.board = int32(piece.board)
 	}
 	ui.selection.SelectPiece(cmd.piece)
-	ui.showShop = false
+	ui.tab = TabBoard
 }
 
 func (cmd *IncreasePieceScaleCmd) undo(sb *Sandbox, ui *UiState) {
@@ -261,7 +261,7 @@ func (cmd *IncreasePieceScaleCmd) undo(sb *Sandbox, ui *UiState) {
 		ui.board = int32(piece.board)
 	}
 	ui.selection.SelectPiece(cmd.piece)
-	ui.showShop = false
+	ui.tab = TabBoard
 }
 
 type DecreasePieceScaleCmd struct {
@@ -282,7 +282,7 @@ func (cmd *DecreasePieceScaleCmd) redo(sb *Sandbox, ui *UiState) {
 		ui.board = int32(piece.board)
 	}
 	ui.selection.SelectPiece(cmd.piece)
-	ui.showShop = false
+	ui.tab = TabBoard
 }
 
 func (cmd *DecreasePieceScaleCmd) undo(sb *Sandbox, ui *UiState) {
@@ -292,7 +292,7 @@ func (cmd *DecreasePieceScaleCmd) undo(sb *Sandbox, ui *UiState) {
 		ui.board = int32(piece.board)
 	}
 	ui.selection.SelectPiece(cmd.piece)
-	ui.showShop = false
+	ui.tab = TabBoard
 }
 
 type CreateTileCmd struct {
@@ -312,14 +312,14 @@ func (cmd *CreateTileCmd) redo(sb *Sandbox, ui *UiState) {
 	sb.NewTile(cmd.board, cmd.coord)
 	ui.board = int32(cmd.board)
 	ui.selection.SelectCoord(cmd.coord)
-	ui.showShop = false
+	ui.tab = TabBoard
 }
 
 func (cmd *CreateTileCmd) undo(sb *Sandbox, ui *UiState) {
 	sb.RemoveTile(cmd.board, cmd.coord)
 	ui.board = int32(cmd.board)
 	ui.selection.SelectCoord(cmd.coord)
-	ui.showShop = false
+	ui.tab = TabBoard
 }
 
 type DeleteTileCmd struct {
@@ -339,14 +339,14 @@ func (cmd *DeleteTileCmd) redo(sb *Sandbox, ui *UiState) {
 	sb.RemoveTile(cmd.board, cmd.coord)
 	ui.board = int32(cmd.board)
 	ui.selection.SelectCoord(cmd.coord)
-	ui.showShop = false
+	ui.tab = TabBoard
 }
 
 func (cmd *DeleteTileCmd) undo(sb *Sandbox, ui *UiState) {
 	sb.NewTile(cmd.board, cmd.coord)
 	ui.board = int32(cmd.board)
 	ui.selection.SelectCoord(cmd.coord)
-	ui.showShop = false
+	ui.tab = TabBoard
 }
 
 type CreateObstacleCmd struct {
@@ -368,14 +368,14 @@ func (cmd *CreateObstacleCmd) redo(sb *Sandbox, ui *UiState) {
 	sb.NewObstacle(cmd.coord, cmd.board, cmd.obstacle)
 	ui.board = int32(cmd.board)
 	ui.selection.SelectCoord(cmd.coord)
-	ui.showShop = false
+	ui.tab = TabBoard
 }
 
 func (cmd *CreateObstacleCmd) undo(sb *Sandbox, ui *UiState) {
 	sb.RemoveObstacle(cmd.coord, cmd.board, cmd.obstacle)
 	ui.board = int32(cmd.board)
 	ui.selection.SelectCoord(cmd.coord)
-	ui.showShop = false
+	ui.tab = TabBoard
 }
 
 type DeleteObstacleCmd struct {
@@ -397,14 +397,14 @@ func (cmd *DeleteObstacleCmd) redo(sb *Sandbox, ui *UiState) {
 	sb.RemoveObstacle(cmd.coord, cmd.board, cmd.obstacle)
 	ui.board = int32(cmd.board)
 	ui.selection.SelectCoord(cmd.coord)
-	ui.showShop = false
+	ui.tab = TabBoard
 }
 
 func (cmd *DeleteObstacleCmd) undo(sb *Sandbox, ui *UiState) {
 	sb.NewObstacle(cmd.coord, cmd.board, cmd.obstacle)
 	ui.board = int32(cmd.board)
 	ui.selection.SelectCoord(cmd.coord)
-	ui.showShop = false
+	ui.tab = TabBoard
 }
 
 type PastePieceCmd struct {
@@ -449,7 +449,7 @@ func (cmd *PastePieceCmd) redo(sb *Sandbox, ui *UiState) {
 		ui.board = int32(cmd.piece.board)
 	}
 	ui.selection.SelectPiece(cmd.piece.id)
-	ui.showShop = false
+	ui.tab = TabBoard
 }
 
 func (cmd *PastePieceCmd) undo(sb *Sandbox, ui *UiState) {
@@ -465,7 +465,7 @@ func (cmd *PastePieceCmd) undo(sb *Sandbox, ui *UiState) {
 	if cmd.piece.board != OffBoard {
 		ui.board = int32(cmd.piece.board)
 	}
-	ui.showShop = false
+	ui.tab = TabBoard
 }
 
 type DuplicatePieceCmd struct {
@@ -496,13 +496,13 @@ func (cmd *DuplicatePieceCmd) redo(sb *Sandbox, ui *UiState) {
 		sb.NewStatusEffect(cmd.piece.id, effect)
 	}
 	ui.selection.SelectPiece(cmd.piece.id)
-	ui.showShop = false
+	ui.tab = TabBoard
 }
 
 func (cmd *DuplicatePieceCmd) undo(sb *Sandbox, ui *UiState) {
 	sb.RemovePiece(cmd.piece.id)
 	ui.selection.SelectPiece(cmd.originalId)
-	ui.showShop = false
+	ui.tab = TabBoard
 }
 
 type ChangeColorOfPieceCmd struct {
@@ -525,13 +525,13 @@ func NewChangeColorOfPieceCmd(sb *Sandbox, id uint32, color PieceColor) *ChangeC
 func (cmd *ChangeColorOfPieceCmd) redo(sb *Sandbox, ui *UiState) {
 	sb.GetPiece(cmd.piece).color = cmd.after
 	ui.selection.SelectPiece(cmd.piece)
-	ui.showShop = false
+	ui.tab = TabBoard
 }
 
 func (cmd *ChangeColorOfPieceCmd) undo(sb *Sandbox, ui *UiState) {
 	sb.GetPiece(cmd.piece).color = cmd.before
 	ui.selection.SelectPiece(cmd.piece)
-	ui.showShop = false
+	ui.tab = TabBoard
 }
 
 type ChangeMoneyAmountCmd struct {
@@ -580,12 +580,12 @@ func NewChangeShopUnlockCountCmd(ui *UiState, newCount int) *ChangeShopUnlockCou
 
 func (cmd *ChangeShopUnlockCountCmd) redo(sb *Sandbox, ui *UiState) {
 	ui.shop.unlockedCount = cmd.after
-	ui.showShop = true
+	ui.tab = TabShop
 }
 
 func (cmd *ChangeShopUnlockCountCmd) undo(sb *Sandbox, ui *UiState) {
 	ui.shop.unlockedCount = cmd.before
-	ui.showShop = true
+	ui.tab = TabShop
 }
 
 type ShuffleShopCmd struct {
@@ -610,7 +610,7 @@ func (cmd *ShuffleShopCmd) redo(sb *Sandbox, ui *UiState) {
 		var j = cmd.swaps[len(ui.shop.entries)-1-i]
 		ui.shop.entries[i], ui.shop.entries[j] = ui.shop.entries[j], ui.shop.entries[i]
 	}
-	ui.showShop = true
+	ui.tab = TabShop
 }
 
 func (cmd *ShuffleShopCmd) undo(sb *Sandbox, ui *UiState) {
@@ -618,7 +618,7 @@ func (cmd *ShuffleShopCmd) undo(sb *Sandbox, ui *UiState) {
 		var j = cmd.swaps[len(ui.shop.entries)-1-i]
 		ui.shop.entries[i], ui.shop.entries[j] = ui.shop.entries[j], ui.shop.entries[i]
 	}
-	ui.showShop = true
+	ui.tab = TabShop
 }
 
 type ChangeShopEntryPriceCmd struct {
@@ -640,12 +640,12 @@ func NewChangeShopEntryPriceCmd(shop *Shop, entry uint32, newPrice int) *ChangeS
 
 func (cmd *ChangeShopEntryPriceCmd) redo(sb *Sandbox, ui *UiState) {
 	ui.shop.GetEntry(cmd.entry).price = cmd.priceAfter
-	ui.showShop = true
+	ui.tab = TabShop
 }
 
 func (cmd *ChangeShopEntryPriceCmd) undo(sb *Sandbox, ui *UiState) {
 	ui.shop.GetEntry(cmd.entry).price = cmd.priceBefore
-	ui.showShop = true
+	ui.tab = TabShop
 }
 
 type QuickBuyCmd struct {
@@ -676,7 +676,7 @@ func (cmd *QuickBuyCmd) redo(sb *Sandbox, ui *UiState) {
 	if cmd.unlock {
 		ui.shop.unlockedCount++
 	}
-	ui.showShop = true
+	ui.tab = TabShop
 }
 
 func (cmd *QuickBuyCmd) undo(sb *Sandbox, ui *UiState) {
@@ -686,5 +686,5 @@ func (cmd *QuickBuyCmd) undo(sb *Sandbox, ui *UiState) {
 	var e = ui.shop.GetEntry(cmd.entry)
 	e.price--
 	ui.shop.money[cmd.player] += e.price
-	ui.showShop = true
+	ui.tab = TabShop
 }
