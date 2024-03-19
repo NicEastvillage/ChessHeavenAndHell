@@ -56,7 +56,7 @@ func main() {
 
 		rl.BeginDrawing()
 		rl.ClearBackground(rl.RayWhite)
-		if !ui.showShop {
+		if ui.tab == TabBoard {
 			sandbox.Render(uint32(ui.board), false, &ui.selection)
 		}
 		ui.Render(&undo)
@@ -73,7 +73,7 @@ func handleBoardInteraction(undo *UndoRedoSystem, ui *UiState) {
 
 	var ctrlDown = rl.IsKeyDown(rl.KeyLeftControl) || rl.IsKeyDown(rl.KeyLeftControl)
 
-	if pieceId, ok := ui.selection.GetSelectedPieceId(); ok && !ui.showShop {
+	if pieceId, ok := ui.selection.GetSelectedPieceId(); ok && ui.tab == TabBoard {
 		if rl.IsKeyPressed(rl.KeyDelete) || rl.IsKeyPressed(rl.KeyBackspace) {
 			undo.Append(NewDeletePieceCmd(&sandbox, ui, pieceId))
 		} else if rl.IsKeyPressed(rl.KeyC) && ctrlDown {
@@ -96,7 +96,7 @@ func handleBoardInteraction(undo *UndoRedoSystem, ui *UiState) {
 	} else if rl.IsKeyPressed(rl.KeyY) && ctrlDown {
 		undo.Redo(&sandbox, ui)
 	} else if rl.IsKeyPressed(rl.KeyV) && ctrlDown {
-		if !ui.clipboard.isEmpty && !ui.showShop {
+		if !ui.clipboard.isEmpty && ui.tab == TabBoard {
 			var coord = GetHoveredCoord()
 			if !IsCoordUnderUi(coord) {
 				undo.Append(NewPastePieceCmd(&sandbox, ui, coord, uint32(ui.board)))
@@ -106,7 +106,7 @@ func handleBoardInteraction(undo *UndoRedoSystem, ui *UiState) {
 }
 
 func handleMouseInteraction(undo *UndoRedoSystem, ui *UiState) {
-	if ui.showShop {
+	if ui.tab != TabBoard {
 		return
 	}
 
@@ -116,14 +116,14 @@ func handleMouseInteraction(undo *UndoRedoSystem, ui *UiState) {
 	}
 	if rl.IsMouseButtonPressed(rl.MouseButtonLeft) {
 		var coord = GetHoveredCoord()
-		if ui.tab == 0 {
+		if ui.mode == 0 {
 			var piece = sandbox.GetPieceAtVisual(coord, uint32(ui.board))
 			if piece == nil {
 				ui.selection.Deselect()
 			} else {
 				ui.selection.SelectPiece(piece.id)
 			}
-		} else if ui.tab == 1 {
+		} else if ui.mode == 1 {
 			ui.selection.SelectCoord(coord)
 		}
 	} else if id, ok := ui.selection.GetSelectedPieceId(); ok {

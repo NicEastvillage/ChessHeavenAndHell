@@ -276,6 +276,16 @@ func (s *Sandbox) NewObstacle(coord Vec2, board uint32, typ uint32) *Obstacle {
 	return &s.obstacles[len(s.obstacles)-1]
 }
 
+func (s *Sandbox) GetObstaclesAt(coord Vec2, board uint32) []uint32 {
+	var obstacles = make([]uint32, 0)
+	for _, obstacle := range s.obstacles {
+		if obstacle.coord == coord && obstacle.board == board {
+			obstacles = append(obstacles, obstacle.typ)
+		}
+	}
+	return obstacles
+}
+
 func (s *Sandbox) GetObstacleCount(coord Vec2, board uint32, typ uint32) int {
 	var count = 0
 	for i := 0; i < len(s.obstacles); i++ {

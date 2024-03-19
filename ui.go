@@ -17,19 +17,27 @@ const (
 	UiButtonTinyW    = 36
 	UiRightMenuWidth = 155
 	UiShopWidth      = 660
+	UiShopTopMargin  = 140
+)
+
+const (
+	TabBoard int32 = iota
+	TabShop
+	TabRng
 )
 
 type UiState struct {
 	selection       Selection
 	clipboard       Clipboard
 	shop            Shop
-	board           int32
+	rng             RngStuff
 	tab             int32
+	board           int32
+	mode            int32
 	color           int32
 	renderTexHeaven rl.RenderTexture2D
 	renderTexEarth  rl.RenderTexture2D
 	renderTexHell   rl.RenderTexture2D
-	showShop        bool
 }
 
 func NewUiState() UiState {
@@ -37,6 +45,7 @@ func NewUiState() UiState {
 		selection:       NewSelection(),
 		clipboard:       NewClipboard(),
 		shop:            NewShop(),
+		rng:             NewRngStuff(),
 		board:           int32(1),
 		renderTexHeaven: rl.LoadRenderTexture(WindowWidth, WindowHeight),
 		renderTexEarth:  rl.LoadRenderTexture(WindowWidth, WindowHeight),
@@ -54,24 +63,24 @@ func (s *UiState) Update() {
 	//var origo = GetBoardOrigo()
 	//var previewSourceOrigo = rl.NewVector2(float32(origo.x-TileSize), float32(origo.y-TileSize))
 
-	if s.showShop {
+	if s.tab != TabBoard {
 		s.selection.Deselect()
 	}
 
-	if s.board != 0 || s.showShop {
+	if s.board != 0 || s.tab != TabBoard {
 		rl.BeginTextureMode(s.renderTexHeaven)
 		rl.ClearBackground(rl.RayWhite)
 		//rl.Translatef(previewSourceOrigo.X, previewSourceOrigo.Y, 0)
 		sandbox.Render(0, true, &s.selection)
 		rl.EndTextureMode()
 	}
-	if s.board != 1 || s.showShop {
+	if s.board != 1 || s.tab != TabBoard {
 		rl.BeginTextureMode(s.renderTexEarth)
 		rl.ClearBackground(rl.RayWhite)
 		sandbox.Render(1, true, &s.selection)
 		rl.EndTextureMode()
 	}
-	if s.board != 2 || s.showShop {
+	if s.board != 2 || s.tab != TabBoard {
 		rl.BeginTextureMode(s.renderTexHell)
 		rl.ClearBackground(rl.RayWhite)
 		sandbox.Render(2, true, &s.selection)
@@ -94,41 +103,25 @@ func (s *UiState) Render(undo *UndoRedoSystem) {
 
 	s.RenderMoneyWidget(undo)
 	if rl.IsKeyPressed(rl.KeyS) {
-		s.showShop = !s.showShop
-	}
-	if s.showShop {
-		s.RenderShop(undo)
-		return
-	}
-
-	var oldTab = s.tab
-	s.tab = rg.ToggleGroup(rl.NewRectangle(float32(rl.GetScreenWidth()-UiMargin-2*UiButtonH-1*int(rg.GetStyle(rg.TOGGLE, rg.GROUP_PADDING))), UiMargin, UiButtonH, UiButtonH), "#149#;#97#", s.tab)
-	if rl.IsKeyPressed(rl.KeyT) {
-		s.tab = 1 - s.tab
-	}
-	if oldTab != s.tab {
-		s.selection.Deselect()
-	}
-
-	switch s.selection.selectionType {
-	case SelectionTypePiece:
-		s.RenderPieceContextMenu(undo)
-		s.tab = 0
-	case SelectionTypePieceType:
-		s.RenderPiecesTab()
-		s.tab = 0
-	case SelectionTypeCoord:
-		s.RenderCoordContextMenu(undo)
-		s.tab = 1
-	default:
-		if s.tab == 0 {
-			s.RenderPiecesTab()
+		if s.tab == TabShop {
+			s.tab = TabBoard
+		} else {
+			s.tab = TabShop
 		}
+	}
+	switch s.tab {
+	case TabShop:
+		s.RenderShop(undo)
+	case TabRng:
+		s.RenderRngMenu(undo)
+	default:
+		s.RenderBoardUi(undo)
 	}
 }
 
 func (s *UiState) RenderBoardPreview(index int32) {
-	if s.board == index && !s.showShop {
+	if s.board == index && s.tab == TabBoard {
+		// Main board. Do not render
 		return
 	}
 
@@ -148,7 +141,7 @@ func (s *UiState) RenderBoardPreview(index int32) {
 
 	if rg.Button(buttonPlacement, "") {
 		s.board = index
-		s.showShop = false
+		s.tab = TabBoard
 	}
 	rl.DrawTexturePro(previewTex, previewSourceRect, previewPlacement, rl.NewVector2(0, 0), 0, rl.White)
 	if rl.CheckCollisionPointRec(rl.GetMousePosition(), previewPlacement) {
@@ -156,7 +149,34 @@ func (s *UiState) RenderBoardPreview(index int32) {
 	}
 }
 
-func (s *UiState) RenderPiecesTab() {
+func (s *UiState) RenderBoardUi(undo *UndoRedoSystem) {
+	var oldMode = s.mode
+	s.mode = rg.ToggleGroup(rl.NewRectangle(float32(rl.GetScreenWidth()-UiMargin-2*UiButtonH-1*int(rg.GetStyle(rg.TOGGLE, rg.GROUP_PADDING))), UiMargin, UiButtonH, UiButtonH), "#149#;#97#", s.mode)
+	if rl.IsKeyPressed(rl.KeyT) {
+		s.mode = 1 - s.mode
+	}
+	if oldMode != s.mode {
+		s.selection.Deselect()
+	}
+
+	switch s.selection.selectionType {
+	case SelectionTypePiece:
+		s.RenderPieceContextMenu(undo)
+		s.mode = 0
+	case SelectionTypePieceType:
+		s.RenderPiecesMode()
+		s.mode = 0
+	case SelectionTypeCoord:
+		s.RenderCoordContextMenu(undo)
+		s.mode = 1
+	default:
+		if s.mode == 0 {
+			s.RenderPiecesMode()
+		}
+	}
+}
+
+func (s *UiState) RenderPiecesMode() {
 	s.color = rg.ToggleSlider(rl.NewRectangle(float32(rl.GetScreenWidth()-UiMargin-UiButtonW), 2*UiMargin+UiButtonH, UiButtonW, UiButtonH), "White;Black", s.color)
 	if rl.IsKeyPressed(rl.KeyC) {
 		s.color = 1 - s.color
@@ -267,27 +287,26 @@ func SpinnerWithIcon(x float32, y float32, text string, tex rl.Texture2D) int {
 
 func (s *UiState) RenderShop(undo *UndoRedoSystem) {
 	const fontSize = 20
-	const unlockButtonW = 88
-	const incButtonH = 30
 	var posX = float32(rl.GetScreenWidth()/2 - UiShopWidth/2)
-	var posY = float32(180)
-	rl.DrawText("Shop", int32(posX), int32(posY-incButtonH-UiMarginSmall), fontSize, rl.Black)
+	var posY = float32(UiShopTopMargin)
+	rl.DrawText("Shop", int32(posX), int32(posY), fontSize, rl.Black)
+	posY += UiButtonFlatH + UiMarginSmall
 	for i := 0; i < len(s.shop.entries); i++ {
 		var entry = &s.shop.entries[i]
 		var posX = posX
-		if rg.Button(rl.NewRectangle(posX, posY, UiButtonH, incButtonH), "$W") {
+		if rg.Button(rl.NewRectangle(posX, posY, UiButtonH, UiButtonFlatH), "$W") {
 			undo.Append(NewQuickBuyCmd(&s.shop, 0, entry.id))
 		}
 		posX += UiButtonH + UiMarginSmall
-		if rg.Button(rl.NewRectangle(posX, posY, UiButtonH, incButtonH), "$B") {
+		if rg.Button(rl.NewRectangle(posX, posY, UiButtonH, UiButtonFlatH), "$B") {
 			undo.Append(NewQuickBuyCmd(&s.shop, 1, entry.id))
 		}
 		posX += UiButtonH + UiMarginSmall
-		if rg.Button(rl.NewRectangle(posX, posY, UiButtonH, incButtonH), "++") {
+		if rg.Button(rl.NewRectangle(posX, posY, UiButtonH, UiButtonFlatH), "++") {
 			undo.Append(NewChangeShopEntryPriceCmd(&s.shop, entry.id, entry.price+1))
 		}
 		posX += UiButtonH + UiMarginSmall
-		if rg.Button(rl.NewRectangle(posX, posY, UiButtonH, incButtonH), "--") && entry.price > 0 {
+		if rg.Button(rl.NewRectangle(posX, posY, UiButtonH, UiButtonFlatH), "--") && entry.price > 0 {
 			undo.Append(NewChangeShopEntryPriceCmd(&s.shop, entry.id, entry.price-1))
 		}
 		posX += UiButtonH + UiMargin
@@ -296,49 +315,113 @@ func (s *UiState) RenderShop(undo *UndoRedoSystem) {
 		if i >= s.shop.unlockedCount {
 			color = rl.LightGray
 		}
-		rl.DrawText(text, int32(posX), int32(posY+incButtonH/2-fontSize/2), fontSize, color)
-		posY += incButtonH + UiMarginSmall
+		rl.DrawText(text, int32(posX), int32(posY+UiButtonFlatH/2-fontSize/2), fontSize, color)
+		posY += UiButtonFlatH + UiMarginSmall
 	}
 	posY += UiMarginSmall
-	if rg.Button(rl.NewRectangle(posX, posY, unlockButtonW, UiButtonH), "Unlock") && s.shop.unlockedCount < len(s.shop.entries) {
+	if rg.Button(rl.NewRectangle(posX, posY, UiButtonNarrowW, UiButtonH), "Unlock") && s.shop.unlockedCount < len(s.shop.entries) {
 		undo.Append(NewChangeShopUnlockCountCmd(s, s.shop.unlockedCount+1))
 	}
-	if rg.Button(rl.NewRectangle(posX+unlockButtonW+UiMarginSmall, posY, unlockButtonW, UiButtonH), "Lock") && s.shop.unlockedCount > 0 {
+	if rg.Button(rl.NewRectangle(posX+UiButtonNarrowW+UiMarginSmall, posY, UiButtonNarrowW, UiButtonH), "Lock") && s.shop.unlockedCount > 0 {
 		undo.Append(NewChangeShopUnlockCountCmd(s, s.shop.unlockedCount-1))
 	}
-	if rg.Button(rl.NewRectangle(posX+2*unlockButtonW+2*UiMarginSmall, posY, unlockButtonW, UiButtonH), "Shuffle") {
+	if rg.Button(rl.NewRectangle(posX+2*UiButtonNarrowW+2*UiMarginSmall, posY, UiButtonNarrowW, UiButtonH), "Shuffle") {
 		undo.Append(NewShuffleShopCmd(&s.shop))
 	}
 }
 
 func (s *UiState) RenderMoneyWidget(undo *UndoRedoSystem) {
 	const fontSize = 20
-	const unlockButtonW = 88
-	const incButtonH = 30
 	var posX = float32(rl.GetScreenWidth()/2 - UiShopWidth/2)
 	var posY = float32(UiMargin)
 
 	// Row 1 (White)
-	if rg.Button(rl.NewRectangle(posX, posY, UiButtonH, incButtonH), "++") {
+	if rg.Button(rl.NewRectangle(posX, posY, UiButtonH, UiButtonFlatH), "++") {
 		undo.Append(NewChangeMoneyAmountCmd(s, *s.shop.WhiteMoney()+1, *s.shop.BlackMoney()))
 	}
-	if rg.Button(rl.NewRectangle(posX+UiButtonH+UiMarginSmall, posY, UiButtonH, incButtonH), "--") {
+	if rg.Button(rl.NewRectangle(posX+UiButtonH+UiMarginSmall, posY, UiButtonH, UiButtonFlatH), "--") {
 		undo.Append(NewChangeMoneyAmountCmd(s, *s.shop.WhiteMoney()-1, *s.shop.BlackMoney()))
 	}
-	rl.DrawText(fmt.Sprint("White money: ", *s.shop.WhiteMoney()), int32(posX+2*UiButtonH+UiMarginSmall+UiMargin), int32(posY+incButtonH/2-fontSize/2), fontSize, rl.Black)
-	s.showShop = rg.Toggle(rl.NewRectangle(posX+UiShopWidth-unlockButtonW, posY, unlockButtonW, UiButtonH), "Shop", s.showShop)
-	if rg.Button(rl.NewRectangle(posX+UiShopWidth-2*unlockButtonW-UiMarginSmall, posY, unlockButtonW, UiButtonH), "++Both") {
+	rl.DrawText(fmt.Sprint("White money: ", *s.shop.WhiteMoney()), int32(posX+2*UiButtonH+UiMarginSmall+UiMargin), int32(posY+UiButtonFlatH/2-fontSize/2), fontSize, rl.Black)
+	var inRngTab = rg.Toggle(rl.NewRectangle(posX+UiShopWidth-UiButtonNarrowW, posY, UiButtonNarrowW, UiButtonH), "Rng", s.tab == TabRng)
+	var inShopTab = rg.Toggle(rl.NewRectangle(posX+UiShopWidth-2*UiButtonNarrowW-UiMarginSmall, posY, UiButtonNarrowW, UiButtonH), "Shop", s.tab == TabShop)
+	if inRngTab && inShopTab {
+		if s.tab == TabShop {
+			s.tab = TabRng
+		} else {
+			s.tab = TabShop
+		}
+	} else if inShopTab {
+		s.tab = TabShop
+	} else if inRngTab {
+		s.tab = TabRng
+	} else {
+		s.tab = TabBoard
+	}
+	if rg.Button(rl.NewRectangle(posX+UiShopWidth-3*UiButtonNarrowW-2*UiMarginSmall, posY, UiButtonNarrowW, UiButtonH), "++Both") {
 		undo.Append(NewChangeMoneyAmountCmd(s, *s.shop.WhiteMoney()+1, *s.shop.BlackMoney()+1))
 	}
-	posY += incButtonH + UiMarginSmall
+	posY += UiButtonFlatH + UiMarginSmall
 
 	// Row 2 (Black)
-	if rg.Button(rl.NewRectangle(posX, posY, UiButtonH, incButtonH), "++") {
+	if rg.Button(rl.NewRectangle(posX, posY, UiButtonH, UiButtonFlatH), "++") {
 		undo.Append(NewChangeMoneyAmountCmd(s, *s.shop.WhiteMoney(), *s.shop.BlackMoney()+1))
 	}
-	if rg.Button(rl.NewRectangle(posX+UiButtonH+UiMarginSmall, posY, UiButtonH, incButtonH), "--") {
+	if rg.Button(rl.NewRectangle(posX+UiButtonH+UiMarginSmall, posY, UiButtonH, UiButtonFlatH), "--") {
 		undo.Append(NewChangeMoneyAmountCmd(s, *s.shop.WhiteMoney(), *s.shop.BlackMoney()-1))
 	}
-	rl.DrawText(fmt.Sprint("Black money: ", *s.shop.BlackMoney()), int32(posX+2*UiButtonH+UiMarginSmall+UiMargin), int32(posY+incButtonH/2-fontSize/2), fontSize, rl.Black)
-	posY += incButtonH + UiMarginSmall
+	rl.DrawText(fmt.Sprint("Black money: ", *s.shop.BlackMoney()), int32(posX+2*UiButtonH+UiMarginSmall+UiMargin), int32(posY+UiButtonFlatH/2-fontSize/2), fontSize, rl.Black)
+	posY += UiButtonFlatH + UiMarginSmall
+}
+
+func (s *UiState) RenderRngMenu(undo *UndoRedoSystem) {
+	const fontSize = 20
+	var posX = float32(rl.GetScreenWidth()/2 - UiShopWidth/2)
+	var posY = float32(UiShopTopMargin)
+
+	rl.DrawText("Chaos", int32(posX), int32(posY), fontSize, rl.Black)
+	posY += UiButtonFlatH + UiMarginSmall
+	for i := 0; i < len(s.rng.chaosShown); i++ {
+		var text = fmt.Sprint("- ", s.rng.chaosShown[i])
+		rl.DrawText(text, int32(posX), int32(posY+UiButtonFlatH/2-fontSize/2), fontSize, rl.Black)
+		posY += UiButtonFlatH + UiMarginSmall
+	}
+	posY += UiMarginSmall
+	if rg.Button(rl.NewRectangle(posX, posY, UiButtonNarrowW, UiButtonH), "Reroll") {
+		s.rng.RerollChaosShown()
+	}
+	posY += 3 * UiMarginBig
+
+	rl.DrawText("RNG Utils", int32(posX), int32(posY), fontSize, rl.Black)
+	posY += UiButtonFlatH + UiMarginSmall
+
+	if rg.Button(rl.NewRectangle(posX, posY, UiButtonNarrowW, UiButtonH), "Reroll") {
+		s.rng.RerollPiece(&sandbox)
+	}
+	rl.DrawText("Random piece: "+s.rng.piece, int32(posX+UiButtonNarrowW+UiMarginSmall), int32(posY)+UiButtonH/2-fontSize/2, fontSize, rl.Black)
+	posY += UiButtonH + UiMarginSmall
+
+	if rg.Button(rl.NewRectangle(posX, posY, UiButtonNarrowW, UiButtonH), "Reroll") {
+		s.rng.RerollPlane()
+	}
+	rl.DrawText("Random plane: "+s.rng.plane, int32(posX+UiButtonNarrowW+UiMarginSmall), int32(posY)+UiButtonH/2-fontSize/2, fontSize, rl.Black)
+	posY += UiButtonH + UiMarginSmall
+
+	if rg.Button(rl.NewRectangle(posX, posY, UiButtonNarrowW, UiButtonH), "Reroll") {
+		s.rng.RerollTile()
+	}
+	rl.DrawText("Random tile: "+s.rng.tile, int32(posX+UiButtonNarrowW+UiMarginSmall), int32(posY)+UiButtonH/2-fontSize/2, fontSize, rl.Black)
+	posY += UiButtonH + UiMarginSmall
+
+	if rg.Button(rl.NewRectangle(posX, posY, UiButtonNarrowW, UiButtonH), "Reroll") {
+		s.rng.RerollUnoccupiedTile(&sandbox)
+	}
+	rl.DrawText("Random unoccupied tile: "+s.rng.unoccupiedTile, int32(posX+UiButtonNarrowW+UiMarginSmall), int32(posY)+UiButtonH/2-fontSize/2, fontSize, rl.Black)
+	posY += UiButtonH + UiMarginSmall
+
+	if rg.Button(rl.NewRectangle(posX, posY, UiButtonNarrowW, UiButtonH), "Reroll") {
+		s.rng.RerollEmptyTile(&sandbox)
+	}
+	rl.DrawText("Random empty tile: "+s.rng.emptyTile, int32(posX+UiButtonNarrowW+UiMarginSmall), int32(posY)+UiButtonH/2-fontSize/2, fontSize, rl.Black)
+	posY += UiButtonH + UiMarginSmall
 }
