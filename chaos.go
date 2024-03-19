@@ -1,10 +1,18 @@
 package main
 
-import "math/rand"
+import (
+	"fmt"
+	"math/rand"
+)
 
 type RngStuff struct {
-	chaosEntries []string
-	chaosShown   [3]string
+	chaosEntries   []string
+	chaosShown     [3]string
+	piece          string
+	plane          string
+	tile           string
+	unoccupiedTile string // No piece on it, but obstacle allowed
+	emptyTile      string
 }
 
 func NewRngStuff() RngStuff {
@@ -14,7 +22,7 @@ func NewRngStuff() RngStuff {
 	res.AddChaosOption("Shuffle the shop ordering and gain 6 coins")
 	res.AddChaosOption("Freeze all tiles with Pawns")
 	res.AddChaosOption("Summon two Imps on Earth on random empty tiles")
-	res.AddChaosOption("Pick a plane and rank. Curse all non-royal pieces in the chosen rank")
+	res.AddChaosOption("Pick a file in a plane. Curse all non-royal pieces in the chosen file")
 	res.AddChaosOption("Replace all Bishops with Rooks and vice versa")
 	res.AddChaosOption("Reset both player’s coin count to 0")
 	res.AddChaosOption("Spread all ice to adjacent tiles")
@@ -89,4 +97,66 @@ func (r *RngStuff) RerollChaosShown() {
 		third = rand.Intn(len(r.chaosEntries))
 	}
 	r.chaosShown[2] = r.chaosEntries[third]
+}
+
+func (r *RngStuff) RerollPiece(sandbox *Sandbox) {
+	if len(sandbox.pieces) == 0 {
+		r.piece = ""
+		return
+	}
+	var piece = sandbox.pieces[rand.Intn(len(sandbox.pieces))]
+	var file = piece.coord.x
+	var rank = piece.coord.y
+	var fileLetter = 'a' + (file+('z'-'a'+1))%('z'-'a'+1)
+	r.piece = fmt.Sprintf("%s, %c%d %s", sandbox.GetPieceType(piece.typ).name, fileLetter, rank+1, NameOfBoard(piece.board))
+}
+
+func (r *RngStuff) RerollPlane() {
+	var n = rand.Intn(3)
+	r.plane = NameOfBoard(uint32(n))
+}
+
+func (r *RngStuff) RerollTile() {
+	var file = rand.Intn(8)
+	var rank = rand.Intn(8)
+	r.tile = fmt.Sprintf("%c%d", 'a'+file, rank+1)
+}
+
+func (r *RngStuff) RerollUnoccupiedTile(sandbox *Sandbox) {
+	// No piece on it, but obstacle allowed
+	// There is a possibility that such a tile does not exist
+	var tiles = make([]Tile, 0)
+	for _, tile := range sandbox.tiles {
+		if sandbox.GetPieceAt(tile.coord, tile.board) == nil {
+			tiles = append(tiles, tile)
+		}
+	}
+	if len(tiles) == 0 {
+		r.unoccupiedTile = ""
+		return
+	}
+	var tile = tiles[rand.Intn(len(tiles))]
+	var file = tile.coord.x
+	var rank = tile.coord.y
+	var fileLetter = 'a' + (file+('z'-'a'+1))%('z'-'a'+1)
+	r.unoccupiedTile = fmt.Sprintf("%c%d %s", fileLetter, rank+1, NameOfBoard(tile.board))
+}
+
+func (r *RngStuff) RerollEmptyTile(sandbox *Sandbox) {
+	// There is a possibility that such a tile does not exist
+	var tiles = make([]Tile, 0)
+	for _, tile := range sandbox.tiles {
+		if sandbox.GetPieceAt(tile.coord, tile.board) == nil && len(sandbox.GetObstaclesAt(tile.coord, tile.board)) == 0 {
+			tiles = append(tiles, tile)
+		}
+	}
+	if len(tiles) == 0 {
+		r.emptyTile = ""
+		return
+	}
+	var tile = tiles[rand.Intn(len(tiles))]
+	var file = tile.coord.x
+	var rank = tile.coord.y
+	var fileLetter = 'a' + (file+('z'-'a'+1))%('z'-'a'+1)
+	r.emptyTile = fmt.Sprintf("%c%d %s", fileLetter, rank+1, NameOfBoard(tile.board))
 }

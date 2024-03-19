@@ -378,17 +378,50 @@ func (s *UiState) RenderRngMenu(undo *UndoRedoSystem) {
 	const fontSize = 20
 	var posX = float32(rl.GetScreenWidth()/2 - UiShopWidth/2)
 	var posY = float32(UiShopTopMargin)
+
 	rl.DrawText("Chaos", int32(posX), int32(posY), fontSize, rl.Black)
 	posY += UiButtonFlatH + UiMarginSmall
-
 	for i := 0; i < len(s.rng.chaosShown); i++ {
 		var text = fmt.Sprint("- ", s.rng.chaosShown[i])
 		rl.DrawText(text, int32(posX), int32(posY+UiButtonFlatH/2-fontSize/2), fontSize, rl.Black)
 		posY += UiButtonFlatH + UiMarginSmall
 	}
 	posY += UiMarginSmall
-	if rg.Button(rl.NewRectangle(posX, posY, UiButtonNarrowW, UiButtonH), "Reroll") && s.shop.unlockedCount < len(s.shop.entries) {
+	if rg.Button(rl.NewRectangle(posX, posY, UiButtonNarrowW, UiButtonH), "Reroll") {
 		s.rng.RerollChaosShown()
 	}
-	posY += 2 * UiMarginBig
+	posY += 3 * UiMarginBig
+
+	rl.DrawText("RNG Utils", int32(posX), int32(posY), fontSize, rl.Black)
+	posY += UiButtonFlatH + UiMarginSmall
+
+	if rg.Button(rl.NewRectangle(posX, posY, UiButtonNarrowW, UiButtonH), "Reroll") {
+		s.rng.RerollPiece(&sandbox)
+	}
+	rl.DrawText("Random piece: "+s.rng.piece, int32(posX+UiButtonNarrowW+UiMarginSmall), int32(posY)+UiButtonH/2-fontSize/2, fontSize, rl.Black)
+	posY += UiButtonH + UiMarginSmall
+
+	if rg.Button(rl.NewRectangle(posX, posY, UiButtonNarrowW, UiButtonH), "Reroll") {
+		s.rng.RerollPlane()
+	}
+	rl.DrawText("Random plane: "+s.rng.plane, int32(posX+UiButtonNarrowW+UiMarginSmall), int32(posY)+UiButtonH/2-fontSize/2, fontSize, rl.Black)
+	posY += UiButtonH + UiMarginSmall
+
+	if rg.Button(rl.NewRectangle(posX, posY, UiButtonNarrowW, UiButtonH), "Reroll") {
+		s.rng.RerollTile()
+	}
+	rl.DrawText("Random tile: "+s.rng.tile, int32(posX+UiButtonNarrowW+UiMarginSmall), int32(posY)+UiButtonH/2-fontSize/2, fontSize, rl.Black)
+	posY += UiButtonH + UiMarginSmall
+
+	if rg.Button(rl.NewRectangle(posX, posY, UiButtonNarrowW, UiButtonH), "Reroll") {
+		s.rng.RerollUnoccupiedTile(&sandbox)
+	}
+	rl.DrawText("Random unoccupied tile: "+s.rng.unoccupiedTile, int32(posX+UiButtonNarrowW+UiMarginSmall), int32(posY)+UiButtonH/2-fontSize/2, fontSize, rl.Black)
+	posY += UiButtonH + UiMarginSmall
+
+	if rg.Button(rl.NewRectangle(posX, posY, UiButtonNarrowW, UiButtonH), "Reroll") {
+		s.rng.RerollEmptyTile(&sandbox)
+	}
+	rl.DrawText("Random empty tile: "+s.rng.emptyTile, int32(posX+UiButtonNarrowW+UiMarginSmall), int32(posY)+UiButtonH/2-fontSize/2, fontSize, rl.Black)
+	posY += UiButtonH + UiMarginSmall
 }
