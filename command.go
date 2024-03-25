@@ -534,6 +534,35 @@ func (cmd *ChangeColorOfPieceCmd) undo(sb *Sandbox, ui *UiState) {
 	ui.tab = TabBoard
 }
 
+type ChangeTypeOfPieceCmd struct {
+	piece  uint32
+	before uint32
+	after  uint32
+}
+
+func NewChangeTypeOfPieceCmd(sb *Sandbox, id uint32, typ uint32) *ChangeTypeOfPieceCmd {
+	piece := sb.GetPiece(id)
+	var before = piece.typ
+	piece.typ = typ
+	return &ChangeTypeOfPieceCmd{
+		piece:  id,
+		before: before,
+		after:  typ,
+	}
+}
+
+func (cmd *ChangeTypeOfPieceCmd) redo(sb *Sandbox, ui *UiState) {
+	sb.GetPiece(cmd.piece).typ = cmd.after
+	ui.selection.SelectPiece(cmd.piece)
+	ui.tab = TabBoard
+}
+
+func (cmd *ChangeTypeOfPieceCmd) undo(sb *Sandbox, ui *UiState) {
+	sb.GetPiece(cmd.piece).typ = cmd.before
+	ui.selection.SelectPiece(cmd.piece)
+	ui.tab = TabBoard
+}
+
 type ChangeMoneyAmountCmd struct {
 	whiteBefore int
 	whiteAfter  int

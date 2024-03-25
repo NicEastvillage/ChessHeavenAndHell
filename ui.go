@@ -27,17 +27,18 @@ const (
 )
 
 type UiState struct {
-	selection       Selection
-	clipboard       Clipboard
-	shop            Shop
-	rng             RngStuff
-	tab             int32
-	board           int32
-	mode            int32
-	color           int32
-	renderTexHeaven rl.RenderTexture2D
-	renderTexEarth  rl.RenderTexture2D
-	renderTexHell   rl.RenderTexture2D
+	selection          Selection
+	clipboard          Clipboard
+	shop               Shop
+	rng                RngStuff
+	tab                int32
+	board              int32
+	mode               int32
+	color              int32
+	showEffectsOrTypes int32
+	renderTexHeaven    rl.RenderTexture2D
+	renderTexEarth     rl.RenderTexture2D
+	renderTexHell      rl.RenderTexture2D
 }
 
 func NewUiState() UiState {
@@ -193,29 +194,46 @@ func (s *UiState) RenderPieceContextMenu(undo *UndoRedoSystem) {
 	var selectedPieceId, _ = s.selection.GetSelectedPieceId()
 	piece := sandbox.GetPiece(selectedPieceId)
 
-	var spinnerX = float32(rl.GetScreenWidth() - 150)
-	var spinnerY = float32(UiMargin + UiMarginBig + UiButtonH)
-
-	{
-		var pieceScale = piece.scale
-		var change = SpinnerWithIcon(spinnerX, spinnerY, fmt.Sprint(pieceScale), assets.texPieceScale)
-		if change < 0 && pieceScale > 1 {
-			undo.Append(NewDecreasePieceScaleCmd(&sandbox, selectedPieceId))
-		}
-		if change > 0 {
-			undo.Append(NewIncreasePieceScaleCmd(&sandbox, selectedPieceId))
-		}
+	s.showEffectsOrTypes = rg.ToggleSlider(rl.NewRectangle(float32(rl.GetScreenWidth()-UiMargin-UiButtonW), 2*UiMargin+UiButtonH, UiButtonW, UiButtonH), "Effect;Types", s.showEffectsOrTypes)
+	if rl.IsKeyPressed(rl.KeyC) {
+		s.color = 1 - s.color
 	}
 
-	for i := range sandbox.effectTypes {
-		var effect = &sandbox.effectTypes[i]
-		var effectCount = sandbox.GetStatusEffectCount(selectedPieceId, effect.id)
-		var change = SpinnerWithIcon(spinnerX, spinnerY+float32(i*55)+55, fmt.Sprint(effectCount), effect.tex)
-		if change < 0 && effectCount > 0 {
-			undo.Append(NewDeleteStatusEffectCmd(&sandbox, selectedPieceId, effect.id))
+	if s.showEffectsOrTypes == 1 {
+		// Show types
+		for i := 0; i < len(sandbox.pieceTypes); i++ {
+			if rg.Toggle(rl.NewRectangle(float32(rl.GetScreenWidth()-UiMargin-UiButtonW), float32(3*UiMargin+2*UiButtonH+i*(UiMarginSmall+UiButtonH)), UiButtonW, UiButtonH), sandbox.GetPieceType(uint32(i)).name, s.selection.IsPieceTypeSelected(uint32(i))) {
+				if piece.typ != sandbox.GetPieceType(uint32(i)).id {
+					undo.Append(NewChangeTypeOfPieceCmd(&sandbox, piece.id, sandbox.GetPieceType(uint32(i)).id))
+				}
+			}
 		}
-		if change > 0 {
-			undo.Append(NewCreateStatusEffectCmd(&sandbox, selectedPieceId, effect.id))
+	} else {
+		// Show effects
+		var spinnerX = float32(rl.GetScreenWidth() - 150)
+		var spinnerY = float32(3*UiMargin + 2*UiButtonH)
+
+		{
+			var pieceScale = piece.scale
+			var change = SpinnerWithIcon(spinnerX, spinnerY, fmt.Sprint(pieceScale), assets.texPieceScale)
+			if change < 0 && pieceScale > 1 {
+				undo.Append(NewDecreasePieceScaleCmd(&sandbox, selectedPieceId))
+			}
+			if change > 0 {
+				undo.Append(NewIncreasePieceScaleCmd(&sandbox, selectedPieceId))
+			}
+		}
+
+		for i := range sandbox.effectTypes {
+			var effect = &sandbox.effectTypes[i]
+			var effectCount = sandbox.GetStatusEffectCount(selectedPieceId, effect.id)
+			var change = SpinnerWithIcon(spinnerX, spinnerY+float32(i*55)+55, fmt.Sprint(effectCount), effect.tex)
+			if change < 0 && effectCount > 0 {
+				undo.Append(NewDeleteStatusEffectCmd(&sandbox, selectedPieceId, effect.id))
+			}
+			if change > 0 {
+				undo.Append(NewCreateStatusEffectCmd(&sandbox, selectedPieceId, effect.id))
+			}
 		}
 	}
 
