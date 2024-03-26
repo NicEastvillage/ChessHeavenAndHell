@@ -308,9 +308,30 @@ func (s *Sandbox) RemoveObstacle(coord Vec2, board uint32, typ uint32) bool {
 }
 
 func (s *Sandbox) Render(board uint32, preview bool, selection *Selection) {
+	var origo = GetBoardOrigo()
 	for i := 0; i < len(s.tiles); i++ {
 		if s.tiles[i].board == board {
 			s.tiles[i].Render(s.boards[board].style)
+		}
+	}
+	if !preview {
+		var rankFileTextColor = ColorAt(Vec2{1, 0}, s.boards[board].style)
+		for x := 0; x < 8; x++ {
+			rl.DrawText(string(rune('a'+x)), int32(origo.x+x*TileSize+7), int32(origo.y+4+TileSize*8), 20, rankFileTextColor)
+		}
+		for y := 0; y < 8; y++ {
+			rl.DrawText(string(rune('1'+y)), int32(origo.x-7-10), int32(origo.y-7-20+TileSize*8-y*TileSize), 20, rankFileTextColor)
+		}
+	} else {
+		const fontSize = 60
+		var rankFileTextColor = ColorAt(Vec2{1, 0}, s.boards[board].style)
+		var offsetX = TileSize/2 - fontSize/3
+		var offsetY = TileSize/2 - fontSize/2
+		for x := 0; x < 8; x++ {
+			rl.DrawText(string(rune('a'+x)), int32(origo.x+x*TileSize+offsetX), int32(origo.y+offsetY+TileSize*8), fontSize, rankFileTextColor)
+		}
+		for y := 0; y < 8; y++ {
+			rl.DrawText(string(rune('1'+y)), int32(origo.x-TileSize+offsetX), int32(origo.y+offsetY+TileSize*7-y*TileSize), fontSize, rankFileTextColor)
 		}
 	}
 	var obstacleHasBeenRenderedFlag = make([]bool, len(s.obstacles))
