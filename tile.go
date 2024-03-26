@@ -8,12 +8,12 @@ type Tile struct {
 }
 
 func (t *Tile) Render(style BoardStyle) {
-	var color = colorAt(t.coord, style)
+	var color = ColorAt(t.coord, style)
 	var pos = GetBoardOrigo().Add(t.coord.Scale(TileSize))
 	rl.DrawRectangle(int32(pos.x), int32(pos.y), TileSize, TileSize, color)
 }
 
-func colorAt(coord Vec2, style BoardStyle) rl.Color {
+func ColorAt(coord Vec2, style BoardStyle) rl.Color {
 	var light = coord.x%2 == coord.y%2
 	var color = rl.NewColor(227, 193, 111, 255)
 	if style == BoardStyleEarth && !light {
