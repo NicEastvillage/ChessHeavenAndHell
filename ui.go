@@ -18,6 +18,8 @@ const (
 	UiRightMenuWidth = 155
 	UiShopWidth      = 660
 	UiShopTopMargin  = 140
+	UiFontSize       = 20
+	UiFontSizeBig    = 28
 )
 
 const (
@@ -292,7 +294,7 @@ func SpinnerWithIcon(x float32, y float32, text string, tex rl.Texture2D) int {
 
 	var texScale = iconSize / float32(tex.Height)
 	rl.DrawTextureEx(tex, rl.NewVector2(x+UiButtonTinyW+spacing+iconSize/2-texScale*float32(tex.Width/2), y+UiButtonFlatH/2-texScale*float32(tex.Height)/2-3), 0, texScale, rl.White)
-	rl.DrawText(text, int32(x+UiButtonTinyW+spacing+13), int32(y+UiButtonFlatH/2+iconSize/2-3), 16, rl.Black)
+	rl.DrawTextEx(assets.fontComicSansMs, text, rl.NewVector2(x+UiButtonTinyW+spacing+13, y+UiButtonFlatH/2+iconSize/2-3), 20, 1, rl.Black)
 	var res = 0
 	if rg.Button(rl.NewRectangle(x, y, UiButtonTinyW, UiButtonFlatH), "--") {
 		res--
@@ -304,10 +306,9 @@ func SpinnerWithIcon(x float32, y float32, text string, tex rl.Texture2D) int {
 }
 
 func (s *UiState) RenderShop(undo *UndoRedoSystem) {
-	const fontSize = 20
 	var posX = float32(rl.GetScreenWidth()/2 - UiShopWidth/2)
 	var posY = float32(UiShopTopMargin)
-	rl.DrawText("Shop", int32(posX), int32(posY), fontSize, rl.Black)
+	rl.DrawTextEx(assets.fontComicSansMsBig, "Shop", rl.NewVector2(posX, posY), UiFontSizeBig, 1, rl.Black)
 	posY += UiButtonFlatH + UiMarginSmall
 	for i := 0; i < len(s.shop.entries); i++ {
 		var entry = &s.shop.entries[i]
@@ -333,7 +334,7 @@ func (s *UiState) RenderShop(undo *UndoRedoSystem) {
 		if i >= s.shop.unlockedCount {
 			color = rl.LightGray
 		}
-		rl.DrawText(text, int32(posX), int32(posY+UiButtonFlatH/2-fontSize/2), fontSize, color)
+		rl.DrawTextEx(assets.fontComicSansMsBig, text, rl.NewVector2(posX, posY+UiButtonFlatH/2-UiFontSizeBig/2), UiFontSizeBig, 1, color)
 		posY += UiButtonFlatH + UiMarginSmall
 	}
 	posY += UiMarginSmall
@@ -349,7 +350,6 @@ func (s *UiState) RenderShop(undo *UndoRedoSystem) {
 }
 
 func (s *UiState) RenderMoneyWidget(undo *UndoRedoSystem) {
-	const fontSize = 20
 	var posX = float32(rl.GetScreenWidth()/2 - UiShopWidth/2)
 	var posY = float32(UiMargin)
 
@@ -360,7 +360,7 @@ func (s *UiState) RenderMoneyWidget(undo *UndoRedoSystem) {
 	if rg.Button(rl.NewRectangle(posX+UiButtonH+UiMarginSmall, posY, UiButtonH, UiButtonFlatH), "--") {
 		undo.Append(NewChangeMoneyAmountCmd(s, *s.shop.WhiteMoney()-1, *s.shop.BlackMoney()))
 	}
-	rl.DrawText(fmt.Sprint("White money: ", *s.shop.WhiteMoney()), int32(posX+2*UiButtonH+UiMarginSmall+UiMargin), int32(posY+UiButtonFlatH/2-fontSize/2), fontSize, rl.Black)
+	rl.DrawTextEx(assets.fontComicSansMsBig, fmt.Sprint("White money: ", *s.shop.WhiteMoney()), rl.NewVector2(posX+2*UiButtonH+UiMarginSmall+UiMargin, posY+UiButtonFlatH/2-UiFontSizeBig/2), UiFontSizeBig, 1, rl.Black)
 	var inRngTab = rg.Toggle(rl.NewRectangle(posX+UiShopWidth-UiButtonNarrowW, posY, UiButtonNarrowW, UiButtonH), "Rng", s.tab == TabRng)
 	var inShopTab = rg.Toggle(rl.NewRectangle(posX+UiShopWidth-2*UiButtonNarrowW-UiMarginSmall, posY, UiButtonNarrowW, UiButtonH), "Shop", s.tab == TabShop)
 	if inRngTab && inShopTab {
@@ -388,20 +388,19 @@ func (s *UiState) RenderMoneyWidget(undo *UndoRedoSystem) {
 	if rg.Button(rl.NewRectangle(posX+UiButtonH+UiMarginSmall, posY, UiButtonH, UiButtonFlatH), "--") {
 		undo.Append(NewChangeMoneyAmountCmd(s, *s.shop.WhiteMoney(), *s.shop.BlackMoney()-1))
 	}
-	rl.DrawText(fmt.Sprint("Black money: ", *s.shop.BlackMoney()), int32(posX+2*UiButtonH+UiMarginSmall+UiMargin), int32(posY+UiButtonFlatH/2-fontSize/2), fontSize, rl.Black)
+	rl.DrawTextEx(assets.fontComicSansMsBig, fmt.Sprint("Black money: ", *s.shop.BlackMoney()), rl.NewVector2(posX+2*UiButtonH+UiMarginSmall+UiMargin, posY+UiButtonFlatH/2-UiFontSizeBig/2), UiFontSizeBig, 1, rl.Black)
 	posY += UiButtonFlatH + UiMarginSmall
 }
 
 func (s *UiState) RenderRngMenu(undo *UndoRedoSystem) {
-	const fontSize = 20
 	var posX = float32(rl.GetScreenWidth()/2 - UiShopWidth/2)
 	var posY = float32(UiShopTopMargin)
 
-	rl.DrawText("Chaos", int32(posX), int32(posY), fontSize, rl.Black)
+	rl.DrawTextEx(assets.fontComicSansMsBig, "Chaos", rl.NewVector2(posX, posY), UiFontSizeBig, 1, rl.Black)
 	posY += UiButtonFlatH + UiMarginSmall
 	for i := 0; i < len(s.rng.chaosShown); i++ {
 		var text = fmt.Sprint("- ", s.rng.chaosShown[i])
-		rl.DrawText(text, int32(posX), int32(posY+UiButtonFlatH/2-fontSize/2), fontSize, rl.Black)
+		rl.DrawTextEx(assets.fontComicSansMsBig, text, rl.NewVector2(posX, posY+UiButtonFlatH/2-UiFontSizeBig/2), UiFontSizeBig, 1, rl.Black)
 		posY += UiButtonFlatH + UiMarginSmall
 	}
 	posY += UiMarginSmall
@@ -410,36 +409,36 @@ func (s *UiState) RenderRngMenu(undo *UndoRedoSystem) {
 	}
 	posY += 3 * UiMarginBig
 
-	rl.DrawText("RNG Utils", int32(posX), int32(posY), fontSize, rl.Black)
+	rl.DrawTextEx(assets.fontComicSansMsBig, "RNG Utils", rl.NewVector2(posX, posY), UiFontSizeBig, 1, rl.Black)
 	posY += UiButtonFlatH + UiMarginSmall
 
 	if rg.Button(rl.NewRectangle(posX, posY, UiButtonNarrowW, UiButtonH), "Reroll") {
 		s.rng.RerollPiece(&sandbox)
 	}
-	rl.DrawText("Random piece: "+s.rng.piece, int32(posX+UiButtonNarrowW+UiMarginSmall), int32(posY)+UiButtonH/2-fontSize/2, fontSize, rl.Black)
+	rl.DrawTextEx(assets.fontComicSansMsBig, "Random piece: "+s.rng.piece, rl.NewVector2(posX+UiButtonNarrowW+UiMarginSmall, posY+UiButtonH/2-UiFontSizeBig/2), UiFontSizeBig, 1, rl.Black)
 	posY += UiButtonH + UiMarginSmall
 
 	if rg.Button(rl.NewRectangle(posX, posY, UiButtonNarrowW, UiButtonH), "Reroll") {
 		s.rng.RerollPlane()
 	}
-	rl.DrawText("Random plane: "+s.rng.plane, int32(posX+UiButtonNarrowW+UiMarginSmall), int32(posY)+UiButtonH/2-fontSize/2, fontSize, rl.Black)
+	rl.DrawTextEx(assets.fontComicSansMsBig, "Random plane: "+s.rng.plane, rl.NewVector2(posX+UiButtonNarrowW+UiMarginSmall, posY+UiButtonH/2-UiFontSizeBig/2), UiFontSizeBig, 1, rl.Black)
 	posY += UiButtonH + UiMarginSmall
 
 	if rg.Button(rl.NewRectangle(posX, posY, UiButtonNarrowW, UiButtonH), "Reroll") {
 		s.rng.RerollTile()
 	}
-	rl.DrawText("Random tile: "+s.rng.tile, int32(posX+UiButtonNarrowW+UiMarginSmall), int32(posY)+UiButtonH/2-fontSize/2, fontSize, rl.Black)
+	rl.DrawTextEx(assets.fontComicSansMsBig, "Random tile: "+s.rng.tile, rl.NewVector2(posX+UiButtonNarrowW+UiMarginSmall, posY+UiButtonH/2-UiFontSizeBig/2), UiFontSizeBig, 1, rl.Black)
 	posY += UiButtonH + UiMarginSmall
 
 	if rg.Button(rl.NewRectangle(posX, posY, UiButtonNarrowW, UiButtonH), "Reroll") {
 		s.rng.RerollUnoccupiedTile(&sandbox)
 	}
-	rl.DrawText("Random unoccupied tile: "+s.rng.unoccupiedTile, int32(posX+UiButtonNarrowW+UiMarginSmall), int32(posY)+UiButtonH/2-fontSize/2, fontSize, rl.Black)
+	rl.DrawTextEx(assets.fontComicSansMsBig, "Random unoccupied tile: "+s.rng.unoccupiedTile, rl.NewVector2(posX+UiButtonNarrowW+UiMarginSmall, posY+UiButtonH/2-UiFontSizeBig/2), UiFontSizeBig, 1, rl.Black)
 	posY += UiButtonH + UiMarginSmall
 
 	if rg.Button(rl.NewRectangle(posX, posY, UiButtonNarrowW, UiButtonH), "Reroll") {
 		s.rng.RerollEmptyTile(&sandbox)
 	}
-	rl.DrawText("Random empty tile: "+s.rng.emptyTile, int32(posX+UiButtonNarrowW+UiMarginSmall), int32(posY)+UiButtonH/2-fontSize/2, fontSize, rl.Black)
+	rl.DrawTextEx(assets.fontComicSansMsBig, "Random empty tile: "+s.rng.emptyTile, rl.NewVector2(posX+UiButtonNarrowW+UiMarginSmall, posY+UiButtonH/2-UiFontSizeBig/2), UiFontSizeBig, 1, rl.Black)
 	posY += UiButtonH + UiMarginSmall
 }

@@ -2,6 +2,8 @@ package main
 
 import rl "github.com/gen2brain/raylib-go/raylib"
 
+const FontChars = "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]^_`abcdefghijklmnopqrstuvwxyz{|}~æøåÆØÅ"
+
 var assets = AssetManager{}
 
 type AssetManager struct {
@@ -53,6 +55,9 @@ type AssetManager struct {
 	texEffectStun        rl.Texture2D
 	texEffectWizardHat   rl.Texture2D
 	texPieceScale        rl.Texture2D
+
+	fontComicSansMs    rl.Font
+	fontComicSansMsBig rl.Font
 }
 
 func (am *AssetManager) LoadAll() {
@@ -104,6 +109,9 @@ func (am *AssetManager) LoadAll() {
 	am.texEffectStun = rl.LoadTexture("assets/effects/stun.png")
 	am.texEffectWizardHat = rl.LoadTexture("assets/effects/wizard_hat.png")
 	am.texPieceScale = rl.LoadTexture("assets/effects/piece_scale.png")
+
+	am.fontComicSansMs = rl.LoadFontEx("assets/comic.ttf", 20, []rune(FontChars))
+	am.fontComicSansMsBig = rl.LoadFontEx("assets/comic.ttf", 28, []rune(FontChars))
 }
 
 func (am *AssetManager) UnloadAll() {
@@ -155,4 +163,7 @@ func (am *AssetManager) UnloadAll() {
 	rl.UnloadTexture(am.texEffectStun)
 	rl.UnloadTexture(am.texEffectWizardHat)
 	rl.UnloadTexture(am.texPieceScale)
+
+	rl.UnloadFont(am.fontComicSansMs)
+	rl.UnloadFont(am.fontComicSansMsBig)
 }
