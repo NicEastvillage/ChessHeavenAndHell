@@ -317,21 +317,21 @@ func (s *Sandbox) Render(board uint32, preview bool, selection *Selection) {
 	if !preview {
 		var rankFileTextColor = ColorAt(Vec2{1, 0}, s.boards[board].style)
 		for x := 0; x < 8; x++ {
-			rl.DrawText(string(rune('a'+x)), int32(origo.x+x*TileSize+7), int32(origo.y+4+TileSize*8), 20, rankFileTextColor)
+			rl.DrawTextEx(assets.fontComicSansMs, string(rune('a'+x)), rl.NewVector2(float32(origo.x+x*TileSize+7), float32(origo.y+4+TileSize*8)), UiFontSize, 1, rankFileTextColor)
 		}
 		for y := 0; y < 8; y++ {
-			rl.DrawText(string(rune('1'+y)), int32(origo.x-7-10), int32(origo.y-7-20+TileSize*8-y*TileSize), 20, rankFileTextColor)
+			rl.DrawTextEx(assets.fontComicSansMs, string(rune('1'+y)), rl.NewVector2(float32(origo.x-7-10), float32(origo.y-7-20+TileSize*8-y*TileSize)), UiFontSize, 1, rankFileTextColor)
 		}
 	} else {
-		const fontSize = 60
+		const fontSizeGiant = 60
 		var rankFileTextColor = ColorAt(Vec2{1, 0}, s.boards[board].style)
-		var offsetX = TileSize/2 - fontSize/3
-		var offsetY = TileSize/2 - fontSize/2
+		var offsetX = TileSize/2 - fontSizeGiant/3
+		var offsetY = TileSize/2 - fontSizeGiant/2
 		for x := 0; x < 8; x++ {
-			rl.DrawText(string(rune('a'+x)), int32(origo.x+x*TileSize+offsetX), int32(origo.y+offsetY+TileSize*8), fontSize, rankFileTextColor)
+			rl.DrawTextEx(assets.fontComicSansMs, string(rune('a'+x)), rl.NewVector2(float32(origo.x+x*TileSize+offsetX), float32(origo.y+offsetY+TileSize*8)), fontSizeGiant, 1, rankFileTextColor)
 		}
 		for y := 0; y < 8; y++ {
-			rl.DrawText(string(rune('1'+y)), int32(origo.x-TileSize+offsetX), int32(origo.y+offsetY+TileSize*7-y*TileSize), fontSize, rankFileTextColor)
+			rl.DrawTextEx(assets.fontComicSansMs, string(rune('1'+y)), rl.NewVector2(float32(origo.x-TileSize+offsetX), float32(origo.y+offsetY+TileSize*7-y*TileSize)), fontSizeGiant, 1, rankFileTextColor)
 		}
 	}
 	var obstacleHasBeenRenderedFlag = make([]bool, len(s.obstacles))

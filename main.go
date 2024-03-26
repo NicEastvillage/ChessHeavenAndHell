@@ -20,11 +20,12 @@ func main() {
 
 	rl.SetTargetFPS(60)
 
-	rg.LoadStyleDefault()
-	rg.SetStyle(rg.DEFAULT, rg.TEXT_SIZE, 20)
-
 	assets.LoadAll()
 	defer assets.UnloadAll()
+
+	rg.LoadStyleDefault()
+	rg.SetFont(assets.fontComicSansMs)
+	rg.SetStyle(rg.DEFAULT, rg.TEXT_SIZE, 20)
 
 	registerPieceTypes()
 	registerStatusEffectTypes()
