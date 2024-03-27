@@ -30,7 +30,7 @@ Some final terminology:
 
 - 2.1 There are three 8x8 boards in play. They called Earth, Heaven, and Hell and they are typically referred to as planes.
   - 2.1a The Earth plane is set up as a standard chess board at the start of the game.
-  - 2.1b The Hell plane starts with a Chaos Orb at c3 and at f6 and with two coins at b6 and at g3. 
+  - 2.1b The Heaven plane starts with a Chaos Orb at c3 and at f6 and with two coins at b6 and at g3. 
   - 2.1c The Hell plane starts with a Chaos Orb at c6 and at f3 and with fire at b3 and at g6.
 - 2.2 When a piece dies on Earth, it is moved to the same square on a different plane. It goes Hell if it has the Murderer status effect and Heaven otherwise.
   - 2.2a If a piece dies in Heaven or Hell, they are removed from the game.

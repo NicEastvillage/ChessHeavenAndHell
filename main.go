@@ -1,8 +1,6 @@
 package main
 
 import (
-	"math/rand"
-
 	rl "github.com/gen2brain/raylib-go/raylib"
 
 	rg "github.com/gen2brain/raylib-go/raygui"
@@ -33,22 +31,20 @@ func main() {
 	setupBoard(0, BoardStyleHeaven, false)
 	setupBoard(1, BoardStyleEarth, true)
 	setupBoard(2, BoardStyleHell, false)
+	sandbox.NewObstacle(Vec2{1, 2}, 0, sandbox.GetObstacleTypeByName(NameCoin).id)
+	sandbox.NewObstacle(Vec2{1, 2}, 0, sandbox.GetObstacleTypeByName(NameCoin).id)
+	sandbox.NewObstacle(Vec2{6, 5}, 0, sandbox.GetObstacleTypeByName(NameCoin).id)
+	sandbox.NewObstacle(Vec2{6, 5}, 0, sandbox.GetObstacleTypeByName(NameCoin).id)
+	sandbox.NewObstacle(Vec2{2, 5}, 0, sandbox.GetObstacleTypeByName(NameChaosOrb).id)
+	sandbox.NewObstacle(Vec2{5, 2}, 0, sandbox.GetObstacleTypeByName(NameChaosOrb).id)
+	sandbox.NewObstacle(Vec2{6, 2}, 2, sandbox.GetObstacleTypeByName(NameFire).id)
+	sandbox.NewObstacle(Vec2{1, 5}, 2, sandbox.GetObstacleTypeByName(NameFire).id)
+	sandbox.NewObstacle(Vec2{2, 2}, 2, sandbox.GetObstacleTypeByName(NameChaosOrb).id)
+	sandbox.NewObstacle(Vec2{5, 5}, 2, sandbox.GetObstacleTypeByName(NameChaosOrb).id)
 
 	var undo = NewUndoRedoSystem()
 	var ui = NewUiState()
 	defer ui.Dispose()
-
-	for i := 0; i < 20; i++ {
-		var piece = sandbox.pieces[rand.Intn(len(sandbox.pieces))].id
-		var effect = sandbox.effectTypes[rand.Intn(len(sandbox.effectTypes))].id
-		sandbox.NewStatusEffect(piece, effect)
-	}
-	for x := 0; x < 8; x++ {
-		for i := 0; i < x; i++ {
-			var obstType = sandbox.obstacleTypes[rand.Intn(len(sandbox.obstacleTypes))].id
-			sandbox.NewObstacle(Vec2{x: x, y: 4}, 0, obstType)
-		}
-	}
 
 	for !rl.WindowShouldClose() {
 
