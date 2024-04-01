@@ -157,15 +157,15 @@ func registerPieceTypes() {
 }
 
 func registerStatusEffectTypes() {
-	sandbox.RegisterEffectType(NameBloody, assets.texEffectBlood)
-	sandbox.RegisterEffectType(NameExperience, assets.texEffectMedal)
-	sandbox.RegisterEffectType(NameCurse, assets.texEffectCurse)
-	sandbox.RegisterEffectType(NameForcedMove, assets.texEffectForcedMove)
-	sandbox.RegisterEffectType(NamePaid2ndMove, assets.texEffectPaid2ndMove)
-	sandbox.RegisterEffectType(NamePortalGun, assets.texEffectPortalGun)
-	sandbox.RegisterEffectType(NameStonks, assets.texEffectStonks)
-	sandbox.RegisterEffectType(NameStun, assets.texEffectStun)
-	sandbox.RegisterEffectType(NameWizardHat, assets.texEffectWizardHat)
+	sandbox.RegisterEffectType(NameBloody, RenderStyleBottom, assets.texEffectBlood)
+	sandbox.RegisterEffectType(NameExperience, RenderStyleBottom, assets.texEffectMedal)
+	sandbox.RegisterEffectType(NameCurse, RenderStyleBottom, assets.texEffectCurse)
+	sandbox.RegisterEffectType(NameForcedMove, RenderStyleBottom, assets.texEffectForcedMove)
+	sandbox.RegisterEffectType(NamePaid2ndMove, RenderStyleBottom, assets.texEffectPaid2ndMove)
+	sandbox.RegisterEffectType(NamePortalGun, RenderStyleBottom, assets.texEffectPortalGun)
+	sandbox.RegisterEffectType(NameStonks, RenderStyleBottom, assets.texEffectStonks)
+	sandbox.RegisterEffectType(NameStun, RenderStyleStun, assets.texEffectStun)
+	sandbox.RegisterEffectType(NameWizardHat, RenderStyleBottom, assets.texEffectWizardHat)
 }
 
 func registerObstacleTypes() {
