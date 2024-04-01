@@ -1,9 +1,8 @@
 package main
 
 import (
-	"sort"
-
 	rl "github.com/gen2brain/raylib-go/raylib"
+	"sort"
 )
 
 var sandbox = Sandbox{}
@@ -184,12 +183,13 @@ func (s *Sandbox) GetPieceAtVisual(coord Vec2, board uint32) *Piece {
 	return nil
 }
 
-func (s *Sandbox) RegisterEffectType(name string, tex rl.Texture2D) *StatusEffectType {
+func (s *Sandbox) RegisterEffectType(name string, style StatusEffectRenderStyle, tex rl.Texture2D) *StatusEffectType {
 	// We assume effect types are never unregistered
 	s.effectTypes = append(s.effectTypes, StatusEffectType{
-		id:   uint32(len(s.effectTypes)),
-		name: name,
-		tex:  tex,
+		id:    uint32(len(s.effectTypes)),
+		name:  name,
+		style: style,
+		tex:   tex,
 	})
 	return &s.effectTypes[len(s.effectTypes)-1]
 }
@@ -365,18 +365,7 @@ func (s *Sandbox) Render(board uint32, preview bool, selection *Selection) {
 	}
 	for i := 0; i < len(s.pieces); i++ {
 		if s.pieces[i].board == board || (s.pieces[i].board == OffBoard && !preview) {
-			var effectsToRender = make([]*StatusEffect, 0)
-			for j := 0; j < len(s.effects); j++ {
-				if s.effects[j].piece == s.pieces[i].id {
-					effectsToRender = append(effectsToRender, &s.effects[j])
-				}
-			}
-			sort.Slice(effectsToRender, func(a, b int) bool {
-				return effectsToRender[a].typ > effectsToRender[b].typ
-			})
-			for j := 0; j < len(effectsToRender); j++ {
-				effectsToRender[j].Render(s.pieces[i].coord, j, len(effectsToRender), s.pieces[i].scale)
-			}
+			s.RenderStatusEffectsOfPiece(&s.pieces[i])
 		}
 	}
 	if coord, ok := selection.GetSelectedCoord(); ok {
@@ -393,5 +382,29 @@ func (s *Sandbox) Render(board uint32, preview bool, selection *Selection) {
 	var selectedPiece = s.GetPiece(selectedId)
 	if hasSelection && selectedPiece.board != board && !(selectedPiece.board == OffBoard && !preview) {
 		selectedPiece.RenderCrossPlaneIndicator()
+	}
+}
+
+func (s *Sandbox) RenderStatusEffectsOfPiece(piece *Piece) {
+	var effectsToRenderAtBottom = make([]*StatusEffect, 0)
+	var stuns = 0
+	for j := 0; j < len(s.effects); j++ {
+		if s.effects[j].piece == piece.id {
+			var typ = s.GetStatusEffectType(s.effects[j].typ)
+			switch typ.style {
+			case RenderStyleBottom:
+				effectsToRenderAtBottom = append(effectsToRenderAtBottom, &s.effects[j])
+			case RenderStyleStun:
+				typ.RenderAbove(piece.coord, stuns, float32(piece.scale))
+				stuns++
+			}
+		}
+	}
+	sort.Slice(effectsToRenderAtBottom, func(a, b int) bool {
+		return effectsToRenderAtBottom[a].typ > effectsToRenderAtBottom[b].typ
+	})
+	for j := 0; j < len(effectsToRenderAtBottom); j++ {
+		var typ = s.GetStatusEffectType(effectsToRenderAtBottom[j].typ)
+		typ.RenderAtBottom(piece.coord, j, len(effectsToRenderAtBottom), float32(piece.scale))
 	}
 }
