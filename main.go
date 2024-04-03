@@ -1,9 +1,10 @@
 package main
 
 import (
-	rl "github.com/gen2brain/raylib-go/raylib"
-
+	"fmt"
 	rg "github.com/gen2brain/raylib-go/raygui"
+	rl "github.com/gen2brain/raylib-go/raylib"
+	"runtime/debug"
 )
 
 const (
@@ -11,7 +12,21 @@ const (
 	WindowHeight = 980
 )
 
+// Commit Git hash for current commit
+var Commit = func() string {
+	if info, ok := debug.ReadBuildInfo(); ok {
+		for _, setting := range info.Settings {
+			if setting.Key == "vcs.revision" {
+				return setting.Value
+			}
+		}
+	}
+
+	return ""
+}()
+
 func main() {
+	fmt.Printf("Starting Chess Heaven and Hell v1.0/%s\n", Commit[:7])
 	rl.SetConfigFlags(rl.FlagWindowResizable)
 	rl.InitWindow(WindowWidth, WindowHeight, "Chess - Heaven and Hell")
 	defer rl.CloseWindow()
