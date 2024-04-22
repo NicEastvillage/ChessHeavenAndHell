@@ -11,8 +11,8 @@ const (
 const OffBoard = 99999
 
 type Board struct {
-	id    uint32
-	style BoardStyle
+	Id    uint32
+	Style BoardStyle
 }
 
 func NameOfBoard(board uint32) string {

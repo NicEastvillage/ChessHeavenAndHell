@@ -100,15 +100,15 @@ func (r *RngStuff) RerollChaosShown() {
 }
 
 func (r *RngStuff) RerollPiece(sandbox *Sandbox) {
-	if len(sandbox.pieces) == 0 {
+	if len(sandbox.Pieces) == 0 {
 		r.piece = ""
 		return
 	}
-	var piece = sandbox.pieces[rand.Intn(len(sandbox.pieces))]
-	var file = piece.coord.x
-	var rank = piece.coord.y
+	var piece = sandbox.Pieces[rand.Intn(len(sandbox.Pieces))]
+	var file = piece.Coord.X
+	var rank = piece.Coord.Y
 	var fileLetter = 'a' + (file+('z'-'a'+1))%('z'-'a'+1)
-	r.piece = fmt.Sprintf("%s, %c%d %s", sandbox.GetPieceType(piece.typ).name, fileLetter, rank+1, NameOfBoard(piece.board))
+	r.piece = fmt.Sprintf("%s, %c%d %s", sandbox.GetPieceType(piece.Typ).Name, fileLetter, rank+1, NameOfBoard(piece.Board))
 }
 
 func (r *RngStuff) RerollPlane() {
@@ -123,11 +123,11 @@ func (r *RngStuff) RerollTile() {
 }
 
 func (r *RngStuff) RerollUnoccupiedTile(sandbox *Sandbox) {
-	// No piece on it, but obstacle allowed
+	// No Piece on it, but obstacle allowed
 	// There is a possibility that such a tile does not exist
 	var tiles = make([]Tile, 0)
-	for _, tile := range sandbox.tiles {
-		if sandbox.GetPieceAt(tile.coord, tile.board) == nil {
+	for _, tile := range sandbox.Tiles {
+		if sandbox.GetPieceAt(tile.Coord, tile.Board) == nil {
 			tiles = append(tiles, tile)
 		}
 	}
@@ -136,17 +136,17 @@ func (r *RngStuff) RerollUnoccupiedTile(sandbox *Sandbox) {
 		return
 	}
 	var tile = tiles[rand.Intn(len(tiles))]
-	var file = tile.coord.x
-	var rank = tile.coord.y
+	var file = tile.Coord.X
+	var rank = tile.Coord.Y
 	var fileLetter = 'a' + (file+('z'-'a'+1))%('z'-'a'+1)
-	r.unoccupiedTile = fmt.Sprintf("%c%d %s", fileLetter, rank+1, NameOfBoard(tile.board))
+	r.unoccupiedTile = fmt.Sprintf("%c%d %s", fileLetter, rank+1, NameOfBoard(tile.Board))
 }
 
 func (r *RngStuff) RerollEmptyTile(sandbox *Sandbox) {
 	// There is a possibility that such a tile does not exist
 	var tiles = make([]Tile, 0)
-	for _, tile := range sandbox.tiles {
-		if sandbox.GetPieceAt(tile.coord, tile.board) == nil && len(sandbox.GetObstaclesAt(tile.coord, tile.board)) == 0 {
+	for _, tile := range sandbox.Tiles {
+		if sandbox.GetPieceAt(tile.Coord, tile.Board) == nil && len(sandbox.GetObstaclesAt(tile.Coord, tile.Board)) == 0 {
 			tiles = append(tiles, tile)
 		}
 	}
@@ -155,8 +155,8 @@ func (r *RngStuff) RerollEmptyTile(sandbox *Sandbox) {
 		return
 	}
 	var tile = tiles[rand.Intn(len(tiles))]
-	var file = tile.coord.x
-	var rank = tile.coord.y
+	var file = tile.Coord.X
+	var rank = tile.Coord.Y
 	var fileLetter = 'a' + (file+('z'-'a'+1))%('z'-'a'+1)
-	r.emptyTile = fmt.Sprintf("%c%d %s", fileLetter, rank+1, NameOfBoard(tile.board))
+	r.emptyTile = fmt.Sprintf("%c%d %s", fileLetter, rank+1, NameOfBoard(tile.Board))
 }

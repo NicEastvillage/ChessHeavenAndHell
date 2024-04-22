@@ -10,41 +10,41 @@ var ZEROZERO = Vec2{0, 0}
 var ONEONE = Vec2{1, 1}
 
 type Vec2 struct {
-	x, y int
+	X, Y int
 }
 
 func (v Vec2) Add(u Vec2) Vec2 {
-	return Vec2{x: v.x + u.x, y: v.y + u.y}
+	return Vec2{X: v.X + u.X, Y: v.Y + u.Y}
 }
 
 func (v Vec2) Sub(u Vec2) Vec2 {
-	return Vec2{x: v.x - u.x, y: v.y - u.y}
+	return Vec2{X: v.X - u.X, Y: v.Y - u.Y}
 }
 
 func (v Vec2) Scale(s int) Vec2 {
-	return Vec2{x: v.x * s, y: v.y * s}
+	return Vec2{X: v.X * s, Y: v.Y * s}
 }
 
 func (v Vec2) ManLength() int {
-	return Absi(v.x) + Absi(v.y)
+	return Absi(v.X) + Absi(v.Y)
 }
 
 func (v Vec2) Modulo(d int) Vec2 {
-	return Vec2{x: v.x % d, y: v.y % d}
+	return Vec2{X: v.X % d, Y: v.Y % d}
 }
 
 func (v Vec2) CompwiseMul(u Vec2) Vec2 {
-	return Vec2{x: v.x * u.x, y: v.y * u.y}
+	return Vec2{X: v.X * u.X, Y: v.Y * u.Y}
 }
 
 func (v Vec2) CompwiseMax(u Vec2) Vec2 {
-	return Vec2{x: max(v.x, u.x), y: max(v.y, u.y)}
+	return Vec2{X: max(v.X, u.X), Y: max(v.Y, u.Y)}
 }
 
 func (v Vec2) CompwiseMin(u Vec2) Vec2 {
-	return Vec2{x: min(v.x, u.x), y: min(v.y, u.y)}
+	return Vec2{X: min(v.X, u.X), Y: min(v.Y, u.Y)}
 }
 
 func (v Vec2) ToRlVec() rl.Vector2 {
-	return rl.NewVector2(float32(v.x), float32(v.y))
+	return rl.NewVector2(float32(v.X), float32(v.Y))
 }

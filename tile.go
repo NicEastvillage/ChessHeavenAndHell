@@ -3,18 +3,18 @@ package main
 import rl "github.com/gen2brain/raylib-go/raylib"
 
 type Tile struct {
-	board uint32
-	coord Vec2
+	Board uint32
+	Coord Vec2
 }
 
 func (t *Tile) Render(style BoardStyle) {
-	var color = ColorAt(t.coord, style)
-	var pos = GetBoardOrigo().Add(t.coord.Scale(TileSize))
-	rl.DrawRectangle(int32(pos.x), int32(pos.y), TileSize, TileSize, color)
+	var color = ColorAt(t.Coord, style)
+	var pos = GetBoardOrigo().Add(t.Coord.Scale(TileSize))
+	rl.DrawRectangle(int32(pos.X), int32(pos.Y), TileSize, TileSize, color)
 }
 
 func ColorAt(coord Vec2, style BoardStyle) rl.Color {
-	var light = coord.x%2 == coord.y%2
+	var light = coord.X%2 == coord.Y%2
 	var color = rl.NewColor(227, 193, 111, 255)
 	if style == BoardStyleEarth && !light {
 		color = rl.NewColor(184, 139, 74, 255)

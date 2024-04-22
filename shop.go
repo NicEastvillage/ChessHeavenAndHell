@@ -3,21 +3,21 @@ package main
 import "math/rand"
 
 type ShopEntry struct {
-	id            uint32
-	price         int
-	originalPrice int
-	description   string
+	Id            uint32 `json:"id"`
+	Price         int    `json:"price"`
+	OriginalPrice int    `json:"originalPrice"`
+	Description   string `json:"description"`
 }
 
 type Shop struct {
-	money         [2]int
-	entries       []ShopEntry
-	unlockedCount int
+	Money         [2]int      `json:"money"`
+	Entries       []ShopEntry `json:"entries"`
+	UnlockedCount int         `json:"unlockedCount"`
 }
 
 func NewShop() Shop {
 	var shop = Shop{
-		unlockedCount: 3,
+		UnlockedCount: 3,
 	}
 	shop.AddEntry(6, "Stun a non-King piece for 3 rounds.")
 	shop.AddEntry(12, "Move a non-royal piece to Earth.")
@@ -35,32 +35,32 @@ func NewShop() Shop {
 	shop.AddEntry(2, "Forgive a piece for its sins.")
 	shop.AddEntry(8, "Spawn new Knight anywhere on your back rank.")
 	shop.AddEntry(10, "Spawn new Bishop anywhere on your back rank.")
-	rand.Shuffle(len(shop.entries), func(i, j int) { shop.entries[i], shop.entries[j] = shop.entries[j], shop.entries[i] })
+	rand.Shuffle(len(shop.Entries), func(i, j int) { shop.Entries[i], shop.Entries[j] = shop.Entries[j], shop.Entries[i] })
 	return shop
 }
 
 func (s *Shop) AddEntry(price int, description string) *ShopEntry {
-	s.entries = append(s.entries, ShopEntry{
-		id:            uint32(len(s.entries)),
-		price:         price,
-		originalPrice: price,
-		description:   description,
+	s.Entries = append(s.Entries, ShopEntry{
+		Id:            uint32(len(s.Entries)),
+		Price:         price,
+		OriginalPrice: price,
+		Description:   description,
 	})
-	return &s.entries[len(s.entries)-1]
+	return &s.Entries[len(s.Entries)-1]
 }
 
 func (s *Shop) WhiteMoney() *int {
-	return &s.money[0]
+	return &s.Money[0]
 }
 
 func (s *Shop) BlackMoney() *int {
-	return &s.money[1]
+	return &s.Money[1]
 }
 
 func (s *Shop) GetEntry(id uint32) *ShopEntry {
-	for i := 0; i < len(s.entries); i++ {
-		if s.entries[i].id == id {
-			return &s.entries[i]
+	for i := 0; i < len(s.Entries); i++ {
+		if s.Entries[i].Id == id {
+			return &s.Entries[i]
 		}
 	}
 	return nil
