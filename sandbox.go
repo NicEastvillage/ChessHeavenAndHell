@@ -413,13 +413,13 @@ func (s *Sandbox) RenderStatusEffectsOfPiece(piece *Piece) {
 	}
 }
 
-func (s Sandbox) MarshalJSON() ([]byte, error) {
+func (s *Sandbox) MarshalJSON() ([]byte, error) {
 	type Data Sandbox // Note: Does not have Marshall function avoiding recursion
 	var versioned = struct {
-		Data    Data `json:"data"`
-		Version int  `json:"version"`
+		Data    *Data `json:"data"`
+		Version int   `json:"version"`
 	}{
-		Data:    (Data)(s),
+		Data:    (*Data)(s),
 		Version: SerialVersion,
 	}
 	return json.Marshal(versioned)

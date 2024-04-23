@@ -27,7 +27,7 @@ func CheckSavingAndLoading(sandbox *Sandbox, undo *UndoRedoSystem) {
 	var ctrlDown = rl.IsKeyDown(rl.KeyLeftControl) || rl.IsKeyDown(rl.KeyLeftControl)
 	if ctrlDown && rl.IsKeyPressed(rl.KeyS) {
 		var promptForPath = gameSavePath == "" || rl.IsKeyDown(rl.KeyLeftShift) || rl.IsKeyDown(rl.KeyRightShift)
-		_, err := Save(promptForPath, undo)
+		_, err := Save(promptForPath, sandbox, undo)
 		if err != nil {
 			fmt.Println(err)
 			return
@@ -37,7 +37,7 @@ func CheckSavingAndLoading(sandbox *Sandbox, undo *UndoRedoSystem) {
 		if undo.dirty {
 			var save = dialog.Message("%s", "Do you want to save your current game?").Title("Unsaved game").YesNo()
 			if save {
-				_, err := Save(gameSavePath == "", undo)
+				_, err := Save(gameSavePath == "", sandbox, undo)
 				if err != nil {
 					fmt.Println(err)
 					return
@@ -56,7 +56,7 @@ func CheckSavingAndLoading(sandbox *Sandbox, undo *UndoRedoSystem) {
 	}
 }
 
-func Save(promptForPath bool, undo *UndoRedoSystem) (bool, error) {
+func Save(promptForPath bool, sandbox *Sandbox, undo *UndoRedoSystem) (bool, error) {
 	if promptForPath {
 		var file, err = dialog.File().Filter("Json files", "json").Save()
 		if err != nil {

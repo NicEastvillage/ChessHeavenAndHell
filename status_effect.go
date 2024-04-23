@@ -24,15 +24,15 @@ const (
 )
 
 type StatusEffectType struct {
-	Id    uint32
-	Name  string
-	Style StatusEffectRenderStyle
-	Tex   rl.Texture2D
+	Id    uint32                  `json:"id"`
+	Name  string                  `json:"name"`
+	Style StatusEffectRenderStyle `json:"style"`
+	Tex   rl.Texture2D            `json:"tex"`
 }
 
 type StatusEffect struct {
-	Piece uint32
-	Typ   uint32
+	Piece uint32 `json:"piece"`
+	Typ   uint32 `json:"type"`
 }
 
 func (t *StatusEffectType) RenderAtBottom(coord Vec2, index int, total int, scale float32) {

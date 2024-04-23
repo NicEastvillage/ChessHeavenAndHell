@@ -3,8 +3,8 @@ package main
 import rl "github.com/gen2brain/raylib-go/raylib"
 
 type Tile struct {
-	Board uint32
-	Coord Vec2
+	Board uint32 `json:"board"`
+	Coord Vec2   `json:"coord"`
 }
 
 func (t *Tile) Render(style BoardStyle) {

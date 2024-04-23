@@ -36,12 +36,12 @@ type PieceType struct {
 }
 
 type Piece struct {
-	Id    uint32
-	Typ   uint32
-	Color PieceColor
-	Board uint32
-	Coord Vec2
-	Scale uint32
+	Id    uint32     `json:"id"`
+	Typ   uint32     `json:"type"`
+	Color PieceColor `json:"color"`
+	Board uint32     `json:"board"`
+	Coord Vec2       `json:"coord"`
+	Scale uint32     `json:"scale"`
 }
 
 func (p *Piece) Render() {

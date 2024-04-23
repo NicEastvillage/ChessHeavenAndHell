@@ -10,7 +10,8 @@ var ZEROZERO = Vec2{0, 0}
 var ONEONE = Vec2{1, 1}
 
 type Vec2 struct {
-	X, Y int
+	X int `json:"x"`
+	Y int `json:"y"`
 }
 
 func (v Vec2) Add(u Vec2) Vec2 {

@@ -13,15 +13,15 @@ const (
 )
 
 type ObstacleType struct {
-	Id   uint32
-	Name string
-	Tex  rl.Texture2D
+	Id   uint32       `json:"id"`
+	Name string       `json:"name"`
+	Tex  rl.Texture2D `json:"tex"`
 }
 
 type Obstacle struct {
-	Coord Vec2
-	Board uint32
-	Typ   uint32
+	Coord Vec2   `json:"coord"`
+	Board uint32 `json:"board"`
+	Typ   uint32 `json:"type"`
 }
 
 func (o *Obstacle) Render(index int, total int) {
