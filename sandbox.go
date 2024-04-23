@@ -14,12 +14,12 @@ type Sandbox struct {
 	Shop          Shop               `json:"shop"`
 	Boards        [3]Board           `json:"boards"`
 	Tiles         []Tile             `json:"tiles"`
-	PieceTypes    []PieceType        `json:"pieceTypes"`
+	PieceTypes    []PieceType        `json:"-"`
 	Pieces        []Piece            `json:"pieces"`
 	NextPieceId   uint32             `json:"nextPieceId"`
-	EffectTypes   []StatusEffectType `json:"effectTypes"`
+	EffectTypes   []StatusEffectType `json:"-"`
 	Effects       []StatusEffect     `json:"effects"`
-	ObstacleTypes []ObstacleType     `json:"obstacleTypes"`
+	ObstacleTypes []ObstacleType     `json:"-"`
 	Obstacles     []Obstacle         `json:"obstacles"`
 }
 

@@ -13,9 +13,9 @@ const (
 )
 
 type ObstacleType struct {
-	Id   uint32       `json:"id"`
-	Name string       `json:"name"`
-	Tex  rl.Texture2D `json:"tex"`
+	Id   uint32
+	Name string
+	Tex  rl.Texture2D
 }
 
 type Obstacle struct {

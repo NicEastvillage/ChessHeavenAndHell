@@ -24,10 +24,10 @@ const (
 )
 
 type StatusEffectType struct {
-	Id    uint32                  `json:"id"`
-	Name  string                  `json:"name"`
-	Style StatusEffectRenderStyle `json:"style"`
-	Tex   rl.Texture2D            `json:"tex"`
+	Id    uint32
+	Name  string
+	Style StatusEffectRenderStyle
+	Tex   rl.Texture2D
 }
 
 type StatusEffect struct {

@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	rl "github.com/gen2brain/raylib-go/raylib"
 	// https://pkg.go.dev/github.com/sqweek/dialog#section-readme
@@ -19,6 +18,15 @@ type UnknownSerialVersionError struct {
 
 func (e *UnknownSerialVersionError) Error() string {
 	return fmt.Sprintf("unknown serial version number %d", e.UnknownVersion)
+}
+
+type UnknownTypeMarshallError struct {
+	Kind string
+	Name string
+}
+
+func (e *UnknownTypeMarshallError) Error() string {
+	return fmt.Sprintf("unknown %s type %q", e.Kind, e.Name)
 }
 
 var gameSavePath = ""
@@ -46,9 +54,11 @@ func CheckSavingAndLoading(sandbox *Sandbox, undo *UndoRedoSystem) {
 		}
 		_, err := PromptAndLoad(sandbox, undo)
 		if err != nil {
-			var e *UnknownSerialVersionError
-			if errors.As(err, &e) {
-				dialog.Message("Save file contains unknown version (version %d)", e.UnknownVersion).Error()
+			switch e := err.(type) {
+			case *UnknownSerialVersionError:
+				dialog.Message("Save file uses unknown version (version %d)", e.UnknownVersion).Error()
+			case *UnknownTypeMarshallError:
+				dialog.Message("Save file contains unknown %s type %q", e.Kind, e.Name).Error()
 			}
 			fmt.Println(err)
 			return
