@@ -26,9 +26,10 @@ var Commit = func() string {
 }()
 
 func main() {
-	fmt.Printf("Starting Chess Heaven and Hell v1.0/%s\n", Commit[:7])
+	var version = fmt.Sprintf("v1.1/%s", Commit[:7])
+	fmt.Printf("Starting Chess Heaven and Hell %s\n", version)
 	rl.SetConfigFlags(rl.FlagWindowResizable)
-	rl.InitWindow(WindowWidth, WindowHeight, "Chess - Heaven and Hell")
+	rl.InitWindow(WindowWidth, WindowHeight, fmt.Sprintf("Chess - Heaven and Hell %s", version))
 	defer rl.CloseWindow()
 	rl.SetExitKey(rl.KeyNull)
 	var exit = false
