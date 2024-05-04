@@ -14,6 +14,8 @@ func main() {
 	rl.SetConfigFlags(rl.FlagWindowResizable)
 	rl.InitWindow(WindowWidth, WindowHeight, "Chess - Heaven and Hell")
 	defer rl.CloseWindow()
+	rl.SetExitKey(rl.KeyNull)
+	var exit = false
 
 	rl.SetTargetFPS(60)
 
@@ -45,10 +47,13 @@ func main() {
 	var ui = NewUiState()
 	defer ui.Dispose()
 
-	// TODO Ask about saving before closing
-	for !rl.WindowShouldClose() {
+	for !exit {
 
-		CheckSavingAndLoading(&sandbox, &undo)
+		if rl.WindowShouldClose() {
+			exit = AskAboutSaveBeforeExit(&sandbox, &undo)
+		} else {
+			CheckSavingAndLoading(&sandbox, &undo)
+		}
 
 		ui.Update()
 		handleBoardInteraction(&undo, &ui)

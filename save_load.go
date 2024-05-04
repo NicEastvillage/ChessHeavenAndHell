@@ -29,6 +29,7 @@ func CheckSavingAndLoading(sandbox *Sandbox, undo *UndoRedoSystem) {
 			if save {
 				_, err := Save(gameSavePath == "", sandbox, undo)
 				if err != nil {
+					dialog.Message("Something went wrong while saving: %s", err.Error()).Error()
 					fmt.Println(err)
 					return
 				}
@@ -48,6 +49,21 @@ func CheckSavingAndLoading(sandbox *Sandbox, undo *UndoRedoSystem) {
 			return
 		}
 	}
+}
+
+func AskAboutSaveBeforeExit(sandbox *Sandbox, undo *UndoRedoSystem) bool {
+	if undo.dirty {
+		var save = dialog.Message("%s", "Do you want to save your current game?").Title("Unsaved game").YesNo()
+		if save {
+			_, err := Save(gameSavePath == "", sandbox, undo)
+			if err != nil {
+				dialog.Message("Something went wrong while saving: %s", err.Error()).Error()
+				fmt.Println(err)
+				return false
+			}
+		}
+	}
+	return true
 }
 
 func Save(promptForPath bool, sandbox *Sandbox, undo *UndoRedoSystem) (bool, error) {
