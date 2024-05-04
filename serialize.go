@@ -34,13 +34,13 @@ func (e *UnknownIdMarshallError) Error() string {
 }
 
 type SerializedSandbox struct {
-	Version   int                      `json:"version"`
-	Shop      Shop                     `json:"shop"`
-	Boards    [3]Board                 `json:"boards"`
-	Tiles     []Tile                   `json:"tiles"`
-	Pieces    []SerializedPiece        `json:"pieces"`
-	Effects   []SerializedStatusEffect `json:"effects"`
-	Obstacles []SerializedObstacle     `json:"obstacles"`
+	Version        int                      `json:"version"`
+	Shop           Shop                     `json:"shop"`
+	BoardTileMasks [3]uint64                `json:"board_tile_masks"`
+	ExtraTiles     []Tile                   `json:"extra_tiles"`
+	Pieces         []SerializedPiece        `json:"pieces"`
+	Effects        []SerializedStatusEffect `json:"effects"`
+	Obstacles      []SerializedObstacle     `json:"obstacles"`
 }
 
 type SerializedPiece struct {
@@ -64,14 +64,15 @@ type SerializedObstacle struct {
 }
 
 func (s *Sandbox) MarshalJSON() ([]byte, error) {
+	var boardTileMask, extraTiles = SerializeTiles(s)
 	var serialized = SerializedSandbox{
-		Version:   SerialVersion,
-		Shop:      s.Shop,
-		Boards:    s.Boards,
-		Tiles:     s.Tiles,
-		Pieces:    SerializePieces(s),
-		Effects:   SerializeStatusEffects(s),
-		Obstacles: SerializeObstacles(s),
+		Version:        SerialVersion,
+		Shop:           s.Shop,
+		BoardTileMasks: boardTileMask,
+		ExtraTiles:     extraTiles,
+		Pieces:         SerializePieces(s),
+		Effects:        SerializeStatusEffects(s),
+		Obstacles:      SerializeObstacles(s),
 	}
 	return json.Marshal(serialized)
 }
@@ -86,10 +87,12 @@ func (s *Sandbox) UnmarshalJSON(data []byte) error {
 	}
 
 	s.Shop = serialized.Shop
-	s.Boards = serialized.Boards
-	s.Tiles = serialized.Tiles
 
-	err := DeserializePieces(s, serialized.Pieces)
+	err := DeserializeTiles(s, serialized.BoardTileMasks, serialized.ExtraTiles)
+	if err != nil {
+		return err
+	}
+	err = DeserializePieces(s, serialized.Pieces)
 	if err != nil {
 		return err
 	}
@@ -102,6 +105,39 @@ func (s *Sandbox) UnmarshalJSON(data []byte) error {
 		return err
 	}
 
+	return nil
+}
+
+func SerializeTiles(sb *Sandbox) ([3]uint64, []Tile) {
+	var boardTileMasks = [3]uint64{0, 0, 0}
+	var extraTiles = make([]Tile, 0)
+	for _, tile := range sb.Tiles {
+		if IsOffBoard(tile.Coord) {
+			extraTiles = append(extraTiles, tile)
+		} else {
+			boardTileMasks[tile.Board] |= 1 << (tile.Coord.X + 8*tile.Coord.Y)
+		}
+	}
+	return boardTileMasks, extraTiles
+}
+
+func DeserializeTiles(sb *Sandbox, boardTileMasks [3]uint64, extraTiles []Tile) error {
+	sb.Tiles = make([]Tile, len(extraTiles))
+	for b := 0; b < 3; b++ {
+		for y := 0; y < 8; y++ {
+			for x := 0; x < 8; x++ {
+				if (boardTileMasks[b] & (1 << (x + 8*y))) != 0 {
+					sb.Tiles = append(sb.Tiles, Tile{
+						Board: uint32(b),
+						Coord: Vec2{x, y},
+					})
+				}
+			}
+		}
+	}
+	for _, tile := range extraTiles {
+		sb.Tiles = append(sb.Tiles, tile)
+	}
 	return nil
 }
 

@@ -45,6 +45,7 @@ func main() {
 	var ui = NewUiState()
 	defer ui.Dispose()
 
+	// TODO Ask about saving before closing
 	for !rl.WindowShouldClose() {
 
 		CheckSavingAndLoading(&sandbox, &undo)
