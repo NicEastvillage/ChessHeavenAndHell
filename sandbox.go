@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	rl "github.com/gen2brain/raylib-go/raylib"
 	"sort"
 )
@@ -11,16 +10,16 @@ var sandbox = Sandbox{
 }
 
 type Sandbox struct {
-	Shop          Shop               `json:"shop"`
-	Boards        [3]Board           `json:"boards"`
-	Tiles         []Tile             `json:"tiles"`
-	PieceTypes    []PieceType        `json:"-"`
-	Pieces        []Piece            `json:"pieces"`
-	NextPieceId   uint32             `json:"nextPieceId"`
-	EffectTypes   []StatusEffectType `json:"-"`
-	Effects       []StatusEffect     `json:"effects"`
-	ObstacleTypes []ObstacleType     `json:"-"`
-	Obstacles     []Obstacle         `json:"obstacles"`
+	Shop          Shop
+	Boards        [3]Board
+	Tiles         []Tile
+	PieceTypes    []PieceType
+	Pieces        []Piece
+	NextPieceId   uint32
+	EffectTypes   []StatusEffectType
+	Effects       []StatusEffect
+	ObstacleTypes []ObstacleType
+	Obstacles     []Obstacle
 }
 
 func (s *Sandbox) GetBoard(id uint32) *Board {
@@ -411,33 +410,4 @@ func (s *Sandbox) RenderStatusEffectsOfPiece(piece *Piece) {
 		var typ = s.GetStatusEffectType(effectsToRenderAtBottom[j].Typ)
 		typ.RenderAtBottom(piece.Coord, j, len(effectsToRenderAtBottom), float32(piece.Scale))
 	}
-}
-
-func (s *Sandbox) MarshalJSON() ([]byte, error) {
-	type Data Sandbox // Note: Does not have Marshall function avoiding recursion
-	var versioned = struct {
-		Data    *Data `json:"data"`
-		Version int   `json:"version"`
-	}{
-		Data:    (*Data)(s),
-		Version: SerialVersion,
-	}
-	return json.Marshal(versioned)
-}
-
-func (s *Sandbox) UnmarshalJSON(data []byte) error {
-	type Data Sandbox // Note: Does not have Unmarshall function avoiding recursion
-	type Versioned = struct {
-		Data    *Data `json:"data"`
-		Version int   `json:"version"`
-	}
-	var versioned = Versioned{}
-	if err := json.Unmarshal(data, &versioned); err != nil {
-		return err
-	}
-	if versioned.Version != SerialVersion {
-		return &UnknownSerialVersionError{UnknownVersion: versioned.Version}
-	}
-	*s = (Sandbox)(*versioned.Data)
-	return nil
 }

@@ -31,8 +31,8 @@ type StatusEffectType struct {
 }
 
 type StatusEffect struct {
-	Piece uint32 `json:"piece"`
-	Typ   uint32 `json:"type"`
+	Piece uint32
+	Typ   uint32
 }
 
 func (t *StatusEffectType) RenderAtBottom(coord Vec2, index int, total int, scale float32) {

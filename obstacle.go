@@ -19,9 +19,9 @@ type ObstacleType struct {
 }
 
 type Obstacle struct {
-	Coord Vec2   `json:"coord"`
-	Board uint32 `json:"board"`
-	Typ   uint32 `json:"type"`
+	Coord Vec2
+	Board uint32
+	Typ   uint32
 }
 
 func (o *Obstacle) Render(index int, total int) {

@@ -10,25 +10,6 @@ import (
 	"path/filepath"
 )
 
-const SerialVersion = 1
-
-type UnknownSerialVersionError struct {
-	UnknownVersion int
-}
-
-func (e *UnknownSerialVersionError) Error() string {
-	return fmt.Sprintf("unknown serial version number %d", e.UnknownVersion)
-}
-
-type UnknownTypeMarshallError struct {
-	Kind string
-	Name string
-}
-
-func (e *UnknownTypeMarshallError) Error() string {
-	return fmt.Sprintf("unknown %s type %q", e.Kind, e.Name)
-}
-
 var gameSavePath = ""
 
 func CheckSavingAndLoading(sandbox *Sandbox, undo *UndoRedoSystem) {
@@ -37,6 +18,7 @@ func CheckSavingAndLoading(sandbox *Sandbox, undo *UndoRedoSystem) {
 		var promptForPath = gameSavePath == "" || rl.IsKeyDown(rl.KeyLeftShift) || rl.IsKeyDown(rl.KeyRightShift)
 		_, err := Save(promptForPath, sandbox, undo)
 		if err != nil {
+			dialog.Message("Something went wrong while saving: %s", err.Error()).Error()
 			fmt.Println(err)
 			return
 		}
@@ -56,9 +38,11 @@ func CheckSavingAndLoading(sandbox *Sandbox, undo *UndoRedoSystem) {
 		if err != nil {
 			switch e := err.(type) {
 			case *UnknownSerialVersionError:
-				dialog.Message("Save file uses unknown version (version %d)", e.UnknownVersion).Error()
+				dialog.Message("Failed to load saved game. Save file uses unknown version (version %d)", e.UnknownVersion).Error()
+			case *UnknownIdMarshallError:
+				dialog.Message("Failed to load saved game. Save file contains unknown %s id %d", e.Kind, e.Id).Error()
 			case *UnknownTypeMarshallError:
-				dialog.Message("Save file contains unknown %s type %q", e.Kind, e.Name).Error()
+				dialog.Message("Failed to load saved game. Save file contains unknown %s type %q", e.Kind, e.Name).Error()
 			}
 			fmt.Println(err)
 			return
@@ -100,10 +84,12 @@ func PromptAndLoad(sandbox *Sandbox, undo *UndoRedoSystem) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	err = json.Unmarshal(data, sandbox)
+	var newcopy = *sandbox // Copy
+	err = json.Unmarshal(data, &newcopy)
 	if err != nil {
 		return false, err
 	}
+	*sandbox = newcopy // Commit
 	*undo = NewUndoRedoSystem()
 	fmt.Printf("Successfully loaded game from %s\n", gameSavePath)
 	return true, nil
