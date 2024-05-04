@@ -22,5 +22,5 @@ func GetHoveredCoord() Vec2 {
 	var mousef = rl.GetMousePosition()
 	var origof = GetBoardOrigo().ToRlVec()
 	var coordf = rl.Vector2Scale(rl.Vector2Subtract(mousef, origof), 1./TileSize)
-	return Vec2{x: int(math.Floor(float64(coordf.X))), y: int(math.Floor(float64(coordf.Y)))}
+	return Vec2{X: int(math.Floor(float64(coordf.X))), Y: int(math.Floor(float64(coordf.Y)))}
 }

@@ -30,6 +30,8 @@ func main() {
 	rl.SetConfigFlags(rl.FlagWindowResizable)
 	rl.InitWindow(WindowWidth, WindowHeight, "Chess - Heaven and Hell")
 	defer rl.CloseWindow()
+	rl.SetExitKey(rl.KeyNull)
+	var exit = false
 
 	rl.SetTargetFPS(60)
 
@@ -46,22 +48,28 @@ func main() {
 	setupBoard(0, BoardStyleHeaven, false)
 	setupBoard(1, BoardStyleEarth, true)
 	setupBoard(2, BoardStyleHell, false)
-	sandbox.NewObstacle(Vec2{1, 2}, 0, sandbox.GetObstacleTypeByName(NameCoin).id)
-	sandbox.NewObstacle(Vec2{1, 2}, 0, sandbox.GetObstacleTypeByName(NameCoin).id)
-	sandbox.NewObstacle(Vec2{6, 5}, 0, sandbox.GetObstacleTypeByName(NameCoin).id)
-	sandbox.NewObstacle(Vec2{6, 5}, 0, sandbox.GetObstacleTypeByName(NameCoin).id)
-	sandbox.NewObstacle(Vec2{2, 5}, 0, sandbox.GetObstacleTypeByName(NameChaosOrb).id)
-	sandbox.NewObstacle(Vec2{5, 2}, 0, sandbox.GetObstacleTypeByName(NameChaosOrb).id)
-	sandbox.NewObstacle(Vec2{6, 2}, 2, sandbox.GetObstacleTypeByName(NameFire).id)
-	sandbox.NewObstacle(Vec2{1, 5}, 2, sandbox.GetObstacleTypeByName(NameFire).id)
-	sandbox.NewObstacle(Vec2{2, 2}, 2, sandbox.GetObstacleTypeByName(NameChaosOrb).id)
-	sandbox.NewObstacle(Vec2{5, 5}, 2, sandbox.GetObstacleTypeByName(NameChaosOrb).id)
+	sandbox.NewObstacle(Vec2{1, 2}, 0, sandbox.GetObstacleTypeByName(NameCoin).Id)
+	sandbox.NewObstacle(Vec2{1, 2}, 0, sandbox.GetObstacleTypeByName(NameCoin).Id)
+	sandbox.NewObstacle(Vec2{6, 5}, 0, sandbox.GetObstacleTypeByName(NameCoin).Id)
+	sandbox.NewObstacle(Vec2{6, 5}, 0, sandbox.GetObstacleTypeByName(NameCoin).Id)
+	sandbox.NewObstacle(Vec2{2, 5}, 0, sandbox.GetObstacleTypeByName(NameChaosOrb).Id)
+	sandbox.NewObstacle(Vec2{5, 2}, 0, sandbox.GetObstacleTypeByName(NameChaosOrb).Id)
+	sandbox.NewObstacle(Vec2{6, 2}, 2, sandbox.GetObstacleTypeByName(NameFire).Id)
+	sandbox.NewObstacle(Vec2{1, 5}, 2, sandbox.GetObstacleTypeByName(NameFire).Id)
+	sandbox.NewObstacle(Vec2{2, 2}, 2, sandbox.GetObstacleTypeByName(NameChaosOrb).Id)
+	sandbox.NewObstacle(Vec2{5, 5}, 2, sandbox.GetObstacleTypeByName(NameChaosOrb).Id)
 
 	var undo = NewUndoRedoSystem()
 	var ui = NewUiState()
 	defer ui.Dispose()
 
-	for !rl.WindowShouldClose() {
+	for !exit {
+
+		if rl.WindowShouldClose() {
+			exit = AskAboutSaveBeforeExit(&sandbox, &undo)
+		} else {
+			CheckSavingAndLoading(&sandbox, &undo)
+		}
 
 		ui.Update()
 		handleBoardInteraction(&undo, &ui)
@@ -77,7 +85,7 @@ func main() {
 }
 
 func IsCoordUnderUi(coord Vec2) bool {
-	return coord.x < -2 || coord.x >= 12 || coord.y < -2 || coord.y >= 10
+	return coord.X < -2 || coord.X >= 12 || coord.Y < -2 || coord.Y >= 10
 }
 
 func handleBoardInteraction(undo *UndoRedoSystem, ui *UiState) {
@@ -90,15 +98,15 @@ func handleBoardInteraction(undo *UndoRedoSystem, ui *UiState) {
 			undo.Append(NewDeletePieceCmd(&sandbox, ui, pieceId))
 		} else if rl.IsKeyPressed(rl.KeyC) && ctrlDown {
 			var piece = sandbox.GetPiece(pieceId)
-			ui.clipboard.StorePiece(piece.typ, piece.color, piece.scale, sandbox.GetStatusEffectsOnPiece(pieceId))
+			ui.clipboard.StorePiece(piece.Typ, piece.Color, piece.Scale, sandbox.GetStatusEffectsOnPiece(pieceId))
 		} else if rl.IsKeyPressed(rl.KeyX) && ctrlDown {
 			var piece = sandbox.GetPiece(pieceId)
-			ui.clipboard.StorePiece(piece.typ, piece.color, piece.scale, sandbox.GetStatusEffectsOnPiece(pieceId))
+			ui.clipboard.StorePiece(piece.Typ, piece.Color, piece.Scale, sandbox.GetStatusEffectsOnPiece(pieceId))
 			undo.Append(NewDeletePieceCmd(&sandbox, ui, pieceId))
 		} else if rl.IsKeyReleased(rl.KeyD) && ctrlDown {
 			undo.Append(NewDuplicatePieceCmd(&sandbox, ui, pieceId))
 		} else if rl.IsKeyPressed(rl.KeyC) {
-			var newColor = 1 - sandbox.GetPiece(pieceId).color
+			var newColor = 1 - sandbox.GetPiece(pieceId).Color
 			undo.Append(NewChangeColorOfPieceCmd(&sandbox, pieceId, newColor))
 		}
 	}
@@ -133,7 +141,7 @@ func handleMouseInteraction(undo *UndoRedoSystem, ui *UiState) {
 			if piece == nil {
 				ui.selection.Deselect()
 			} else {
-				ui.selection.SelectPiece(piece.id)
+				ui.selection.SelectPiece(piece.Id)
 			}
 		} else if ui.mode == 1 {
 			ui.selection.SelectCoord(coord)
@@ -141,7 +149,7 @@ func handleMouseInteraction(undo *UndoRedoSystem, ui *UiState) {
 	} else if id, ok := ui.selection.GetSelectedPieceId(); ok {
 		if rl.IsMouseButtonPressed(rl.MouseButtonRight) {
 			var piece = sandbox.GetPiece(id)
-			if piece.coord != coord || piece.board != uint32(ui.board) {
+			if piece.Coord != coord || piece.Board != uint32(ui.board) {
 				undo.Append(NewMovePieceCmd(&sandbox, id, coord, uint32(ui.board)))
 			}
 		}
@@ -192,11 +200,11 @@ func registerObstacleTypes() {
 
 func setupBoard(boardId uint32, style BoardStyle, withPieces bool) {
 	var board = sandbox.GetBoard(boardId)
-	board.id = boardId
-	board.style = style
+	board.Id = boardId
+	board.Style = style
 	for y := 0; y < 8; y++ {
 		for x := 0; x < 8; x++ {
-			sandbox.NewTile(board.id, Vec2{x, y})
+			sandbox.NewTile(board.Id, Vec2{x, y})
 		}
 	}
 	if !withPieces {

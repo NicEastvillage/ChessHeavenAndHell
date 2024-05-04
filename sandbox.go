@@ -5,26 +5,29 @@ import (
 	"sort"
 )
 
-var sandbox = Sandbox{}
+var sandbox = Sandbox{
+	Shop: NewShop(),
+}
 
 type Sandbox struct {
-	boards        [3]Board
-	tiles         []Tile
-	pieceTypes    []PieceType
-	pieces        []Piece
-	nextPieceId   uint32
-	effectTypes   []StatusEffectType
-	effects       []StatusEffect
-	obstacleTypes []ObstacleType
-	obstacles     []Obstacle
+	Shop          Shop
+	Boards        [3]Board
+	Tiles         []Tile
+	PieceTypes    []PieceType
+	Pieces        []Piece
+	NextPieceId   uint32
+	EffectTypes   []StatusEffectType
+	Effects       []StatusEffect
+	ObstacleTypes []ObstacleType
+	Obstacles     []Obstacle
 }
 
 func (s *Sandbox) GetBoard(id uint32) *Board {
-	return &s.boards[id]
+	return &s.Boards[id]
 }
 
 func IsOffBoard(coord Vec2) bool {
-	return coord.x < 0 || coord.x >= 8 || coord.y < 0 || coord.y >= 8
+	return coord.X < 0 || coord.X >= 8 || coord.Y < 0 || coord.Y >= 8
 }
 
 func (s *Sandbox) FindUnoccupiedOffBoardCoord() Vec2 {
@@ -42,33 +45,33 @@ func (s *Sandbox) FindUnoccupiedOffBoardCoord() Vec2 {
 			}
 		}
 	}
-	return Vec2{x: 9, y: -1}
+	return Vec2{X: 9, Y: -1}
 }
 
 func (s *Sandbox) NewTile(board uint32, coord Vec2) *Tile {
-	s.tiles = append(s.tiles, Tile{board: board, coord: coord})
-	return &s.tiles[len(s.tiles)-1]
+	s.Tiles = append(s.Tiles, Tile{Board: board, Coord: coord})
+	return &s.Tiles[len(s.Tiles)-1]
 }
 
 func (s *Sandbox) GetTile(board uint32, coord Vec2) *Tile {
-	for i := 0; i < len(s.tiles); i++ {
-		if s.tiles[i].board == board && s.tiles[i].coord == coord {
-			return &s.tiles[i]
+	for i := 0; i < len(s.Tiles); i++ {
+		if s.Tiles[i].Board == board && s.Tiles[i].Coord == coord {
+			return &s.Tiles[i]
 		}
 	}
 	return nil
 }
 
 func (s *Sandbox) RemoveTile(board uint32, coord Vec2) bool {
-	if len(s.tiles) == 0 {
+	if len(s.Tiles) == 0 {
 		return false
 	}
 	// The slice is unordered, so we insert the last Tile where there removed Tile was and shorten the slice
-	var last = s.tiles[len(s.tiles)-1]
-	for i := 0; i < len(s.tiles); i++ {
-		if s.tiles[i].board == board && s.tiles[i].coord == coord {
-			s.tiles[i] = last
-			s.tiles = s.tiles[:len(s.tiles)-1]
+	var last = s.Tiles[len(s.Tiles)-1]
+	for i := 0; i < len(s.Tiles); i++ {
+		if s.Tiles[i].Board == board && s.Tiles[i].Coord == coord {
+			s.Tiles[i] = last
+			s.Tiles = s.Tiles[:len(s.Tiles)-1]
 			return true
 		}
 	}
@@ -76,74 +79,74 @@ func (s *Sandbox) RemoveTile(board uint32, coord Vec2) bool {
 }
 
 func (s *Sandbox) RegisterPieceType(name string, texWhite rl.Texture2D, texBlack rl.Texture2D) *PieceType {
-	// We assume piece types are never unregistered
-	s.pieceTypes = append(s.pieceTypes, PieceType{
-		id:       uint32(len(s.pieceTypes)),
-		name:     name,
-		texWhite: texWhite,
-		texBlack: texBlack,
+	// We assume Piece types are never unregistered
+	s.PieceTypes = append(s.PieceTypes, PieceType{
+		Id:       uint32(len(s.PieceTypes)),
+		Name:     name,
+		TexWhite: texWhite,
+		TexBlack: texBlack,
 	})
-	return &s.pieceTypes[len(s.pieceTypes)-1]
+	return &s.PieceTypes[len(s.PieceTypes)-1]
 }
 
 func (s *Sandbox) GetPieceType(id uint32) *PieceType {
-	return &s.pieceTypes[id]
+	return &s.PieceTypes[id]
 }
 
 func (s *Sandbox) GetPieceTypeByName(name string) *PieceType {
-	for i := 0; i < len(s.pieceTypes); i++ {
-		if s.pieceTypes[i].name == name {
-			return &s.pieceTypes[i]
+	for i := 0; i < len(s.PieceTypes); i++ {
+		if s.PieceTypes[i].Name == name {
+			return &s.PieceTypes[i]
 		}
 	}
 	return nil
 }
 
 func (s *Sandbox) NewPiece(typ uint32, color PieceColor, board uint32, coord Vec2) *Piece {
-	s.nextPieceId++
-	s.pieces = append(s.pieces, Piece{
-		id:    s.nextPieceId - 1,
-		typ:   typ,
-		color: color,
-		board: board,
-		coord: coord,
-		scale: 1,
+	s.NextPieceId++
+	s.Pieces = append(s.Pieces, Piece{
+		Id:    s.NextPieceId - 1,
+		Typ:   typ,
+		Color: color,
+		Board: board,
+		Coord: coord,
+		Scale: 1,
 	})
-	return &s.pieces[len(s.pieces)-1]
+	return &s.Pieces[len(s.Pieces)-1]
 }
 
 func (s *Sandbox) NewPieceFromName(typ string, color PieceColor, board uint32, coord Vec2) *Piece {
-	return s.NewPiece(s.GetPieceTypeByName(typ).id, color, board, coord)
+	return s.NewPiece(s.GetPieceTypeByName(typ).Id, color, board, coord)
 }
 
-// AddPiece adds a piece with full details. It is up to the called to ensure that another piece with
-// the same id does not exist.
+// AddPiece adds a Piece with full details. It is up to the called to ensure that another Piece with
+// the same Id does not exist.
 func (s *Sandbox) AddPiece(piece Piece) *Piece {
-	s.pieces = append(s.pieces, piece)
-	return &s.pieces[len(s.pieces)-1]
+	s.Pieces = append(s.Pieces, piece)
+	return &s.Pieces[len(s.Pieces)-1]
 }
 
 func (s *Sandbox) GetPiece(id uint32) *Piece {
-	for i := 0; i < len(s.pieces); i++ {
-		if s.pieces[i].id == id {
-			return &s.pieces[i]
+	for i := 0; i < len(s.Pieces); i++ {
+		if s.Pieces[i].Id == id {
+			return &s.Pieces[i]
 		}
 	}
 	return nil
 }
 
 func (s *Sandbox) RemovePiece(id uint32) bool {
-	if len(s.pieces) == 0 {
+	if len(s.Pieces) == 0 {
 		return false
 	}
 
 	s.RemoveEffectsFromPiece(id)
 
 	// The slice is unordered, so we insert the last Piece where there removed Piece was and shorten the slice
-	for i := 0; i < len(s.pieces); i++ {
-		if s.pieces[i].id == id {
-			s.pieces[i] = s.pieces[len(s.pieces)-1]
-			s.pieces = s.pieces[:len(s.pieces)-1]
+	for i := 0; i < len(s.Pieces); i++ {
+		if s.Pieces[i].Id == id {
+			s.Pieces[i] = s.Pieces[len(s.Pieces)-1]
+			s.Pieces = s.Pieces[:len(s.Pieces)-1]
 			return true
 		}
 	}
@@ -152,30 +155,30 @@ func (s *Sandbox) RemovePiece(id uint32) bool {
 
 func (s *Sandbox) RemoveEffectsFromPiece(pieceId uint32) {
 	var removedEffects = 0
-	for i := len(s.effects) - 1; i >= 0; i-- {
-		if s.effects[i].piece == pieceId {
+	for i := len(s.Effects) - 1; i >= 0; i-- {
+		if s.Effects[i].Piece == pieceId {
 			removedEffects++
-			s.effects[i] = s.effects[len(s.effects)-removedEffects]
+			s.Effects[i] = s.Effects[len(s.Effects)-removedEffects]
 		}
 	}
-	s.effects = s.effects[:len(s.effects)-removedEffects]
+	s.Effects = s.Effects[:len(s.Effects)-removedEffects]
 }
 
 func (s *Sandbox) GetPieceAt(coord Vec2, board uint32) *Piece {
-	for i := 0; i < len(s.pieces); i++ {
-		if s.pieces[i].board == board && s.pieces[i].coord == coord {
-			return &s.pieces[i]
+	for i := 0; i < len(s.Pieces); i++ {
+		if s.Pieces[i].Board == board && s.Pieces[i].Coord == coord {
+			return &s.Pieces[i]
 		}
 	}
 	return nil
 }
 
 func (s *Sandbox) GetPieceAtVisual(coord Vec2, board uint32) *Piece {
-	for i := 0; i < len(s.pieces); i++ {
-		for x := 0; x < int(s.pieces[i].scale); x++ {
-			for y := 0; y < int(s.pieces[i].scale); y++ {
-				if (s.pieces[i].board == board || s.pieces[i].board == OffBoard) && s.pieces[i].coord.Add(Vec2{x, y}) == coord {
-					return &s.pieces[i]
+	for i := 0; i < len(s.Pieces); i++ {
+		for x := 0; x < int(s.Pieces[i].Scale); x++ {
+			for y := 0; y < int(s.Pieces[i].Scale); y++ {
+				if (s.Pieces[i].Board == board || s.Pieces[i].Board == OffBoard) && s.Pieces[i].Coord.Add(Vec2{x, y}) == coord {
+					return &s.Pieces[i]
 				}
 			}
 		}
@@ -185,40 +188,40 @@ func (s *Sandbox) GetPieceAtVisual(coord Vec2, board uint32) *Piece {
 
 func (s *Sandbox) RegisterEffectType(name string, style StatusEffectRenderStyle, tex rl.Texture2D) *StatusEffectType {
 	// We assume effect types are never unregistered
-	s.effectTypes = append(s.effectTypes, StatusEffectType{
-		id:    uint32(len(s.effectTypes)),
-		name:  name,
-		style: style,
-		tex:   tex,
+	s.EffectTypes = append(s.EffectTypes, StatusEffectType{
+		Id:    uint32(len(s.EffectTypes)),
+		Name:  name,
+		Style: style,
+		Tex:   tex,
 	})
-	return &s.effectTypes[len(s.effectTypes)-1]
+	return &s.EffectTypes[len(s.EffectTypes)-1]
 }
 
 func (s *Sandbox) GetStatusEffectType(id uint32) *StatusEffectType {
-	return &s.effectTypes[id]
+	return &s.EffectTypes[id]
 }
 
 func (s *Sandbox) GetStatusEffectTypeByName(name string) *StatusEffectType {
-	for i := 0; i < len(s.effectTypes); i++ {
-		if s.effectTypes[i].name == name {
-			return &s.effectTypes[i]
+	for i := 0; i < len(s.EffectTypes); i++ {
+		if s.EffectTypes[i].Name == name {
+			return &s.EffectTypes[i]
 		}
 	}
 	return nil
 }
 
 func (s *Sandbox) NewStatusEffect(piece uint32, typ uint32) *StatusEffect {
-	s.effects = append(s.effects, StatusEffect{
-		piece: piece,
-		typ:   typ,
+	s.Effects = append(s.Effects, StatusEffect{
+		Piece: piece,
+		Typ:   typ,
 	})
-	return &s.effects[len(s.effects)-1]
+	return &s.Effects[len(s.Effects)-1]
 }
 
 func (s *Sandbox) RemoveStatusEffect(piece uint32, typ uint32) {
-	for i, effect := range s.effects {
-		if effect.typ == typ && effect.piece == piece {
-			s.effects = append(s.effects[:i], s.effects[i+1:]...)
+	for i, effect := range s.Effects {
+		if effect.Typ == typ && effect.Piece == piece {
+			s.Effects = append(s.Effects[:i], s.Effects[i+1:]...)
 			return
 		}
 	}
@@ -226,8 +229,8 @@ func (s *Sandbox) RemoveStatusEffect(piece uint32, typ uint32) {
 
 func (s *Sandbox) GetStatusEffectCount(pieceId uint32, statusType uint32) int {
 	var count = 0
-	for _, effect := range sandbox.effects {
-		if effect.typ == statusType && effect.piece == pieceId {
+	for _, effect := range sandbox.Effects {
+		if effect.Typ == statusType && effect.Piece == pieceId {
 			count++
 		}
 	}
@@ -236,9 +239,9 @@ func (s *Sandbox) GetStatusEffectCount(pieceId uint32, statusType uint32) int {
 
 func (s *Sandbox) GetStatusEffectsOnPiece(pieceId uint32) []uint32 {
 	var effects = make([]uint32, 0)
-	for _, effect := range s.effects {
-		if effect.piece == pieceId {
-			effects = append(effects, effect.typ)
+	for _, effect := range s.Effects {
+		if effect.Piece == pieceId {
+			effects = append(effects, effect.Typ)
 		}
 	}
 	return effects
@@ -246,41 +249,41 @@ func (s *Sandbox) GetStatusEffectsOnPiece(pieceId uint32) []uint32 {
 
 func (s *Sandbox) RegisterObstacleType(name string, tex rl.Texture2D) *ObstacleType {
 	// We assume obstacle types are never unregistered
-	s.obstacleTypes = append(s.obstacleTypes, ObstacleType{
-		id:   uint32(len(s.obstacleTypes)),
-		name: name,
-		tex:  tex,
+	s.ObstacleTypes = append(s.ObstacleTypes, ObstacleType{
+		Id:   uint32(len(s.ObstacleTypes)),
+		Name: name,
+		Tex:  tex,
 	})
-	return &s.obstacleTypes[len(s.obstacleTypes)-1]
+	return &s.ObstacleTypes[len(s.ObstacleTypes)-1]
 }
 
 func (s *Sandbox) GetObstacleType(id uint32) *ObstacleType {
-	return &s.obstacleTypes[id]
+	return &s.ObstacleTypes[id]
 }
 
 func (s *Sandbox) GetObstacleTypeByName(name string) *ObstacleType {
-	for i := 0; i < len(s.obstacleTypes); i++ {
-		if s.obstacleTypes[i].name == name {
-			return &s.obstacleTypes[i]
+	for i := 0; i < len(s.ObstacleTypes); i++ {
+		if s.ObstacleTypes[i].Name == name {
+			return &s.ObstacleTypes[i]
 		}
 	}
 	return nil
 }
 
 func (s *Sandbox) NewObstacle(coord Vec2, board uint32, typ uint32) *Obstacle {
-	s.obstacles = append(s.obstacles, Obstacle{
-		coord: coord,
-		board: board,
-		typ:   typ,
+	s.Obstacles = append(s.Obstacles, Obstacle{
+		Coord: coord,
+		Board: board,
+		Typ:   typ,
 	})
-	return &s.obstacles[len(s.obstacles)-1]
+	return &s.Obstacles[len(s.Obstacles)-1]
 }
 
 func (s *Sandbox) GetObstaclesAt(coord Vec2, board uint32) []uint32 {
 	var obstacles = make([]uint32, 0)
-	for _, obstacle := range s.obstacles {
-		if obstacle.coord == coord && obstacle.board == board {
-			obstacles = append(obstacles, obstacle.typ)
+	for _, obstacle := range s.Obstacles {
+		if obstacle.Coord == coord && obstacle.Board == board {
+			obstacles = append(obstacles, obstacle.Typ)
 		}
 	}
 	return obstacles
@@ -288,8 +291,8 @@ func (s *Sandbox) GetObstaclesAt(coord Vec2, board uint32) []uint32 {
 
 func (s *Sandbox) GetObstacleCount(coord Vec2, board uint32, typ uint32) int {
 	var count = 0
-	for i := 0; i < len(s.obstacles); i++ {
-		if s.obstacles[i].typ == typ && s.obstacles[i].board == board && s.obstacles[i].coord == coord {
+	for i := 0; i < len(s.Obstacles); i++ {
+		if s.Obstacles[i].Typ == typ && s.Obstacles[i].Board == board && s.Obstacles[i].Coord == coord {
 			count++
 		}
 	}
@@ -297,10 +300,10 @@ func (s *Sandbox) GetObstacleCount(coord Vec2, board uint32, typ uint32) int {
 }
 
 func (s *Sandbox) RemoveObstacle(coord Vec2, board uint32, typ uint32) bool {
-	for i := 0; i < len(s.obstacles); i++ {
-		if s.obstacles[i].typ == typ && s.obstacles[i].board == board && s.obstacles[i].coord == coord {
-			s.obstacles[i] = s.obstacles[len(s.obstacles)-1]
-			s.obstacles = s.obstacles[:len(s.obstacles)-1]
+	for i := 0; i < len(s.Obstacles); i++ {
+		if s.Obstacles[i].Typ == typ && s.Obstacles[i].Board == board && s.Obstacles[i].Coord == coord {
+			s.Obstacles[i] = s.Obstacles[len(s.Obstacles)-1]
+			s.Obstacles = s.Obstacles[:len(s.Obstacles)-1]
 			return true
 		}
 	}
@@ -309,39 +312,39 @@ func (s *Sandbox) RemoveObstacle(coord Vec2, board uint32, typ uint32) bool {
 
 func (s *Sandbox) Render(board uint32, preview bool, selection *Selection) {
 	var origo = GetBoardOrigo()
-	for i := 0; i < len(s.tiles); i++ {
-		if s.tiles[i].board == board {
-			s.tiles[i].Render(s.boards[board].style)
+	for i := 0; i < len(s.Tiles); i++ {
+		if s.Tiles[i].Board == board {
+			s.Tiles[i].Render(s.Boards[board].Style)
 		}
 	}
 	if !preview {
-		var rankFileTextColor = ColorAt(Vec2{1, 0}, s.boards[board].style)
+		var rankFileTextColor = ColorAt(Vec2{1, 0}, s.Boards[board].Style)
 		for x := 0; x < 8; x++ {
-			rl.DrawTextEx(assets.fontComicSansMs, string(rune('a'+x)), rl.NewVector2(float32(origo.x+x*TileSize+7), float32(origo.y+4+TileSize*8)), UiFontSize, 1, rankFileTextColor)
+			rl.DrawTextEx(assets.fontComicSansMs, string(rune('a'+x)), rl.NewVector2(float32(origo.X+x*TileSize+7), float32(origo.Y+4+TileSize*8)), UiFontSize, 1, rankFileTextColor)
 		}
 		for y := 0; y < 8; y++ {
-			rl.DrawTextEx(assets.fontComicSansMs, string(rune('1'+y)), rl.NewVector2(float32(origo.x-7-10), float32(origo.y-7-20+TileSize*8-y*TileSize)), UiFontSize, 1, rankFileTextColor)
+			rl.DrawTextEx(assets.fontComicSansMs, string(rune('1'+y)), rl.NewVector2(float32(origo.X-7-10), float32(origo.Y-7-20+TileSize*8-y*TileSize)), UiFontSize, 1, rankFileTextColor)
 		}
 	} else {
 		const fontSizeGiant = 60
-		var rankFileTextColor = ColorAt(Vec2{1, 0}, s.boards[board].style)
+		var rankFileTextColor = ColorAt(Vec2{1, 0}, s.Boards[board].Style)
 		var offsetX = TileSize/2 - fontSizeGiant/3
 		var offsetY = TileSize/2 - fontSizeGiant/2
 		for x := 0; x < 8; x++ {
-			rl.DrawTextEx(assets.fontComicSansMs, string(rune('a'+x)), rl.NewVector2(float32(origo.x+x*TileSize+offsetX), float32(origo.y+offsetY+TileSize*8)), fontSizeGiant, 1, rankFileTextColor)
+			rl.DrawTextEx(assets.fontComicSansMs, string(rune('a'+x)), rl.NewVector2(float32(origo.X+x*TileSize+offsetX), float32(origo.Y+offsetY+TileSize*8)), fontSizeGiant, 1, rankFileTextColor)
 		}
 		for y := 0; y < 8; y++ {
-			rl.DrawTextEx(assets.fontComicSansMs, string(rune('1'+y)), rl.NewVector2(float32(origo.x-TileSize+offsetX), float32(origo.y+offsetY+TileSize*7-y*TileSize)), fontSizeGiant, 1, rankFileTextColor)
+			rl.DrawTextEx(assets.fontComicSansMs, string(rune('1'+y)), rl.NewVector2(float32(origo.X-TileSize+offsetX), float32(origo.Y+offsetY+TileSize*7-y*TileSize)), fontSizeGiant, 1, rankFileTextColor)
 		}
 	}
-	var obstacleHasBeenRenderedFlag = make([]bool, len(s.obstacles))
-	for i := 0; i < len(s.obstacles); i++ {
-		if !obstacleHasBeenRenderedFlag[i] && s.obstacles[i].board == board {
+	var obstacleHasBeenRenderedFlag = make([]bool, len(s.Obstacles))
+	for i := 0; i < len(s.Obstacles); i++ {
+		if !obstacleHasBeenRenderedFlag[i] && s.Obstacles[i].Board == board {
 			var obstaclesOnThisCoord = make([]*Obstacle, 0)
-			for j := i; j < len(s.obstacles); j++ {
-				if !obstacleHasBeenRenderedFlag[j] && s.obstacles[i].coord == s.obstacles[j].coord && (s.obstacles[j].board == board || (s.obstacles[j].board == OffBoard && !preview)) {
+			for j := i; j < len(s.Obstacles); j++ {
+				if !obstacleHasBeenRenderedFlag[j] && s.Obstacles[i].Coord == s.Obstacles[j].Coord && (s.Obstacles[j].Board == board || (s.Obstacles[j].Board == OffBoard && !preview)) {
 					obstacleHasBeenRenderedFlag[j] = true
-					obstaclesOnThisCoord = append(obstaclesOnThisCoord, &s.obstacles[j])
+					obstaclesOnThisCoord = append(obstaclesOnThisCoord, &s.Obstacles[j])
 				}
 			}
 			for j := 0; j < len(obstaclesOnThisCoord); j++ {
@@ -349,12 +352,12 @@ func (s *Sandbox) Render(board uint32, preview bool, selection *Selection) {
 			}
 		}
 	}
-	for i := 0; i < len(s.pieces); i++ {
-		if s.pieces[i].board == board || (s.pieces[i].board == OffBoard && !preview) {
-			s.pieces[i].Render()
-			if selection.IsPieceSelected(s.pieces[i].id) {
-				var pos = GetBoardOrigo().Add(s.pieces[i].coord.Scale(TileSize))
-				var rect = rl.NewRectangle(float32(pos.x+4), float32(pos.y+4), float32(TileSize*s.pieces[i].scale-8), float32(TileSize*s.pieces[i].scale-8))
+	for i := 0; i < len(s.Pieces); i++ {
+		if s.Pieces[i].Board == board || (s.Pieces[i].Board == OffBoard && !preview) {
+			s.Pieces[i].Render()
+			if selection.IsPieceSelected(s.Pieces[i].Id) {
+				var pos = GetBoardOrigo().Add(s.Pieces[i].Coord.Scale(TileSize))
+				var rect = rl.NewRectangle(float32(pos.X+4), float32(pos.Y+4), float32(TileSize*s.Pieces[i].Scale-8), float32(TileSize*s.Pieces[i].Scale-8))
 				var thickness = 1
 				if preview {
 					thickness = 4
@@ -363,14 +366,14 @@ func (s *Sandbox) Render(board uint32, preview bool, selection *Selection) {
 			}
 		}
 	}
-	for i := 0; i < len(s.pieces); i++ {
-		if s.pieces[i].board == board || (s.pieces[i].board == OffBoard && !preview) {
-			s.RenderStatusEffectsOfPiece(&s.pieces[i])
+	for i := 0; i < len(s.Pieces); i++ {
+		if s.Pieces[i].Board == board || (s.Pieces[i].Board == OffBoard && !preview) {
+			s.RenderStatusEffectsOfPiece(&s.Pieces[i])
 		}
 	}
 	if coord, ok := selection.GetSelectedCoord(); ok {
 		var pos = GetBoardOrigo().Add(coord.Scale(TileSize))
-		var rect = rl.NewRectangle(float32(pos.x+4), float32(pos.y+4), TileSize-8, TileSize-8)
+		var rect = rl.NewRectangle(float32(pos.X+4), float32(pos.Y+4), TileSize-8, TileSize-8)
 		var thickness = 1
 		if preview {
 			thickness = 4
@@ -380,7 +383,7 @@ func (s *Sandbox) Render(board uint32, preview bool, selection *Selection) {
 
 	var selectedId, hasSelection = selection.GetSelectedPieceId()
 	var selectedPiece = s.GetPiece(selectedId)
-	if hasSelection && selectedPiece.board != board && !(selectedPiece.board == OffBoard && !preview) {
+	if hasSelection && selectedPiece.Board != board && !(selectedPiece.Board == OffBoard && !preview) {
 		selectedPiece.RenderCrossPlaneIndicator()
 	}
 }
@@ -388,23 +391,23 @@ func (s *Sandbox) Render(board uint32, preview bool, selection *Selection) {
 func (s *Sandbox) RenderStatusEffectsOfPiece(piece *Piece) {
 	var effectsToRenderAtBottom = make([]*StatusEffect, 0)
 	var stuns = 0
-	for j := 0; j < len(s.effects); j++ {
-		if s.effects[j].piece == piece.id {
-			var typ = s.GetStatusEffectType(s.effects[j].typ)
-			switch typ.style {
+	for j := 0; j < len(s.Effects); j++ {
+		if s.Effects[j].Piece == piece.Id {
+			var typ = s.GetStatusEffectType(s.Effects[j].Typ)
+			switch typ.Style {
 			case RenderStyleBottom:
-				effectsToRenderAtBottom = append(effectsToRenderAtBottom, &s.effects[j])
+				effectsToRenderAtBottom = append(effectsToRenderAtBottom, &s.Effects[j])
 			case RenderStyleStun:
-				typ.RenderAbove(piece.coord, stuns, float32(piece.scale))
+				typ.RenderAbove(piece.Coord, stuns, float32(piece.Scale))
 				stuns++
 			}
 		}
 	}
 	sort.Slice(effectsToRenderAtBottom, func(a, b int) bool {
-		return effectsToRenderAtBottom[a].typ > effectsToRenderAtBottom[b].typ
+		return effectsToRenderAtBottom[a].Typ > effectsToRenderAtBottom[b].Typ
 	})
 	for j := 0; j < len(effectsToRenderAtBottom); j++ {
-		var typ = s.GetStatusEffectType(effectsToRenderAtBottom[j].typ)
-		typ.RenderAtBottom(piece.coord, j, len(effectsToRenderAtBottom), float32(piece.scale))
+		var typ = s.GetStatusEffectType(effectsToRenderAtBottom[j].Typ)
+		typ.RenderAtBottom(piece.Coord, j, len(effectsToRenderAtBottom), float32(piece.Scale))
 	}
 }

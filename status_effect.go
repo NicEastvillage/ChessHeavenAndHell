@@ -24,15 +24,15 @@ const (
 )
 
 type StatusEffectType struct {
-	id    uint32
-	name  string
-	style StatusEffectRenderStyle
-	tex   rl.Texture2D
+	Id    uint32
+	Name  string
+	Style StatusEffectRenderStyle
+	Tex   rl.Texture2D
 }
 
 type StatusEffect struct {
-	piece uint32
-	typ   uint32
+	Piece uint32
+	Typ   uint32
 }
 
 func (t *StatusEffectType) RenderAtBottom(coord Vec2, index int, total int, scale float32) {
@@ -46,9 +46,9 @@ func (t *StatusEffectType) RenderAtBottom(coord Vec2, index int, total int, scal
 		step = LEFT.Scale(int(scale * (1 - 2*margin) * TileSize / float32(total-1)))
 	}
 	var effectCenter = effectRightMost.Add(step.Scale(index))
-	var texScale = float32(TileSize*0.4) / float32(max(t.tex.Width, t.tex.Height))
-	var corner = effectCenter.Sub(Vec2{int(scale * texScale * float32(t.tex.Width) / 2), int(scale * texScale * float32(t.tex.Height) / 2)})
-	rl.DrawTextureEx(t.tex, corner.ToRlVec(), 0, scale*texScale, rl.White)
+	var texScale = float32(TileSize*0.4) / float32(max(t.Tex.Width, t.Tex.Height))
+	var corner = effectCenter.Sub(Vec2{int(scale * texScale * float32(t.Tex.Width) / 2), int(scale * texScale * float32(t.Tex.Height) / 2)})
+	rl.DrawTextureEx(t.Tex, corner.ToRlVec(), 0, scale*texScale, rl.White)
 }
 
 func (t *StatusEffectType) RenderAbove(coord Vec2, index int, scale float32) {
@@ -56,6 +56,6 @@ func (t *StatusEffectType) RenderAbove(coord Vec2, index int, scale float32) {
 	const stepY = -0.1
 	var tilePos = GetBoardOrigo().Add(coord.Scale(TileSize))
 	var center = tilePos.Add(Vec2{int(scale * TileSize / 2), int((startY + stepY*float32(index)) * scale * TileSize)})
-	var corner = center.Sub(Vec2{int(scale * float32(t.tex.Width) / 2), int(scale * float32(t.tex.Height) / 2)})
-	rl.DrawTextureEx(t.tex, corner.ToRlVec(), 0, scale, rl.White)
+	var corner = center.Sub(Vec2{int(scale * float32(t.Tex.Width) / 2), int(scale * float32(t.Tex.Height) / 2)})
+	rl.DrawTextureEx(t.Tex, corner.ToRlVec(), 0, scale, rl.White)
 }

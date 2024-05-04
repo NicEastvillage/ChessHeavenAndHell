@@ -13,24 +13,24 @@ const (
 )
 
 type ObstacleType struct {
-	id   uint32
-	name string
-	tex  rl.Texture2D
+	Id   uint32
+	Name string
+	Tex  rl.Texture2D
 }
 
 type Obstacle struct {
-	coord Vec2
-	board uint32
-	typ   uint32
+	Coord Vec2
+	Board uint32
+	Typ   uint32
 }
 
 func (o *Obstacle) Render(index int, total int) {
 	const scale = 0.6
-	var typ = sandbox.GetObstacleType(o.typ)
-	var halfsize = Vec2{x: int(float32(typ.tex.Width) * scale / 2), y: int(float32(typ.tex.Height) * scale / 2)}
-	var tileCenter = GetBoardOrigo().Add(o.coord.Scale(TileSize)).Add(ONEONE.Scale(TileSize / 2))
+	var typ = sandbox.GetObstacleType(o.Typ)
+	var halfsize = Vec2{X: int(float32(typ.Tex.Width) * scale / 2), Y: int(float32(typ.Tex.Height) * scale / 2)}
+	var tileCenter = GetBoardOrigo().Add(o.Coord.Scale(TileSize)).Add(ONEONE.Scale(TileSize / 2))
 	if total == 1 {
-		rl.DrawTextureEx(typ.tex, tileCenter.Sub(halfsize).ToRlVec(), 0, scale, rl.White)
+		rl.DrawTextureEx(typ.Tex, tileCenter.Sub(halfsize).ToRlVec(), 0, scale, rl.White)
 		return
 	}
 	const offset = 0.165
@@ -40,7 +40,7 @@ func (o *Obstacle) Render(index int, total int) {
 	}
 	var angleStep = 2 * math.Pi / float64(total)
 	var angle = angleBase + angleStep*float64(index)
-	var offsetVec = Vec2{x: int(math.Cos(angle) * offset * TileSize), y: int(math.Sin(angle) * offset * TileSize)}
+	var offsetVec = Vec2{X: int(math.Cos(angle) * offset * TileSize), Y: int(math.Sin(angle) * offset * TileSize)}
 	var pos = tileCenter.Add(offsetVec).Sub(halfsize)
-	rl.DrawTextureEx(typ.tex, pos.ToRlVec(), 0, scale, rl.White)
+	rl.DrawTextureEx(typ.Tex, pos.ToRlVec(), 0, scale, rl.White)
 }

@@ -29,36 +29,36 @@ const (
 )
 
 type PieceType struct {
-	id       uint32
-	name     string
-	texWhite rl.Texture2D
-	texBlack rl.Texture2D
+	Id       uint32
+	Name     string
+	TexWhite rl.Texture2D
+	TexBlack rl.Texture2D
 }
 
 type Piece struct {
-	id    uint32
-	typ   uint32
-	color PieceColor
-	board uint32
-	coord Vec2
-	scale uint32
+	Id    uint32     `json:"id"`
+	Typ   uint32     `json:"type"`
+	Color PieceColor `json:"color"`
+	Board uint32     `json:"board"`
+	Coord Vec2       `json:"coord"`
+	Scale uint32     `json:"scale"`
 }
 
 func (p *Piece) Render() {
-	var typ = sandbox.GetPieceType(p.typ)
-	var tex = typ.texWhite
-	if p.color == BLACK {
-		tex = typ.texBlack
+	var typ = sandbox.GetPieceType(p.Typ)
+	var tex = typ.TexWhite
+	if p.Color == BLACK {
+		tex = typ.TexBlack
 	}
 
-	var pos = GetBoardOrigo().Add(p.coord.Scale(TileSize))
+	var pos = GetBoardOrigo().Add(p.Coord.Scale(TileSize))
 	var texScale = float32(TileSize) / float32(max(tex.Width, tex.Height))
 	var pieceCorner = pos.Add(ONEONE.Scale(TileSize / 2)).Sub(Vec2{int(texScale * float32(tex.Width) / 2), int(texScale * float32(tex.Height) / 2)})
-	rl.DrawTextureEx(tex, pieceCorner.ToRlVec(), 0, float32(p.scale)*texScale, rl.White)
+	rl.DrawTextureEx(tex, pieceCorner.ToRlVec(), 0, float32(p.Scale)*texScale, rl.White)
 }
 
 func (p *Piece) RenderCrossPlaneIndicator() {
-	var pos = GetBoardOrigo().Add(p.coord.Scale(TileSize))
+	var pos = GetBoardOrigo().Add(p.Coord.Scale(TileSize))
 	var offset = TileSize / 2
-	rl.DrawCircle(int32(pos.x+offset), int32(pos.y+offset), 12, rl.Blue)
+	rl.DrawCircle(int32(pos.X+offset), int32(pos.Y+offset), 12, rl.Blue)
 }
