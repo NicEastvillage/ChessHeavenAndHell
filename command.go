@@ -1,6 +1,9 @@
 package main
 
-import "math/rand"
+import (
+	rl "github.com/gen2brain/raylib-go/raylib"
+	"math/rand"
+)
 
 type CreatePieceCmd struct {
 	piece             Piece
@@ -21,6 +24,9 @@ func NewCreatePieceCmd(sb *Sandbox, typ uint32, color PieceColor, board uint32, 
 		cmd.captureAfterCoord = sb.FindUnoccupiedOffBoardCoord()
 		captured.Board = OffBoard
 		captured.Coord = cmd.captureAfterCoord
+		rl.PlaySound(assets.sfxPieceCapture)
+	} else {
+		rl.PlaySound(assets.sfxPieceAdd)
 	}
 	cmd.piece = *sb.NewPiece(typ, color, board, coord)
 	return &cmd
@@ -32,6 +38,9 @@ func (cmd *CreatePieceCmd) redo(sb *Sandbox, ui *UiState) {
 		var captured = sb.GetPiece(cmd.capturedPiece)
 		captured.Board = OffBoard
 		captured.Coord = cmd.captureAfterCoord
+		rl.PlaySound(assets.sfxPieceCapture)
+	} else {
+		rl.PlaySound(assets.sfxPieceAdd)
 	}
 	if cmd.piece.Board != OffBoard {
 		ui.board = int32(cmd.piece.Board)
@@ -49,6 +58,9 @@ func (cmd *CreatePieceCmd) undo(sb *Sandbox, ui *UiState) {
 		var captured = sb.GetPiece(cmd.capturedPiece)
 		captured.Board = cmd.piece.Board
 		captured.Coord = cmd.piece.Coord
+		rl.PlaySound(assets.sfxPieceCapture)
+	} else {
+		rl.PlaySound(assets.sfxPieceRemove)
 	}
 	if cmd.piece.Board != OffBoard {
 		ui.board = int32(cmd.piece.Board)
@@ -67,7 +79,7 @@ func NewDeletePieceCmd(sb *Sandbox, ui *UiState, id uint32) *DeletePieceCmd {
 		piece:   *sb.GetPiece(id),
 		effects: sb.GetStatusEffectsOnPiece(id),
 	}
-
+	rl.PlaySound(assets.sfxPieceRemove)
 	sb.RemovePiece(id)
 	ui.selection.Deselect()
 	return &cmd
@@ -78,6 +90,7 @@ func (cmd *DeletePieceCmd) redo(sb *Sandbox, ui *UiState) {
 		ui.selection.Deselect()
 	}
 	sb.RemovePiece(cmd.piece.Id)
+	rl.PlaySound(assets.sfxPieceRemove)
 	if cmd.piece.Board != OffBoard {
 		ui.board = int32(cmd.piece.Board)
 	}
@@ -89,6 +102,7 @@ func (cmd *DeletePieceCmd) undo(sb *Sandbox, ui *UiState) {
 	for _, effect := range cmd.effects {
 		sb.NewStatusEffect(cmd.piece.Id, effect)
 	}
+	rl.PlaySound(assets.sfxPieceAdd)
 	if cmd.piece.Board != OffBoard {
 		ui.board = int32(cmd.piece.Board)
 	}
@@ -127,6 +141,9 @@ func NewMovePieceCmd(sb *Sandbox, id uint32, destCoord Vec2, destBoard uint32) *
 		cmd.captureAfterCoord = sb.FindUnoccupiedOffBoardCoord()
 		captured.Board = OffBoard
 		captured.Coord = cmd.captureAfterCoord
+		rl.PlaySound(assets.sfxPieceCapture)
+	} else {
+		rl.PlaySound(assets.sfxPieceMove)
 	}
 	cmd.afterBoard = destBoard
 	cmd.afterCoord = destCoord
@@ -143,6 +160,9 @@ func (cmd *MovePieceCmd) redo(sb *Sandbox, ui *UiState) {
 		var captured = sb.GetPiece(cmd.capturedPiece)
 		captured.Board = OffBoard
 		captured.Coord = cmd.captureAfterCoord
+		rl.PlaySound(assets.sfxPieceCapture)
+	} else {
+		rl.PlaySound(assets.sfxPieceMove)
 	}
 	if piece.Board != OffBoard {
 		ui.board = int32(piece.Board)
@@ -159,6 +179,9 @@ func (cmd *MovePieceCmd) undo(sb *Sandbox, ui *UiState) {
 		var captured = sb.GetPiece(cmd.capturedPiece)
 		captured.Board = cmd.afterBoard
 		captured.Coord = cmd.afterCoord
+		rl.PlaySound(assets.sfxPieceCapture)
+	} else {
+		rl.PlaySound(assets.sfxPieceMove)
 	}
 	if piece.Board != OffBoard {
 		ui.board = int32(piece.Board)
@@ -174,6 +197,7 @@ type CreateStatusEffectCmd struct {
 
 func NewCreateStatusEffectCmd(sb *Sandbox, piece uint32, effect uint32) *CreateStatusEffectCmd {
 	sb.NewStatusEffect(piece, effect)
+	rl.PlaySound(assets.sfxStatusEffectAdd)
 	return &CreateStatusEffectCmd{
 		piece:  piece,
 		effect: effect,
@@ -183,6 +207,7 @@ func NewCreateStatusEffectCmd(sb *Sandbox, piece uint32, effect uint32) *CreateS
 func (cmd *CreateStatusEffectCmd) redo(sb *Sandbox, ui *UiState) {
 	sb.NewStatusEffect(cmd.piece, cmd.effect)
 	var piece = sb.GetPiece(cmd.piece)
+	rl.PlaySound(assets.sfxStatusEffectAdd)
 	if piece.Board != OffBoard {
 		ui.board = int32(piece.Board)
 	}
@@ -193,6 +218,7 @@ func (cmd *CreateStatusEffectCmd) redo(sb *Sandbox, ui *UiState) {
 func (cmd *CreateStatusEffectCmd) undo(sb *Sandbox, ui *UiState) {
 	sb.RemoveStatusEffect(cmd.piece, cmd.effect)
 	var piece = sb.GetPiece(cmd.piece)
+	rl.PlaySound(assets.sfxStatusEffectRemove)
 	if piece.Board != OffBoard {
 		ui.board = int32(piece.Board)
 	}
@@ -207,6 +233,7 @@ type DeleteStatusEffectCmd struct {
 
 func NewDeleteStatusEffectCmd(sb *Sandbox, piece uint32, effect uint32) *DeleteStatusEffectCmd {
 	sb.RemoveStatusEffect(piece, effect)
+	rl.PlaySound(assets.sfxStatusEffectRemove)
 	return &DeleteStatusEffectCmd{
 		piece:  piece,
 		effect: effect,
@@ -216,6 +243,7 @@ func NewDeleteStatusEffectCmd(sb *Sandbox, piece uint32, effect uint32) *DeleteS
 func (cmd *DeleteStatusEffectCmd) redo(sb *Sandbox, ui *UiState) {
 	sb.RemoveStatusEffect(cmd.piece, cmd.effect)
 	var piece = sb.GetPiece(cmd.piece)
+	rl.PlaySound(assets.sfxStatusEffectRemove)
 	if piece.Board != OffBoard {
 		ui.board = int32(piece.Board)
 	}
@@ -226,6 +254,7 @@ func (cmd *DeleteStatusEffectCmd) redo(sb *Sandbox, ui *UiState) {
 func (cmd *DeleteStatusEffectCmd) undo(sb *Sandbox, ui *UiState) {
 	sb.NewStatusEffect(cmd.piece, cmd.effect)
 	var piece = sb.GetPiece(cmd.piece)
+	rl.PlaySound(assets.sfxStatusEffectAdd)
 	if piece.Board != OffBoard {
 		ui.board = int32(piece.Board)
 	}
@@ -233,20 +262,28 @@ func (cmd *DeleteStatusEffectCmd) undo(sb *Sandbox, ui *UiState) {
 	ui.tab = TabBoard
 }
 
-type IncreasePieceScaleCmd struct {
-	piece uint32
+type ChangePieceScaleCmd struct {
+	piece    uint32
+	newScale uint32
+	oldScale uint32
 }
 
-func NewIncreasePieceScaleCmd(sb *Sandbox, piece uint32) *IncreasePieceScaleCmd {
-	sb.GetPiece(piece).Scale++
-	return &IncreasePieceScaleCmd{
-		piece: piece,
+func NewChangePieceScaleCmd(sb *Sandbox, id uint32, newScale uint32) *ChangePieceScaleCmd {
+	var piece = sb.GetPiece(id)
+	var oldScale = piece.Scale
+	piece.Scale = newScale
+	rl.PlaySound(assets.sfxPieceSizeChange)
+	return &ChangePieceScaleCmd{
+		piece:    id,
+		newScale: newScale,
+		oldScale: oldScale,
 	}
 }
 
-func (cmd *IncreasePieceScaleCmd) redo(sb *Sandbox, ui *UiState) {
+func (cmd *ChangePieceScaleCmd) redo(sb *Sandbox, ui *UiState) {
 	var piece = sb.GetPiece(cmd.piece)
-	piece.Scale++
+	piece.Scale = cmd.newScale
+	rl.PlaySound(assets.sfxPieceSizeChange)
 	if piece.Board != OffBoard {
 		ui.board = int32(piece.Board)
 	}
@@ -254,40 +291,9 @@ func (cmd *IncreasePieceScaleCmd) redo(sb *Sandbox, ui *UiState) {
 	ui.tab = TabBoard
 }
 
-func (cmd *IncreasePieceScaleCmd) undo(sb *Sandbox, ui *UiState) {
+func (cmd *ChangePieceScaleCmd) undo(sb *Sandbox, ui *UiState) {
 	var piece = sb.GetPiece(cmd.piece)
-	piece.Scale--
-	if piece.Board != OffBoard {
-		ui.board = int32(piece.Board)
-	}
-	ui.selection.SelectPiece(cmd.piece)
-	ui.tab = TabBoard
-}
-
-type DecreasePieceScaleCmd struct {
-	piece uint32
-}
-
-func NewDecreasePieceScaleCmd(sb *Sandbox, piece uint32) *DecreasePieceScaleCmd {
-	sb.GetPiece(piece).Scale--
-	return &DecreasePieceScaleCmd{
-		piece: piece,
-	}
-}
-
-func (cmd *DecreasePieceScaleCmd) redo(sb *Sandbox, ui *UiState) {
-	var piece = sb.GetPiece(cmd.piece)
-	piece.Scale--
-	if piece.Board != OffBoard {
-		ui.board = int32(piece.Board)
-	}
-	ui.selection.SelectPiece(cmd.piece)
-	ui.tab = TabBoard
-}
-
-func (cmd *DecreasePieceScaleCmd) undo(sb *Sandbox, ui *UiState) {
-	var piece = sb.GetPiece(cmd.piece)
-	piece.Scale++
+	piece.Scale = cmd.oldScale
 	if piece.Board != OffBoard {
 		ui.board = int32(piece.Board)
 	}
@@ -302,6 +308,7 @@ type CreateTileCmd struct {
 
 func NewCreateTileCmd(sb *Sandbox, board uint32, coord Vec2) *CreateTileCmd {
 	sb.NewTile(board, coord)
+	rl.PlaySound(assets.sfxTileAddRemove)
 	return &CreateTileCmd{
 		board: board,
 		coord: coord,
@@ -310,6 +317,7 @@ func NewCreateTileCmd(sb *Sandbox, board uint32, coord Vec2) *CreateTileCmd {
 
 func (cmd *CreateTileCmd) redo(sb *Sandbox, ui *UiState) {
 	sb.NewTile(cmd.board, cmd.coord)
+	rl.PlaySound(assets.sfxTileAddRemove)
 	ui.board = int32(cmd.board)
 	ui.selection.SelectCoord(cmd.coord)
 	ui.tab = TabBoard
@@ -317,6 +325,7 @@ func (cmd *CreateTileCmd) redo(sb *Sandbox, ui *UiState) {
 
 func (cmd *CreateTileCmd) undo(sb *Sandbox, ui *UiState) {
 	sb.RemoveTile(cmd.board, cmd.coord)
+	rl.PlaySound(assets.sfxTileAddRemove)
 	ui.board = int32(cmd.board)
 	ui.selection.SelectCoord(cmd.coord)
 	ui.tab = TabBoard
@@ -329,6 +338,7 @@ type DeleteTileCmd struct {
 
 func NewDeleteTileCmd(sb *Sandbox, board uint32, coord Vec2) *DeleteTileCmd {
 	sb.RemoveTile(board, coord)
+	rl.PlaySound(assets.sfxTileAddRemove)
 	return &DeleteTileCmd{
 		board: board,
 		coord: coord,
@@ -337,6 +347,7 @@ func NewDeleteTileCmd(sb *Sandbox, board uint32, coord Vec2) *DeleteTileCmd {
 
 func (cmd *DeleteTileCmd) redo(sb *Sandbox, ui *UiState) {
 	sb.RemoveTile(cmd.board, cmd.coord)
+	rl.PlaySound(assets.sfxTileAddRemove)
 	ui.board = int32(cmd.board)
 	ui.selection.SelectCoord(cmd.coord)
 	ui.tab = TabBoard
@@ -344,6 +355,7 @@ func (cmd *DeleteTileCmd) redo(sb *Sandbox, ui *UiState) {
 
 func (cmd *DeleteTileCmd) undo(sb *Sandbox, ui *UiState) {
 	sb.NewTile(cmd.board, cmd.coord)
+	rl.PlaySound(assets.sfxTileAddRemove)
 	ui.board = int32(cmd.board)
 	ui.selection.SelectCoord(cmd.coord)
 	ui.tab = TabBoard
@@ -357,6 +369,7 @@ type CreateObstacleCmd struct {
 
 func NewCreateObstacleCmd(sb *Sandbox, coord Vec2, board uint32, obstacle uint32) *CreateObstacleCmd {
 	sb.NewObstacle(coord, board, obstacle)
+	rl.PlaySound(assets.sfxObstacleAdd)
 	return &CreateObstacleCmd{
 		obstacle: obstacle,
 		board:    board,
@@ -366,6 +379,7 @@ func NewCreateObstacleCmd(sb *Sandbox, coord Vec2, board uint32, obstacle uint32
 
 func (cmd *CreateObstacleCmd) redo(sb *Sandbox, ui *UiState) {
 	sb.NewObstacle(cmd.coord, cmd.board, cmd.obstacle)
+	rl.PlaySound(assets.sfxObstacleAdd)
 	ui.board = int32(cmd.board)
 	ui.selection.SelectCoord(cmd.coord)
 	ui.tab = TabBoard
@@ -373,6 +387,7 @@ func (cmd *CreateObstacleCmd) redo(sb *Sandbox, ui *UiState) {
 
 func (cmd *CreateObstacleCmd) undo(sb *Sandbox, ui *UiState) {
 	sb.RemoveObstacle(cmd.coord, cmd.board, cmd.obstacle)
+	rl.PlaySound(assets.sfxObstacleRemove)
 	ui.board = int32(cmd.board)
 	ui.selection.SelectCoord(cmd.coord)
 	ui.tab = TabBoard
@@ -386,6 +401,7 @@ type DeleteObstacleCmd struct {
 
 func NewDeleteObstacleCmd(sb *Sandbox, coord Vec2, board uint32, obstacle uint32) *DeleteObstacleCmd {
 	sb.RemoveObstacle(coord, board, obstacle)
+	rl.PlaySound(assets.sfxObstacleRemove)
 	return &DeleteObstacleCmd{
 		obstacle: obstacle,
 		board:    board,
@@ -395,6 +411,7 @@ func NewDeleteObstacleCmd(sb *Sandbox, coord Vec2, board uint32, obstacle uint32
 
 func (cmd *DeleteObstacleCmd) redo(sb *Sandbox, ui *UiState) {
 	sb.RemoveObstacle(cmd.coord, cmd.board, cmd.obstacle)
+	rl.PlaySound(assets.sfxObstacleRemove)
 	ui.board = int32(cmd.board)
 	ui.selection.SelectCoord(cmd.coord)
 	ui.tab = TabBoard
@@ -402,6 +419,7 @@ func (cmd *DeleteObstacleCmd) redo(sb *Sandbox, ui *UiState) {
 
 func (cmd *DeleteObstacleCmd) undo(sb *Sandbox, ui *UiState) {
 	sb.NewObstacle(cmd.coord, cmd.board, cmd.obstacle)
+	rl.PlaySound(assets.sfxObstacleAdd)
 	ui.board = int32(cmd.board)
 	ui.selection.SelectCoord(cmd.coord)
 	ui.tab = TabBoard
@@ -427,6 +445,9 @@ func NewPastePieceCmd(sb *Sandbox, ui *UiState, coord Vec2, board uint32) *Paste
 		cmd.captureAfterCoord = sb.FindUnoccupiedOffBoardCoord()
 		captured.Board = OffBoard
 		captured.Coord = cmd.captureAfterCoord
+		rl.PlaySound(assets.sfxPieceCapture)
+	} else {
+		rl.PlaySound(assets.sfxPieceAdd)
 	}
 	var piece = sb.NewPiece(ui.clipboard.typ, ui.clipboard.color, board, coord)
 	piece.Scale = ui.clipboard.scale
@@ -445,6 +466,14 @@ func (cmd *PastePieceCmd) redo(sb *Sandbox, ui *UiState) {
 	for _, effect := range cmd.effects {
 		sb.NewStatusEffect(cmd.piece.Id, effect)
 	}
+	if cmd.anyCaptured {
+		var captured = sb.GetPiece(cmd.capturedPiece)
+		captured.Board = OffBoard
+		captured.Coord = cmd.captureAfterCoord
+		rl.PlaySound(assets.sfxPieceCapture)
+	} else {
+		rl.PlaySound(assets.sfxPieceMove)
+	}
 	if cmd.piece.Board != OffBoard {
 		ui.board = int32(cmd.piece.Board)
 	}
@@ -461,6 +490,9 @@ func (cmd *PastePieceCmd) undo(sb *Sandbox, ui *UiState) {
 		var captured = sb.GetPiece(cmd.capturedPiece)
 		captured.Board = cmd.piece.Board
 		captured.Coord = cmd.piece.Coord
+		rl.PlaySound(assets.sfxPieceCapture)
+	} else {
+		rl.PlaySound(assets.sfxPieceAdd)
 	}
 	if cmd.piece.Board != OffBoard {
 		ui.board = int32(cmd.piece.Board)
@@ -483,6 +515,7 @@ func NewDuplicatePieceCmd(sb *Sandbox, ui *UiState, id uint32) *DuplicatePieceCm
 		sb.NewStatusEffect(piece.Id, effect)
 	}
 	ui.selection.SelectPiece(piece.Id)
+	rl.PlaySound(assets.sfxPieceAdd)
 	return &DuplicatePieceCmd{
 		originalId: id,
 		piece:      *piece,
@@ -497,12 +530,14 @@ func (cmd *DuplicatePieceCmd) redo(sb *Sandbox, ui *UiState) {
 	}
 	ui.selection.SelectPiece(cmd.piece.Id)
 	ui.tab = TabBoard
+	rl.PlaySound(assets.sfxPieceAdd)
 }
 
 func (cmd *DuplicatePieceCmd) undo(sb *Sandbox, ui *UiState) {
 	sb.RemovePiece(cmd.piece.Id)
 	ui.selection.SelectPiece(cmd.originalId)
 	ui.tab = TabBoard
+	rl.PlaySound(assets.sfxPieceAdd) // TODO Remove piece?
 }
 
 type ChangeColorOfPieceCmd struct {
@@ -515,6 +550,7 @@ func NewChangeColorOfPieceCmd(sb *Sandbox, id uint32, color PieceColor) *ChangeC
 	piece := sb.GetPiece(id)
 	var before = piece.Color
 	piece.Color = color
+	rl.PlaySound(assets.sfxPieceColorChange)
 	return &ChangeColorOfPieceCmd{
 		piece:  id,
 		before: before,
@@ -524,12 +560,14 @@ func NewChangeColorOfPieceCmd(sb *Sandbox, id uint32, color PieceColor) *ChangeC
 
 func (cmd *ChangeColorOfPieceCmd) redo(sb *Sandbox, ui *UiState) {
 	sb.GetPiece(cmd.piece).Color = cmd.after
+	rl.PlaySound(assets.sfxPieceColorChange)
 	ui.selection.SelectPiece(cmd.piece)
 	ui.tab = TabBoard
 }
 
 func (cmd *ChangeColorOfPieceCmd) undo(sb *Sandbox, ui *UiState) {
 	sb.GetPiece(cmd.piece).Color = cmd.before
+	rl.PlaySound(assets.sfxPieceColorChange)
 	ui.selection.SelectPiece(cmd.piece)
 	ui.tab = TabBoard
 }
@@ -544,6 +582,7 @@ func NewChangeTypeOfPieceCmd(sb *Sandbox, id uint32, typ uint32) *ChangeTypeOfPi
 	piece := sb.GetPiece(id)
 	var before = piece.Typ
 	piece.Typ = typ
+	rl.PlaySound(assets.sfxPiecePromote)
 	return &ChangeTypeOfPieceCmd{
 		piece:  id,
 		before: before,
@@ -555,12 +594,14 @@ func (cmd *ChangeTypeOfPieceCmd) redo(sb *Sandbox, ui *UiState) {
 	sb.GetPiece(cmd.piece).Typ = cmd.after
 	ui.selection.SelectPiece(cmd.piece)
 	ui.tab = TabBoard
+	rl.PlaySound(assets.sfxPiecePromote)
 }
 
 func (cmd *ChangeTypeOfPieceCmd) undo(sb *Sandbox, ui *UiState) {
 	sb.GetPiece(cmd.piece).Typ = cmd.before
 	ui.selection.SelectPiece(cmd.piece)
 	ui.tab = TabBoard
+	rl.PlaySound(assets.sfxPiecePromote)
 }
 
 type ChangeMoneyAmountCmd struct {
@@ -575,6 +616,7 @@ func NewChangeMoneyAmountCmd(sb *Sandbox, whiteNewAmount int, blackNewAmount int
 	var blackBefore = sb.Shop.Money[1]
 	sb.Shop.Money[0] = whiteNewAmount
 	sb.Shop.Money[1] = blackNewAmount
+	rl.PlaySound(assets.sfxShopMoneyEarn)
 	return &ChangeMoneyAmountCmd{
 		whiteBefore: whiteBefore,
 		whiteAfter:  whiteNewAmount,
@@ -586,11 +628,13 @@ func NewChangeMoneyAmountCmd(sb *Sandbox, whiteNewAmount int, blackNewAmount int
 func (cmd *ChangeMoneyAmountCmd) redo(sb *Sandbox, ui *UiState) {
 	sb.Shop.Money[0] = cmd.whiteAfter
 	sb.Shop.Money[1] = cmd.blackAfter
+	rl.PlaySound(assets.sfxShopMoneyEarn)
 }
 
 func (cmd *ChangeMoneyAmountCmd) undo(sb *Sandbox, ui *UiState) {
 	sb.Shop.Money[0] = cmd.whiteBefore
 	sb.Shop.Money[1] = cmd.blackBefore
+	rl.PlaySound(assets.sfxShopMoneyEarn)
 }
 
 type ChangeShopUnlockCountCmd struct {
@@ -601,6 +645,7 @@ type ChangeShopUnlockCountCmd struct {
 func NewChangeShopUnlockCountCmd(sb *Sandbox, newCount int) *ChangeShopUnlockCountCmd {
 	var before = sb.Shop.UnlockedCount
 	sb.Shop.UnlockedCount = newCount
+	rl.PlaySound(assets.sfxShopUnlock)
 	return &ChangeShopUnlockCountCmd{
 		before: before,
 		after:  newCount,
@@ -609,11 +654,13 @@ func NewChangeShopUnlockCountCmd(sb *Sandbox, newCount int) *ChangeShopUnlockCou
 
 func (cmd *ChangeShopUnlockCountCmd) redo(sb *Sandbox, ui *UiState) {
 	sb.Shop.UnlockedCount = cmd.after
+	rl.PlaySound(assets.sfxShopUnlock)
 	ui.tab = TabShop
 }
 
 func (cmd *ChangeShopUnlockCountCmd) undo(sb *Sandbox, ui *UiState) {
 	sb.Shop.UnlockedCount = cmd.before
+	rl.PlaySound(assets.sfxShopUnlock)
 	ui.tab = TabShop
 }
 
@@ -629,6 +676,7 @@ func NewShuffleShopCmd(shop *Shop) *ShuffleShopCmd {
 		swaps = append(swaps, j)
 		shop.Entries[i], shop.Entries[j] = shop.Entries[j], shop.Entries[i]
 	}
+	rl.PlaySound(assets.sfxShopShuffle)
 	return &ShuffleShopCmd{
 		swaps: swaps,
 	}
@@ -639,6 +687,7 @@ func (cmd *ShuffleShopCmd) redo(sb *Sandbox, ui *UiState) {
 		var j = cmd.swaps[len(sb.Shop.Entries)-1-i]
 		sb.Shop.Entries[i], sb.Shop.Entries[j] = sb.Shop.Entries[j], sb.Shop.Entries[i]
 	}
+	rl.PlaySound(assets.sfxShopShuffle)
 	ui.tab = TabShop
 }
 
@@ -647,6 +696,7 @@ func (cmd *ShuffleShopCmd) undo(sb *Sandbox, ui *UiState) {
 		var j = cmd.swaps[len(sb.Shop.Entries)-1-i]
 		sb.Shop.Entries[i], sb.Shop.Entries[j] = sb.Shop.Entries[j], sb.Shop.Entries[i]
 	}
+	rl.PlaySound(assets.sfxShopShuffle)
 	ui.tab = TabShop
 }
 
@@ -660,6 +710,7 @@ func NewChangeShopEntryPriceCmd(shop *Shop, entry uint32, newPrice int) *ChangeS
 	var e = shop.GetEntry(entry)
 	var priceBefore = e.Price
 	e.Price = newPrice
+	rl.PlaySound(assets.sfxShopPriceChange)
 	return &ChangeShopEntryPriceCmd{
 		entry:       entry,
 		priceBefore: priceBefore,
@@ -669,11 +720,13 @@ func NewChangeShopEntryPriceCmd(shop *Shop, entry uint32, newPrice int) *ChangeS
 
 func (cmd *ChangeShopEntryPriceCmd) redo(sb *Sandbox, ui *UiState) {
 	sb.Shop.GetEntry(cmd.entry).Price = cmd.priceAfter
+	rl.PlaySound(assets.sfxShopPriceChange)
 	ui.tab = TabShop
 }
 
 func (cmd *ChangeShopEntryPriceCmd) undo(sb *Sandbox, ui *UiState) {
 	sb.Shop.GetEntry(cmd.entry).Price = cmd.priceBefore
+	rl.PlaySound(assets.sfxShopPriceChange)
 	ui.tab = TabShop
 }
 
@@ -691,6 +744,7 @@ func NewQuickBuyCmd(shop *Shop, player uint32, entry uint32) *QuickBuyCmd {
 	if unlock {
 		shop.UnlockedCount++
 	}
+	rl.PlaySound(assets.sfxShopQuickbuy)
 	return &QuickBuyCmd{
 		player: player,
 		entry:  entry,
@@ -705,6 +759,7 @@ func (cmd *QuickBuyCmd) redo(sb *Sandbox, ui *UiState) {
 	if cmd.unlock {
 		sb.Shop.UnlockedCount++
 	}
+	rl.PlaySound(assets.sfxShopQuickbuy)
 	ui.tab = TabShop
 }
 
@@ -715,5 +770,6 @@ func (cmd *QuickBuyCmd) undo(sb *Sandbox, ui *UiState) {
 	var e = sb.Shop.GetEntry(cmd.entry)
 	e.Price--
 	sb.Shop.Money[cmd.player] += e.Price
+	rl.PlaySound(assets.sfxShopQuickbuyUndo)
 	ui.tab = TabShop
 }
