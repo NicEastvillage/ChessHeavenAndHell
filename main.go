@@ -28,11 +28,15 @@ var Commit = func() string {
 func main() {
 	var version = fmt.Sprintf("v1.1/%s", Commit[:7])
 	fmt.Printf("Starting Chess Heaven and Hell %s\n", version)
+
 	rl.SetConfigFlags(rl.FlagWindowResizable)
+
 	rl.InitWindow(WindowWidth, WindowHeight, fmt.Sprintf("Chess - Heaven and Hell %s", version))
 	defer rl.CloseWindow()
 	rl.SetExitKey(rl.KeyNull)
-	var exit = false
+
+	rl.InitAudioDevice()
+	defer rl.CloseAudioDevice()
 
 	rl.SetTargetFPS(60)
 
@@ -64,6 +68,7 @@ func main() {
 	var ui = NewUiState()
 	defer ui.Dispose()
 
+	var exit = false
 	for !exit {
 
 		if rl.WindowShouldClose() {

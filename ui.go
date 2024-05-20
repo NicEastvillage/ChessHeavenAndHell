@@ -219,10 +219,10 @@ func (s *UiState) RenderPieceContextMenu(undo *UndoRedoSystem) {
 			var pieceScale = piece.Scale
 			var change = SpinnerWithIcon(spinnerX, spinnerY, fmt.Sprint(pieceScale), assets.texPieceScale)
 			if change < 0 && pieceScale > 1 {
-				undo.Append(NewDecreasePieceScaleCmd(&sandbox, selectedPieceId))
+				undo.Append(NewChangePieceScaleCmd(&sandbox, selectedPieceId, sandbox.GetPiece(selectedPieceId).Scale-1))
 			}
 			if change > 0 {
-				undo.Append(NewIncreasePieceScaleCmd(&sandbox, selectedPieceId))
+				undo.Append(NewChangePieceScaleCmd(&sandbox, selectedPieceId, sandbox.GetPiece(selectedPieceId).Scale+1))
 			}
 		}
 
