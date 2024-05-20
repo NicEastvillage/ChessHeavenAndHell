@@ -24,7 +24,7 @@ func NewRngStuff() RngStuff {
 	res.AddChaosOption("Summon two Imps on Earth on random empty tiles")
 	res.AddChaosOption("Pick a file in a plane. Curse all non-royal pieces in the chosen file")
 	res.AddChaosOption("Replace all Bishops with Rooks and vice versa")
-	res.AddChaosOption("Reset both player’s coin count to 0")
+	res.AddChaosOption("Reset both players' coin count to 0")
 	res.AddChaosOption("Spread all ice to adjacent tiles")
 	res.AddChaosOption("Summon the Devil (Giant Imp with double move) in the middle of Hell")
 	res.AddChaosOption("Summon an Angel on an empty tile in Heaven")

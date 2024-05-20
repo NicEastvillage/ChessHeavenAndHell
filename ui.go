@@ -106,6 +106,7 @@ func (s *UiState) Render(undo *UndoRedoSystem) {
 
 	s.RenderMoneyWidget(&sandbox, undo)
 	if rl.IsKeyPressed(rl.KeyS) && !ctrlDown {
+		rl.PlaySound(assets.sfxClick)
 		if s.tab == TabShop {
 			s.tab = TabBoard
 		} else {
@@ -159,6 +160,7 @@ func (s *UiState) RenderBoardUi(undo *UndoRedoSystem) {
 		s.mode = 1 - s.mode
 	}
 	if oldMode != s.mode {
+		rl.PlaySound(assets.sfxClickAlt)
 		s.selection.Deselect()
 	}
 
@@ -180,13 +182,20 @@ func (s *UiState) RenderBoardUi(undo *UndoRedoSystem) {
 }
 
 func (s *UiState) RenderPiecesMode() {
+	var colorBefore = s.color
 	s.color = rg.ToggleSlider(rl.NewRectangle(float32(rl.GetScreenWidth()-UiMargin-UiButtonW), 2*UiMargin+UiButtonH, UiButtonW, UiButtonH), "White;Black", s.color)
 	if rl.IsKeyPressed(rl.KeyC) {
 		s.color = 1 - s.color
 	}
+	if s.color != colorBefore {
+		rl.PlaySound(assets.sfxClickAlt)
+	}
 
 	for i := 0; i < len(sandbox.PieceTypes); i++ {
-		if rg.Toggle(rl.NewRectangle(float32(rl.GetScreenWidth()-UiMargin-UiButtonW), float32(3*UiMargin+2*UiButtonH+i*(UiMarginSmall+UiButtonH)), UiButtonW, UiButtonH), sandbox.GetPieceType(uint32(i)).Name, s.selection.IsPieceTypeSelected(uint32(i))) {
+		var activeOld = s.selection.IsPieceTypeSelected(uint32(i))
+		var active = rg.Toggle(rl.NewRectangle(float32(rl.GetScreenWidth()-UiMargin-UiButtonW), float32(3*UiMargin+2*UiButtonH+i*(UiMarginSmall+UiButtonH)), UiButtonW, UiButtonH), sandbox.GetPieceType(uint32(i)).Name, activeOld)
+		if active && !activeOld {
+			rl.PlaySound(assets.sfxClick)
 			s.selection.SelectPieceType(uint32(i))
 		}
 	}
@@ -196,9 +205,10 @@ func (s *UiState) RenderPieceContextMenu(undo *UndoRedoSystem) {
 	var selectedPieceId, _ = s.selection.GetSelectedPieceId()
 	piece := sandbox.GetPiece(selectedPieceId)
 
+	var showEffectsOrTypesBefore = s.showEffectsOrTypes
 	s.showEffectsOrTypes = rg.ToggleSlider(rl.NewRectangle(float32(rl.GetScreenWidth()-UiMargin-UiButtonW), 2*UiMargin+UiButtonH, UiButtonW, UiButtonH), "Effect;Types", s.showEffectsOrTypes)
-	if rl.IsKeyPressed(rl.KeyC) {
-		s.color = 1 - s.color
+	if s.showEffectsOrTypes != showEffectsOrTypesBefore {
+		rl.PlaySound(assets.sfxClickAlt)
 	}
 
 	if s.showEffectsOrTypes == 1 {
@@ -363,6 +373,7 @@ func (s *UiState) RenderMoneyWidget(sb *Sandbox, undo *UndoRedoSystem) {
 	rl.DrawTextEx(assets.fontComicSansMsBig, fmt.Sprint("White money: ", *sb.Shop.WhiteMoney()), rl.NewVector2(posX+2*UiButtonH+UiMarginSmall+UiMargin, posY+UiButtonFlatH/2-UiFontSizeBig/2), UiFontSizeBig, 1, rl.Black)
 	var inRngTab = rg.Toggle(rl.NewRectangle(posX+UiShopWidth-UiButtonNarrowW, posY, UiButtonNarrowW, UiButtonH), "Rng", s.tab == TabRng)
 	var inShopTab = rg.Toggle(rl.NewRectangle(posX+UiShopWidth-2*UiButtonNarrowW-UiMarginSmall, posY, UiButtonNarrowW, UiButtonH), "Shop", s.tab == TabShop)
+	var tabOld = s.tab
 	if inRngTab && inShopTab {
 		if s.tab == TabShop {
 			s.tab = TabRng
@@ -375,6 +386,9 @@ func (s *UiState) RenderMoneyWidget(sb *Sandbox, undo *UndoRedoSystem) {
 		s.tab = TabRng
 	} else {
 		s.tab = TabBoard
+	}
+	if tabOld != s.tab {
+		rl.PlaySound(assets.sfxClick)
 	}
 	if rg.Button(rl.NewRectangle(posX+UiShopWidth-3*UiButtonNarrowW-2*UiMarginSmall, posY, UiButtonNarrowW, UiButtonH), "++Both") {
 		undo.Append(NewChangeMoneyAmountCmd(sb, *sb.Shop.WhiteMoney()+1, *sb.Shop.BlackMoney()+1))
@@ -405,6 +419,8 @@ func (s *UiState) RenderRngMenu(undo *UndoRedoSystem) {
 	}
 	posY += UiMarginSmall
 	if rg.Button(rl.NewRectangle(posX, posY, UiButtonNarrowW, UiButtonH), "Reroll") {
+		rl.PlaySound(assets.sfxClick)
+		rl.PlaySound(assets.sfxChaosRoll)
 		s.rng.RerollChaosShown()
 	}
 	posY += 3 * UiMarginBig
@@ -413,30 +429,35 @@ func (s *UiState) RenderRngMenu(undo *UndoRedoSystem) {
 	posY += UiButtonFlatH + UiMarginSmall
 
 	if rg.Button(rl.NewRectangle(posX, posY, UiButtonNarrowW, UiButtonH), "Reroll") {
+		rl.PlaySound(assets.sfxClick)
 		s.rng.RerollPiece(&sandbox)
 	}
 	rl.DrawTextEx(assets.fontComicSansMsBig, "Random Piece: "+s.rng.piece, rl.NewVector2(posX+UiButtonNarrowW+UiMarginSmall, posY+UiButtonH/2-UiFontSizeBig/2), UiFontSizeBig, 1, rl.Black)
 	posY += UiButtonH + UiMarginSmall
 
 	if rg.Button(rl.NewRectangle(posX, posY, UiButtonNarrowW, UiButtonH), "Reroll") {
+		rl.PlaySound(assets.sfxClick)
 		s.rng.RerollPlane()
 	}
 	rl.DrawTextEx(assets.fontComicSansMsBig, "Random plane: "+s.rng.plane, rl.NewVector2(posX+UiButtonNarrowW+UiMarginSmall, posY+UiButtonH/2-UiFontSizeBig/2), UiFontSizeBig, 1, rl.Black)
 	posY += UiButtonH + UiMarginSmall
 
 	if rg.Button(rl.NewRectangle(posX, posY, UiButtonNarrowW, UiButtonH), "Reroll") {
+		rl.PlaySound(assets.sfxClick)
 		s.rng.RerollTile()
 	}
 	rl.DrawTextEx(assets.fontComicSansMsBig, "Random tile: "+s.rng.tile, rl.NewVector2(posX+UiButtonNarrowW+UiMarginSmall, posY+UiButtonH/2-UiFontSizeBig/2), UiFontSizeBig, 1, rl.Black)
 	posY += UiButtonH + UiMarginSmall
 
 	if rg.Button(rl.NewRectangle(posX, posY, UiButtonNarrowW, UiButtonH), "Reroll") {
+		rl.PlaySound(assets.sfxClick)
 		s.rng.RerollUnoccupiedTile(&sandbox)
 	}
 	rl.DrawTextEx(assets.fontComicSansMsBig, "Random unoccupied tile: "+s.rng.unoccupiedTile, rl.NewVector2(posX+UiButtonNarrowW+UiMarginSmall, posY+UiButtonH/2-UiFontSizeBig/2), UiFontSizeBig, 1, rl.Black)
 	posY += UiButtonH + UiMarginSmall
 
 	if rg.Button(rl.NewRectangle(posX, posY, UiButtonNarrowW, UiButtonH), "Reroll") {
+		rl.PlaySound(assets.sfxClick)
 		s.rng.RerollEmptyTile(&sandbox)
 	}
 	rl.DrawTextEx(assets.fontComicSansMsBig, "Random empty tile: "+s.rng.emptyTile, rl.NewVector2(posX+UiButtonNarrowW+UiMarginSmall, posY+UiButtonH/2-UiFontSizeBig/2), UiFontSizeBig, 1, rl.Black)

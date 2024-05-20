@@ -59,21 +59,24 @@ type AssetManager struct {
 	fontComicSansMs    rl.Font
 	fontComicSansMsBig rl.Font
 
+	sfxClick              rl.Sound
+	sfxClickAlt           rl.Sound
+	sfxChaosRoll          rl.Sound
 	sfxTileAddRemove      rl.Sound
-	sfxMove               rl.Sound
-	sfxCapture            rl.Sound
-	sfxPromote            rl.Sound
-	sfxCreatePiece        rl.Sound
-	sfxDeletePiece        rl.Sound
-	sfxChangeColor        rl.Sound
+	sfxPieceMove          rl.Sound
+	sfxPieceCapture       rl.Sound
+	sfxPiecePromote       rl.Sound
+	sfxPieceAdd           rl.Sound
+	sfxPieceRemove        rl.Sound
+	sfxPieceColorChange   rl.Sound
 	sfxPieceSizeChange    rl.Sound
 	sfxStatusEffectAdd    rl.Sound
 	sfxStatusEffectRemove rl.Sound
 	sfxObstacleAdd        rl.Sound
 	sfxObstacleRemove     rl.Sound
-	sfxEarnMoney          rl.Sound
-	sfxQuickbuy           rl.Sound
-	sfxUndoQuickbuy       rl.Sound
+	sfxShopMoneyEarn      rl.Sound
+	sfxShopQuickbuy       rl.Sound
+	sfxShopQuickbuyUndo   rl.Sound
 	sfxShopUnlock         rl.Sound
 	sfxShopShuffle        rl.Sound
 	sfxShopPriceChange    rl.Sound
@@ -132,21 +135,24 @@ func (am *AssetManager) LoadAll() {
 	am.fontComicSansMs = rl.LoadFontEx("assets/comic.ttf", 20, []rune(FontChars))
 	am.fontComicSansMsBig = rl.LoadFontEx("assets/comic.ttf", 28, []rune(FontChars))
 
+	am.sfxClick = rl.LoadSound("assets/sfx/click3.wav")
+	am.sfxClickAlt = rl.LoadSound("assets/sfx/click.wav")
+	am.sfxChaosRoll = rl.LoadSound("assets/sfx/chaos_roll.ogg")
 	am.sfxTileAddRemove = rl.LoadSound("assets/sfx/tile_add_remove.ogg")
-	am.sfxMove = rl.LoadSound("assets/sfx/move.mp3")
-	am.sfxCapture = rl.LoadSound("assets/sfx/capture.mp3")
-	am.sfxPromote = rl.LoadSound("assets/sfx/promote.mp3")
-	am.sfxCreatePiece = rl.LoadSound("assets/sfx/create_piece.ogg")
-	am.sfxDeletePiece = rl.LoadSound("assets/sfx/delete_piece.ogg")
-	am.sfxChangeColor = rl.LoadSound("assets/sfx/change_color.ogg")
+	am.sfxPieceMove = rl.LoadSound("assets/sfx/piece_move.mp3")
+	am.sfxPieceCapture = rl.LoadSound("assets/sfx/piece_capture.mp3")
+	am.sfxPiecePromote = rl.LoadSound("assets/sfx/piece_promote.mp3")
+	am.sfxPieceAdd = rl.LoadSound("assets/sfx/piece_add.ogg")
+	am.sfxPieceRemove = rl.LoadSound("assets/sfx/piece_remove.ogg")
+	am.sfxPieceColorChange = rl.LoadSound("assets/sfx/piece_color_change.ogg")
 	am.sfxPieceSizeChange = rl.LoadSound("assets/sfx/piece_size_change.wav")
 	am.sfxStatusEffectAdd = rl.LoadSound("assets/sfx/status_effect_add.ogg")
 	am.sfxStatusEffectRemove = rl.LoadSound("assets/sfx/status_effect_remove.ogg")
 	am.sfxObstacleAdd = rl.LoadSound("assets/sfx/obstacle_add.wav")
 	am.sfxObstacleRemove = rl.LoadSound("assets/sfx/obstacle_remove.wav")
-	am.sfxEarnMoney = rl.LoadSound("assets/sfx/earn_money.ogg")
-	am.sfxQuickbuy = rl.LoadSound("assets/sfx/quickbuy.ogg")
-	am.sfxUndoQuickbuy = rl.LoadSound("assets/sfx/undo_quickbuy.ogg")
+	am.sfxShopMoneyEarn = rl.LoadSound("assets/sfx/shop_money_earn.ogg")
+	am.sfxShopQuickbuy = rl.LoadSound("assets/sfx/shop_quickbuy.ogg")
+	am.sfxShopQuickbuyUndo = rl.LoadSound("assets/sfx/shop_quickbuy_undo.ogg")
 	am.sfxShopUnlock = rl.LoadSound("assets/sfx/shop_unlock.ogg")
 	am.sfxShopShuffle = rl.LoadSound("assets/sfx/shop_shuffle.ogg")
 	am.sfxShopPriceChange = rl.LoadSound("assets/sfx/shop_price_change.ogg")
@@ -205,21 +211,24 @@ func (am *AssetManager) UnloadAll() {
 	rl.UnloadFont(am.fontComicSansMs)
 	rl.UnloadFont(am.fontComicSansMsBig)
 
+	rl.UnloadSound(am.sfxClick)
+	rl.UnloadSound(am.sfxClickAlt)
+	rl.UnloadSound(am.sfxChaosRoll)
 	rl.UnloadSound(am.sfxTileAddRemove)
-	rl.UnloadSound(am.sfxMove)
-	rl.UnloadSound(am.sfxCapture)
-	rl.UnloadSound(am.sfxPromote)
-	rl.UnloadSound(am.sfxCreatePiece)
-	rl.UnloadSound(am.sfxDeletePiece)
-	rl.UnloadSound(am.sfxChangeColor)
+	rl.UnloadSound(am.sfxPieceMove)
+	rl.UnloadSound(am.sfxPieceCapture)
+	rl.UnloadSound(am.sfxPiecePromote)
+	rl.UnloadSound(am.sfxPieceAdd)
+	rl.UnloadSound(am.sfxPieceRemove)
+	rl.UnloadSound(am.sfxPieceColorChange)
 	rl.UnloadSound(am.sfxPieceSizeChange)
 	rl.UnloadSound(am.sfxStatusEffectAdd)
 	rl.UnloadSound(am.sfxStatusEffectRemove)
 	rl.UnloadSound(am.sfxObstacleAdd)
 	rl.UnloadSound(am.sfxObstacleRemove)
-	rl.UnloadSound(am.sfxEarnMoney)
-	rl.UnloadSound(am.sfxQuickbuy)
-	rl.UnloadSound(am.sfxUndoQuickbuy)
+	rl.UnloadSound(am.sfxShopMoneyEarn)
+	rl.UnloadSound(am.sfxShopQuickbuy)
+	rl.UnloadSound(am.sfxShopQuickbuyUndo)
 	rl.UnloadSound(am.sfxShopUnlock)
 	rl.UnloadSound(am.sfxShopShuffle)
 	rl.UnloadSound(am.sfxShopPriceChange)
