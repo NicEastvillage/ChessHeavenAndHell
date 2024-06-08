@@ -389,25 +389,41 @@ func (s *Sandbox) Render(board uint32, preview bool, selection *Selection) {
 }
 
 func (s *Sandbox) RenderStatusEffectsOfPiece(piece *Piece) {
+	var effectsToRenderOnTop = make([]*StatusEffect, 0)
 	var effectsToRenderAtBottom = make([]*StatusEffect, 0)
-	var stuns = 0
+	var effectsToRenderAsStun = make([]*StatusEffect, 0)
 	for j := 0; j < len(s.Effects); j++ {
 		if s.Effects[j].Piece == piece.Id {
 			var typ = s.GetStatusEffectType(s.Effects[j].Typ)
 			switch typ.Style {
+			case RenderStyleOverlay:
+				effectsToRenderOnTop = append(effectsToRenderOnTop, &s.Effects[j])
 			case RenderStyleBottom:
 				effectsToRenderAtBottom = append(effectsToRenderAtBottom, &s.Effects[j])
 			case RenderStyleStun:
-				typ.RenderAbove(piece.Coord, stuns, float32(piece.Scale))
-				stuns++
+				effectsToRenderAsStun = append(effectsToRenderAsStun, &s.Effects[j])
 			}
 		}
 	}
+
+	sort.Slice(effectsToRenderOnTop, func(a, b int) bool {
+		return effectsToRenderOnTop[a].Typ > effectsToRenderOnTop[b].Typ
+	})
+	for j := 0; j < len(effectsToRenderOnTop); j++ {
+		var typ = s.GetStatusEffectType(effectsToRenderOnTop[j].Typ)
+		typ.RenderOnTop(piece.Coord, float32(piece.Scale))
+	}
+
 	sort.Slice(effectsToRenderAtBottom, func(a, b int) bool {
 		return effectsToRenderAtBottom[a].Typ > effectsToRenderAtBottom[b].Typ
 	})
 	for j := 0; j < len(effectsToRenderAtBottom); j++ {
 		var typ = s.GetStatusEffectType(effectsToRenderAtBottom[j].Typ)
 		typ.RenderAtBottom(piece.Coord, j, len(effectsToRenderAtBottom), float32(piece.Scale))
+	}
+
+	for j := 0; j < len(effectsToRenderAsStun); j++ {
+		var typ = s.GetStatusEffectType(effectsToRenderAsStun[j].Typ)
+		typ.RenderAsStun(piece.Coord, j, float32(piece.Scale))
 	}
 }
