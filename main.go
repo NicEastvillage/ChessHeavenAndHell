@@ -191,10 +191,10 @@ func registerStatusEffectTypes() {
 	sandbox.RegisterEffectType(NameCurse, RenderStyleBottom, assets.texEffectCurse)
 	sandbox.RegisterEffectType(NameForcedMove, RenderStyleBottom, assets.texEffectForcedMove)
 	sandbox.RegisterEffectType(NamePaid2ndMove, RenderStyleBottom, assets.texEffectPaid2ndMove)
-	sandbox.RegisterEffectType(NamePortalGun, RenderStyleBottom, assets.texEffectPortalGun)
-	sandbox.RegisterEffectType(NameStonks, RenderStyleBottom, assets.texEffectStonks)
+	sandbox.RegisterEffectType(NamePortalGun, RenderStyleOverlay, assets.texEffectPortalGun)
+	sandbox.RegisterEffectType(NameStonks, RenderStyleOverlay, assets.texEffectStonks)
 	sandbox.RegisterEffectType(NameStun, RenderStyleStun, assets.texEffectStun)
-	sandbox.RegisterEffectType(NameWizardHat, RenderStyleBottom, assets.texEffectWizardHat)
+	sandbox.RegisterEffectType(NameWizardHat, RenderStyleOverlay, assets.texEffectWizardHat)
 }
 
 func registerObstacleTypes() {
