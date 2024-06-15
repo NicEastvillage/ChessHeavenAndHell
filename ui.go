@@ -319,38 +319,39 @@ func (s *UiState) RenderShop(sb *Sandbox, undo *UndoRedoSystem) {
 	var posX = float32(rl.GetScreenWidth()/2 - UiShopWidth/2)
 	var posY = float32(UiShopTopMargin)
 	rl.DrawTextEx(assets.fontComicSansMsBig, "Shop", rl.NewVector2(posX, posY), UiFontSizeBig, 1, rl.Black)
+	var ctrlHeld = rl.IsKeyDown(rl.KeyLeftControl) || rl.IsKeyDown(rl.KeyRightControl)
 	posY += UiButtonFlatH + UiMarginSmall
 	for i := 0; i < len(sb.Shop.Entries); i++ {
 		var entry = &sb.Shop.Entries[i]
 		var posX = posX
-		var unlockIcon = "#137#"
-		if rl.IsKeyDown(rl.KeyLeftControl) || rl.IsKeyDown(rl.KeyRightControl) {
-			unlockIcon = "#113#" // Remove/hide icon
-		} else if !entry.Unlocked {
-			unlockIcon = "#138#"
-		}
-		if rg.Button(rl.NewRectangle(posX, posY, UiButtonH, UiButtonFlatH), unlockIcon) {
-			if rl.IsKeyDown(rl.KeyLeftControl) || rl.IsKeyDown(rl.KeyRightControl) {
-				undo.Append(NewHideShopEntryCmd(&sb.Shop, entry.Id))
-			} else {
+		if !ctrlHeld {
+			var unlockIcon = "#137#"
+			if !entry.Unlocked {
+				unlockIcon = "#138#"
+			}
+			if rg.Button(rl.NewRectangle(posX, posY, UiButtonH, UiButtonFlatH), unlockIcon) {
 				undo.Append(NewChangeShopEntryUnlockCmd(sb, entry.Id))
 			}
-		}
-		posX += UiButtonH + UiMarginSmall
-		if rg.Button(rl.NewRectangle(posX, posY, UiButtonH, UiButtonFlatH), "$W") {
-			undo.Append(NewQuickBuyCmd(&sb.Shop, 0, entry.Id))
-		}
-		posX += UiButtonH + UiMarginSmall
-		if rg.Button(rl.NewRectangle(posX, posY, UiButtonH, UiButtonFlatH), "$B") {
-			undo.Append(NewQuickBuyCmd(&sb.Shop, 1, entry.Id))
-		}
-		posX += UiButtonH + UiMarginSmall
-		if rg.Button(rl.NewRectangle(posX, posY, UiButtonH, UiButtonFlatH), "++") {
-			undo.Append(NewChangeShopEntryPriceCmd(&sb.Shop, entry.Id, entry.Price+1))
-		}
-		posX += UiButtonH + UiMarginSmall
-		if rg.Button(rl.NewRectangle(posX, posY, UiButtonH, UiButtonFlatH), "--") && entry.Price > 0 {
-			undo.Append(NewChangeShopEntryPriceCmd(&sb.Shop, entry.Id, entry.Price-1))
+			posX += UiButtonH + UiMarginSmall
+			if rg.Button(rl.NewRectangle(posX, posY, UiButtonH, UiButtonFlatH), "$W") {
+				undo.Append(NewQuickBuyCmd(&sb.Shop, 0, entry.Id))
+			}
+			posX += UiButtonH + UiMarginSmall
+			if rg.Button(rl.NewRectangle(posX, posY, UiButtonH, UiButtonFlatH), "$B") {
+				undo.Append(NewQuickBuyCmd(&sb.Shop, 1, entry.Id))
+			}
+		} else {
+			if rg.Button(rl.NewRectangle(posX, posY, UiButtonH, UiButtonFlatH), "#113#") {
+				undo.Append(NewHideShopEntryCmd(&sb.Shop, entry.Id))
+			}
+			posX += UiButtonH + UiMarginSmall
+			if rg.Button(rl.NewRectangle(posX, posY, UiButtonH, UiButtonFlatH), "++") {
+				undo.Append(NewChangeShopEntryPriceCmd(&sb.Shop, entry.Id, entry.Price+1))
+			}
+			posX += UiButtonH + UiMarginSmall
+			if rg.Button(rl.NewRectangle(posX, posY, UiButtonH, UiButtonFlatH), "--") && entry.Price > 0 {
+				undo.Append(NewChangeShopEntryPriceCmd(&sb.Shop, entry.Id, entry.Price-1))
+			}
 		}
 		posX += UiButtonH + UiMargin
 		var text = fmt.Sprint(entry.Price, ": ", entry.Description)
@@ -365,7 +366,7 @@ func (s *UiState) RenderShop(sb *Sandbox, undo *UndoRedoSystem) {
 	if rg.Button(rl.NewRectangle(posX, posY, UiButtonNarrowW, UiButtonH), "Shuffle") {
 		undo.Append(NewShuffleShopCmd(&sb.Shop))
 	}
-	rl.DrawTextEx(assets.fontComicSansMsBig, "Hold ctrl to remove", rl.Vector2{posX + UiButtonNarrowW + UiMargin, posY + UiButtonFlatH/2 - UiFontSizeBig/2}, UiFontSizeBig, 1, rl.LightGray)
+	rl.DrawTextEx(assets.fontComicSansMsBig, "Hold ctrl for more options", rl.Vector2{posX + UiButtonNarrowW + UiMargin, posY + UiButtonFlatH/2 - UiFontSizeBig/2}, UiFontSizeBig, 1, rl.LightGray)
 }
 
 func (s *UiState) RenderMoneyWidget(sb *Sandbox, undo *UndoRedoSystem) {

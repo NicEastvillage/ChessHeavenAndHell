@@ -5,7 +5,16 @@ import (
 	"fmt"
 )
 
-const SerialVersion = 1
+const SerialVersion = 2
+
+type OldSerialVersionErroor struct {
+	OldSerialVersion           int
+	LatestSupportingAppVersion string
+}
+
+func (e OldSerialVersionErroor) Error() string {
+	return fmt.Sprintf("file uses old serial version %d, not supported since app version %s", e.OldSerialVersion, e.LatestSupportingAppVersion)
+}
 
 type UnknownSerialVersionError struct {
 	UnknownVersion int
@@ -83,6 +92,12 @@ func (s *Sandbox) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	if serialized.Version != SerialVersion {
+		if serialized.Version == 1 {
+			return &OldSerialVersionErroor{
+				OldSerialVersion:           serialized.Version,
+				LatestSupportingAppVersion: "v1.3",
+			}
+		}
 		return &UnknownSerialVersionError{UnknownVersion: serialized.Version}
 	}
 
