@@ -13,8 +13,9 @@ type ShopEntry struct {
 }
 
 type Shop struct {
-	Money   [2]int      `json:"money"`
-	Entries []ShopEntry `json:"entries"`
+	Money         [2]int      `json:"money"`
+	Entries       []ShopEntry `json:"entries"`
+	HiddenEntries []ShopEntry `json:"hiddenEntries"`
 }
 
 func NewShop() Shop {

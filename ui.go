@@ -324,11 +324,17 @@ func (s *UiState) RenderShop(sb *Sandbox, undo *UndoRedoSystem) {
 		var entry = &sb.Shop.Entries[i]
 		var posX = posX
 		var unlockIcon = "#137#"
-		if !entry.Unlocked {
+		if rl.IsKeyDown(rl.KeyLeftControl) || rl.IsKeyDown(rl.KeyRightControl) {
+			unlockIcon = "#113#" // Remove/hide icon
+		} else if !entry.Unlocked {
 			unlockIcon = "#138#"
 		}
 		if rg.Button(rl.NewRectangle(posX, posY, UiButtonH, UiButtonFlatH), unlockIcon) {
-			undo.Append(NewChangeShopEntryUnlockCmd(sb, uint32(i)))
+			if rl.IsKeyDown(rl.KeyLeftControl) || rl.IsKeyDown(rl.KeyRightControl) {
+				undo.Append(NewHideShopEntryCmd(&sb.Shop, entry.Id))
+			} else {
+				undo.Append(NewChangeShopEntryUnlockCmd(sb, entry.Id))
+			}
 		}
 		posX += UiButtonH + UiMarginSmall
 		if rg.Button(rl.NewRectangle(posX, posY, UiButtonH, UiButtonFlatH), "$W") {
@@ -355,10 +361,11 @@ func (s *UiState) RenderShop(sb *Sandbox, undo *UndoRedoSystem) {
 		rl.DrawTextEx(assets.fontComicSansMsBig, text, rl.NewVector2(posX, posY+UiButtonFlatH/2-UiFontSizeBig/2), UiFontSizeBig, 1, color)
 		posY += UiButtonFlatH + UiMarginSmall
 	}
-	posY += UiMarginSmall
+	posY += UiMarginSmall + float32(len(sb.Shop.HiddenEntries))*(UiButtonFlatH+UiMarginSmall)
 	if rg.Button(rl.NewRectangle(posX, posY, UiButtonNarrowW, UiButtonH), "Shuffle") {
 		undo.Append(NewShuffleShopCmd(&sb.Shop))
 	}
+	rl.DrawTextEx(assets.fontComicSansMsBig, "Hold ctrl to remove", rl.Vector2{posX + UiButtonNarrowW + UiMargin, posY + UiButtonFlatH/2 - UiFontSizeBig/2}, UiFontSizeBig, 1, rl.LightGray)
 }
 
 func (s *UiState) RenderMoneyWidget(sb *Sandbox, undo *UndoRedoSystem) {

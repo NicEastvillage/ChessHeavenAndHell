@@ -3,6 +3,7 @@ package main
 import (
 	rl "github.com/gen2brain/raylib-go/raylib"
 	"math/rand"
+	"slices"
 )
 
 type CreatePieceCmd struct {
@@ -642,7 +643,7 @@ type ChangeShopEntryUnlockCmd struct {
 }
 
 func NewChangeShopEntryUnlockCmd(sb *Sandbox, entry uint32) *ChangeShopEntryUnlockCmd {
-	sb.Shop.Entries[entry].Unlocked = !sb.Shop.Entries[entry].Unlocked
+	sb.Shop.GetEntry(entry).Unlocked = !sb.Shop.GetEntry(entry).Unlocked
 	rl.PlaySound(assets.sfxShopUnlock)
 	return &ChangeShopEntryUnlockCmd{
 		entry: entry,
@@ -650,13 +651,13 @@ func NewChangeShopEntryUnlockCmd(sb *Sandbox, entry uint32) *ChangeShopEntryUnlo
 }
 
 func (cmd *ChangeShopEntryUnlockCmd) redo(sb *Sandbox, ui *UiState) {
-	sb.Shop.Entries[cmd.entry].Unlocked = !sb.Shop.Entries[cmd.entry].Unlocked
+	sb.Shop.GetEntry(cmd.entry).Unlocked = !sb.Shop.GetEntry(cmd.entry).Unlocked
 	rl.PlaySound(assets.sfxShopUnlock)
 	ui.tab = TabShop
 }
 
 func (cmd *ChangeShopEntryUnlockCmd) undo(sb *Sandbox, ui *UiState) {
-	sb.Shop.Entries[cmd.entry].Unlocked = !sb.Shop.Entries[cmd.entry].Unlocked
+	sb.Shop.GetEntry(cmd.entry).Unlocked = !sb.Shop.GetEntry(cmd.entry).Unlocked
 	rl.PlaySound(assets.sfxShopUnlock)
 	ui.tab = TabShop
 }
@@ -795,5 +796,46 @@ func (cmd *QuickBuyCmd) undo(sb *Sandbox, ui *UiState) {
 	e.Price--
 	sb.Shop.Money[cmd.player] += e.Price
 	rl.PlaySound(assets.sfxShopQuickbuyUndo)
+	ui.tab = TabShop
+}
+
+type HideShopEntryCmd struct {
+	entryId    uint32
+	entryIndex int
+}
+
+func NewHideShopEntryCmd(shop *Shop, entry uint32) *HideShopEntryCmd {
+	var entryIndex = 0
+	for i := 0; i < len(shop.Entries); i++ {
+		if shop.Entries[i].Id == entry {
+			shop.HiddenEntries = append(shop.HiddenEntries, shop.Entries[i])
+			shop.Entries = append(shop.Entries[:i], shop.Entries[i+1:]...)
+			entryIndex = i
+			break
+		}
+	}
+	rl.PlaySound(assets.sfxShopRemove)
+	return &HideShopEntryCmd{
+		entryId:    entry,
+		entryIndex: entryIndex,
+	}
+}
+
+func (cmd HideShopEntryCmd) redo(sb *Sandbox, ui *UiState) {
+	for i := 0; i < len(sb.Shop.Entries); i++ {
+		if sb.Shop.Entries[i].Id == cmd.entryId {
+			sb.Shop.HiddenEntries = append(sb.Shop.HiddenEntries, sb.Shop.Entries[i])
+			sb.Shop.Entries = append(sb.Shop.Entries[:i], sb.Shop.Entries[i+1:]...)
+			break
+		}
+	}
+	rl.PlaySound(assets.sfxShopRemove)
+	ui.tab = TabShop
+}
+
+func (cmd HideShopEntryCmd) undo(sb *Sandbox, ui *UiState) {
+	sb.Shop.Entries = slices.Insert(sb.Shop.Entries, cmd.entryIndex, sb.Shop.HiddenEntries[len(sb.Shop.HiddenEntries)-1])
+	sb.Shop.HiddenEntries = sb.Shop.HiddenEntries[:len(sb.Shop.HiddenEntries)-1]
+	rl.PlaySound(assets.sfxShopRemove)
 	ui.tab = TabShop
 }
