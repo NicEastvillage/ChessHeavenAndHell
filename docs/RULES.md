@@ -59,7 +59,7 @@ Some final terminology:
 - 5.3 Cursed: After you move this piece, it has 25% of dying.
 - 5.4 Stunned: You cannot move this piece as an action. This status effect stacks and one is removed at the end of your turn.
 - 5.5 Wizard hat: The piece is not affected by Fire and Ice.
-- 5.6 Double Move: After you move this piece, you may pay one coin to move it again.
+- 5.6 Double Move: After you move this piece, you may pay one coin to move it a second time.
 - 5.7 Investor: At the end of white's turn, you get an additional coin. This status effect stacks.
 - 5.8 Portal Gun: As an action you can move this piece to the same square on a different plane. This status effect is removed when you do so.
 - 5.9 Increased size: This piece takes up more space. This status effect stacks.
@@ -90,7 +90,7 @@ Some final terminology:
   - Suicide Bomber: Moves like a pawn. Creates Fire where it dies.
   - Leopard: Moves like indicated in the picture below.
     - ![Leopard movement](images/leopard_movement.png)
-  - Checker Knight: Moves like a pawn, but can also jump over an adjacent piece, if the other side is unoccupied. If the Checker Knight jumps over a piece, it may do a second such jump. If the Checker Knight jumps over an enemy piece, the enemy piece is captured.
+  - Checker Knight: Moves like a King, but can also jump over an adjacent piece, if the other side is unoccupied. If the Checker Knight jumps over a piece, it may do a second such jump. If the Checker Knight jumps over an enemy piece, the enemy piece is captured.
   - Mounted Archer: Moves like indicated in the picture below.
     - ![Mounted archer movement](images/mounted_archer_movement.png)
   - Wizard: Moves like a Bishop and is not affected by Fire and Ice. As an action, the Wizard can create Fire or Ice on all adjacent unoccupied squares.
