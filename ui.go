@@ -40,6 +40,9 @@ type UiState struct {
 	renderTexHeaven    rl.RenderTexture2D
 	renderTexEarth     rl.RenderTexture2D
 	renderTexHell      rl.RenderTexture2D
+	hideLeft           bool
+	hideTop            bool
+	hideRight          bool
 }
 
 func NewUiState() UiState {
@@ -61,9 +64,6 @@ func (s *UiState) Dispose() {
 }
 
 func (s *UiState) Update() {
-	//var origo = GetBoardOrigo()
-	//var previewSourceOrigo = rl.NewVector2(float32(origo.X-TileSize), float32(origo.Y-TileSize))
-
 	if s.tab != TabBoard {
 		s.selection.Deselect()
 	}
@@ -91,26 +91,31 @@ func (s *UiState) Update() {
 
 func (s *UiState) Render(undo *UndoRedoSystem) {
 
+	s.CheckHide()
 	var ctrlDown = rl.IsKeyDown(rl.KeyLeftControl) || rl.IsKeyDown(rl.KeyLeftControl)
 
-	s.RenderBoardPreview(0)
-	s.RenderBoardPreview(1)
-	s.RenderBoardPreview(2)
-	if rl.IsKeyPressed(rl.KeyUp) && s.board > 0 {
-		s.board--
-	} else if rl.IsKeyPressed(rl.KeyDown) && s.board < 2 {
-		s.board++
-	} else if rl.IsKeyPressed(rl.KeyTab) {
-		s.board = (s.board + 1) % 3
+	if !s.hideLeft {
+		s.RenderBoardPreview(0)
+		s.RenderBoardPreview(1)
+		s.RenderBoardPreview(2)
+		if rl.IsKeyPressed(rl.KeyUp) && s.board > 0 {
+			s.board--
+		} else if rl.IsKeyPressed(rl.KeyDown) && s.board < 2 {
+			s.board++
+		} else if rl.IsKeyPressed(rl.KeyTab) {
+			s.board = (s.board + 1) % 3
+		}
 	}
 
-	s.RenderMoneyWidget(&sandbox, undo)
-	if rl.IsKeyPressed(rl.KeyS) && !ctrlDown {
-		rl.PlaySound(assets.sfxClick)
-		if s.tab == TabShop {
-			s.tab = TabBoard
-		} else {
-			s.tab = TabShop
+	if !s.hideTop {
+		s.RenderMoneyWidget(&sandbox, undo)
+		if rl.IsKeyPressed(rl.KeyS) && !ctrlDown {
+			rl.PlaySound(assets.sfxClick)
+			if s.tab == TabShop {
+				s.tab = TabBoard
+			} else {
+				s.tab = TabShop
+			}
 		}
 	}
 	switch s.tab {
@@ -119,7 +124,23 @@ func (s *UiState) Render(undo *UndoRedoSystem) {
 	case TabRng:
 		s.RenderRngMenu(undo)
 	default:
-		s.RenderBoardUi(undo)
+		if !s.hideRight {
+			s.RenderBoardUi(undo)
+		}
+	}
+}
+
+func (s *UiState) CheckHide() {
+	if !rl.IsKeyPressed(rl.KeyH) {
+		return
+	}
+	var mpos = rl.GetMousePosition()
+	if mpos.Y < 200 {
+		s.hideTop = !s.hideTop
+	} else if mpos.X < 200 {
+		s.hideLeft = !s.hideLeft
+	} else if mpos.X > float32(rl.GetScreenWidth())-200 {
+		s.hideRight = !s.hideRight
 	}
 }
 
