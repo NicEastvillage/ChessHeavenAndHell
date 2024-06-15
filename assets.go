@@ -80,6 +80,7 @@ type AssetManager struct {
 	sfxShopUnlock         rl.Sound
 	sfxShopShuffle        rl.Sound
 	sfxShopPriceChange    rl.Sound
+	sfxShopRemove         rl.Sound
 }
 
 func (am *AssetManager) LoadAll() {
@@ -156,6 +157,7 @@ func (am *AssetManager) LoadAll() {
 	am.sfxShopUnlock = rl.LoadSound("assets/sfx/shop_unlock.ogg")
 	am.sfxShopShuffle = rl.LoadSound("assets/sfx/shop_shuffle.ogg")
 	am.sfxShopPriceChange = rl.LoadSound("assets/sfx/shop_price_change.ogg")
+	am.sfxShopRemove = rl.LoadSound("assets/sfx/shop_remove.ogg")
 }
 
 func (am *AssetManager) UnloadAll() {
@@ -232,4 +234,5 @@ func (am *AssetManager) UnloadAll() {
 	rl.UnloadSound(am.sfxShopUnlock)
 	rl.UnloadSound(am.sfxShopShuffle)
 	rl.UnloadSound(am.sfxShopPriceChange)
+	rl.UnloadSound(am.sfxShopRemove)
 }

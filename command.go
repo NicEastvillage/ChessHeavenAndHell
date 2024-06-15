@@ -3,6 +3,7 @@ package main
 import (
 	rl "github.com/gen2brain/raylib-go/raylib"
 	"math/rand"
+	"slices"
 )
 
 type CreatePieceCmd struct {
@@ -637,29 +638,26 @@ func (cmd *ChangeMoneyAmountCmd) undo(sb *Sandbox, ui *UiState) {
 	rl.PlaySound(assets.sfxShopMoneyEarn)
 }
 
-type ChangeShopUnlockCountCmd struct {
-	before int
-	after  int
+type ChangeShopEntryUnlockCmd struct {
+	entry uint32
 }
 
-func NewChangeShopUnlockCountCmd(sb *Sandbox, newCount int) *ChangeShopUnlockCountCmd {
-	var before = sb.Shop.UnlockedCount
-	sb.Shop.UnlockedCount = newCount
+func NewChangeShopEntryUnlockCmd(sb *Sandbox, entry uint32) *ChangeShopEntryUnlockCmd {
+	sb.Shop.GetEntry(entry).Unlocked = !sb.Shop.GetEntry(entry).Unlocked
 	rl.PlaySound(assets.sfxShopUnlock)
-	return &ChangeShopUnlockCountCmd{
-		before: before,
-		after:  newCount,
+	return &ChangeShopEntryUnlockCmd{
+		entry: entry,
 	}
 }
 
-func (cmd *ChangeShopUnlockCountCmd) redo(sb *Sandbox, ui *UiState) {
-	sb.Shop.UnlockedCount = cmd.after
+func (cmd *ChangeShopEntryUnlockCmd) redo(sb *Sandbox, ui *UiState) {
+	sb.Shop.GetEntry(cmd.entry).Unlocked = !sb.Shop.GetEntry(cmd.entry).Unlocked
 	rl.PlaySound(assets.sfxShopUnlock)
 	ui.tab = TabShop
 }
 
-func (cmd *ChangeShopUnlockCountCmd) undo(sb *Sandbox, ui *UiState) {
-	sb.Shop.UnlockedCount = cmd.before
+func (cmd *ChangeShopEntryUnlockCmd) undo(sb *Sandbox, ui *UiState) {
+	sb.Shop.GetEntry(cmd.entry).Unlocked = !sb.Shop.GetEntry(cmd.entry).Unlocked
 	rl.PlaySound(assets.sfxShopUnlock)
 	ui.tab = TabShop
 }
@@ -670,11 +668,19 @@ type ShuffleShopCmd struct {
 
 func NewShuffleShopCmd(shop *Shop) *ShuffleShopCmd {
 	// Fisher-Yates shuffle, but we store which indices we roll, so we can undo it
+	// Note that the position of unlocked entries should not change
+	var unlocks = make([]bool, 0)
+	for i := 0; i < len(shop.Entries); i++ {
+		unlocks = append(unlocks, shop.Entries[i].Unlocked)
+	}
 	var swaps = make([]int, 0)
 	for i := len(shop.Entries) - 1; i >= 1; i-- {
 		var j = rand.Intn(i + 1)
 		swaps = append(swaps, j)
 		shop.Entries[i], shop.Entries[j] = shop.Entries[j], shop.Entries[i]
+	}
+	for i := 0; i < len(shop.Entries); i++ {
+		shop.Entries[i].Unlocked = unlocks[i]
 	}
 	rl.PlaySound(assets.sfxShopShuffle)
 	return &ShuffleShopCmd{
@@ -683,18 +689,32 @@ func NewShuffleShopCmd(shop *Shop) *ShuffleShopCmd {
 }
 
 func (cmd *ShuffleShopCmd) redo(sb *Sandbox, ui *UiState) {
+	var unlocks = make([]bool, 0)
+	for i := 0; i < len(sb.Shop.Entries); i++ {
+		unlocks = append(unlocks, sb.Shop.Entries[i].Unlocked)
+	}
 	for i := len(sb.Shop.Entries) - 1; i >= 1; i-- {
 		var j = cmd.swaps[len(sb.Shop.Entries)-1-i]
 		sb.Shop.Entries[i], sb.Shop.Entries[j] = sb.Shop.Entries[j], sb.Shop.Entries[i]
+	}
+	for i := 0; i < len(sb.Shop.Entries); i++ {
+		sb.Shop.Entries[i].Unlocked = unlocks[i]
 	}
 	rl.PlaySound(assets.sfxShopShuffle)
 	ui.tab = TabShop
 }
 
 func (cmd *ShuffleShopCmd) undo(sb *Sandbox, ui *UiState) {
+	var unlocks = make([]bool, 0)
+	for i := 0; i < len(sb.Shop.Entries); i++ {
+		unlocks = append(unlocks, sb.Shop.Entries[i].Unlocked)
+	}
 	for i := 1; i < len(sb.Shop.Entries); i++ {
 		var j = cmd.swaps[len(sb.Shop.Entries)-1-i]
 		sb.Shop.Entries[i], sb.Shop.Entries[j] = sb.Shop.Entries[j], sb.Shop.Entries[i]
+	}
+	for i := 0; i < len(sb.Shop.Entries); i++ {
+		sb.Shop.Entries[i].Unlocked = unlocks[i]
 	}
 	rl.PlaySound(assets.sfxShopShuffle)
 	ui.tab = TabShop
@@ -733,22 +753,27 @@ func (cmd *ChangeShopEntryPriceCmd) undo(sb *Sandbox, ui *UiState) {
 type QuickBuyCmd struct {
 	player uint32
 	entry  uint32
-	unlock bool
+	// Max value (^uint32(0)) if none were unlocked
+	unlockedEntry uint32
 }
 
 func NewQuickBuyCmd(shop *Shop, player uint32, entry uint32) *QuickBuyCmd {
 	var e = shop.GetEntry(entry)
 	shop.Money[player] -= e.Price
 	e.Price++
-	var unlock = shop.UnlockedCount < len(shop.Entries)
-	if unlock {
-		shop.UnlockedCount++
+	var unlockedEntry = ^uint32(0)
+	for i := 0; i < len(shop.Entries); i++ {
+		if !shop.Entries[i].Unlocked {
+			unlockedEntry = uint32(i)
+			shop.Entries[i].Unlocked = true
+			break
+		}
 	}
 	rl.PlaySound(assets.sfxShopQuickbuy)
 	return &QuickBuyCmd{
-		player: player,
-		entry:  entry,
-		unlock: unlock,
+		player:        player,
+		entry:         entry,
+		unlockedEntry: unlockedEntry,
 	}
 }
 
@@ -756,20 +781,61 @@ func (cmd *QuickBuyCmd) redo(sb *Sandbox, ui *UiState) {
 	var e = sb.Shop.GetEntry(cmd.entry)
 	sb.Shop.Money[cmd.player] -= e.Price
 	e.Price++
-	if cmd.unlock {
-		sb.Shop.UnlockedCount++
+	if cmd.unlockedEntry != ^uint32(0) {
+		sb.Shop.Entries[cmd.unlockedEntry].Unlocked = true
 	}
 	rl.PlaySound(assets.sfxShopQuickbuy)
 	ui.tab = TabShop
 }
 
 func (cmd *QuickBuyCmd) undo(sb *Sandbox, ui *UiState) {
-	if cmd.unlock {
-		sb.Shop.UnlockedCount--
+	if cmd.unlockedEntry != ^uint32(0) {
+		sb.Shop.Entries[cmd.unlockedEntry].Unlocked = false
 	}
 	var e = sb.Shop.GetEntry(cmd.entry)
 	e.Price--
 	sb.Shop.Money[cmd.player] += e.Price
 	rl.PlaySound(assets.sfxShopQuickbuyUndo)
+	ui.tab = TabShop
+}
+
+type HideShopEntryCmd struct {
+	entryId    uint32
+	entryIndex int
+}
+
+func NewHideShopEntryCmd(shop *Shop, entry uint32) *HideShopEntryCmd {
+	var entryIndex = 0
+	for i := 0; i < len(shop.Entries); i++ {
+		if shop.Entries[i].Id == entry {
+			shop.HiddenEntries = append(shop.HiddenEntries, shop.Entries[i])
+			shop.Entries = append(shop.Entries[:i], shop.Entries[i+1:]...)
+			entryIndex = i
+			break
+		}
+	}
+	rl.PlaySound(assets.sfxShopRemove)
+	return &HideShopEntryCmd{
+		entryId:    entry,
+		entryIndex: entryIndex,
+	}
+}
+
+func (cmd HideShopEntryCmd) redo(sb *Sandbox, ui *UiState) {
+	for i := 0; i < len(sb.Shop.Entries); i++ {
+		if sb.Shop.Entries[i].Id == cmd.entryId {
+			sb.Shop.HiddenEntries = append(sb.Shop.HiddenEntries, sb.Shop.Entries[i])
+			sb.Shop.Entries = append(sb.Shop.Entries[:i], sb.Shop.Entries[i+1:]...)
+			break
+		}
+	}
+	rl.PlaySound(assets.sfxShopRemove)
+	ui.tab = TabShop
+}
+
+func (cmd HideShopEntryCmd) undo(sb *Sandbox, ui *UiState) {
+	sb.Shop.Entries = slices.Insert(sb.Shop.Entries, cmd.entryIndex, sb.Shop.HiddenEntries[len(sb.Shop.HiddenEntries)-1])
+	sb.Shop.HiddenEntries = sb.Shop.HiddenEntries[:len(sb.Shop.HiddenEntries)-1]
+	rl.PlaySound(assets.sfxShopRemove)
 	ui.tab = TabShop
 }
