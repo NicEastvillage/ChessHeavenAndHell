@@ -19,7 +19,7 @@ func NewRngStuff() RngStuff {
 	var res = RngStuff{
 		chaosShown: [3]string{"", "", ""},
 	}
-	res.AddChaosOption("Shuffle the shop ordering and gain 6 coins.")
+	res.AddChaosOption("Shuffle the shop ordering and which options are unlocked and then gain 6 coins.")
 	res.AddChaosOption("Give both players 30 coins at the start of your next round.")
 	res.AddChaosOption("Freeze all tiles with Pawns on them.")
 	res.AddChaosOption("Summon two Imps on Earth on random empty tiles.")

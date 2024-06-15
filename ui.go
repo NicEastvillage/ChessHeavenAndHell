@@ -323,6 +323,14 @@ func (s *UiState) RenderShop(sb *Sandbox, undo *UndoRedoSystem) {
 	for i := 0; i < len(sb.Shop.Entries); i++ {
 		var entry = &sb.Shop.Entries[i]
 		var posX = posX
+		var unlockIcon = "#137#"
+		if !entry.Unlocked {
+			unlockIcon = "#138#"
+		}
+		if rg.Button(rl.NewRectangle(posX, posY, UiButtonH, UiButtonFlatH), unlockIcon) {
+			undo.Append(NewChangeShopEntryUnlockCmd(sb, uint32(i)))
+		}
+		posX += UiButtonH + UiMarginSmall
 		if rg.Button(rl.NewRectangle(posX, posY, UiButtonH, UiButtonFlatH), "$W") {
 			undo.Append(NewQuickBuyCmd(&sb.Shop, 0, entry.Id))
 		}
@@ -341,20 +349,14 @@ func (s *UiState) RenderShop(sb *Sandbox, undo *UndoRedoSystem) {
 		posX += UiButtonH + UiMargin
 		var text = fmt.Sprint(entry.Price, ": ", entry.Description)
 		var color = rl.Black
-		if i >= sb.Shop.UnlockedCount {
+		if !entry.Unlocked {
 			color = rl.LightGray
 		}
 		rl.DrawTextEx(assets.fontComicSansMsBig, text, rl.NewVector2(posX, posY+UiButtonFlatH/2-UiFontSizeBig/2), UiFontSizeBig, 1, color)
 		posY += UiButtonFlatH + UiMarginSmall
 	}
 	posY += UiMarginSmall
-	if rg.Button(rl.NewRectangle(posX, posY, UiButtonNarrowW, UiButtonH), "Unlock") && sb.Shop.UnlockedCount < len(sb.Shop.Entries) {
-		undo.Append(NewChangeShopUnlockCountCmd(sb, sb.Shop.UnlockedCount+1))
-	}
-	if rg.Button(rl.NewRectangle(posX+UiButtonNarrowW+UiMarginSmall, posY, UiButtonNarrowW, UiButtonH), "Lock") && sb.Shop.UnlockedCount > 0 {
-		undo.Append(NewChangeShopUnlockCountCmd(sb, sb.Shop.UnlockedCount-1))
-	}
-	if rg.Button(rl.NewRectangle(posX+2*UiButtonNarrowW+2*UiMarginSmall, posY, UiButtonNarrowW, UiButtonH), "Shuffle") {
+	if rg.Button(rl.NewRectangle(posX, posY, UiButtonNarrowW, UiButtonH), "Shuffle") {
 		undo.Append(NewShuffleShopCmd(&sb.Shop))
 	}
 }
