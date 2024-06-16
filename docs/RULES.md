@@ -13,7 +13,7 @@ Some final terminology:
 - an "empty" square has no piece nor item on it,
 - an "unoccupied" square has no piece on it but may have an item,
 - when a piece is captured, it "dies",
-- "adjacent" refers to the 4 touching squares,
+- "adjacent" refers to the 4 touching squares (potentially more for pieces of increased size),
 - Kings and Queens are "royal" pieces,
 - Pawns, Knights, Bishops, Rooks, Kings, and Queens are "standard" pieces,
 
@@ -41,44 +41,51 @@ Some final terminology:
 - 3.1 If a piece is moved onto an enemy piece, the enemy piece is captured.
   - 3.1a If a piece is moved onto an enemy piece which cannot be captured due to some other effect, the moving piece dies.
 - 3.2 If a piece is moved onto an allied piece, the moving piece dies.
-- 3.3 If a piece is moved off the board, even partially, it is dies.
+- 3.3 If a piece is moved off the board, it is dies.
 
 ### 4 Items
 
-- 4.1 Coin: When a piece is moved onto a Coin the owner gets one coin.
+- 4.1 Coin: When a piece is moved onto a Coin the owner gets one coin. Coins can stack.
 - 4.2 Fire: When a piece is moved onto or through Fire, it dies (on the fire's square).
-- 4.3 Ice: When a piece is moved onto Ice, they must move an additional step in the same direction, even if that moves it off the board or onto an allied piece.
+- 4.3 Ice: When a piece is moved onto Ice, they must move an additional step in the same direction, even if that moves it off the board or onto an allied piece. This extra movement happens after resolving captures and potential upgrades, but end-of-move effects like Traps and Curses are only triggered once.
+  - 4.3b If the move is a jump like a Knight's, then the additional step is a additional jump of the same shape. 
 - 4.4 Ice and Fire: If Ice and Fire ever appear on the same square, they are both removed.
 - 4.5 Chaos Orb: When a piece is moved onto a Chaos Orb, the owner must pick one of three Chaos Effects to happen.
-- 4.6 Secret Trap: When a piece ends a move on a Secret Trap it dies and the trap disappears. A Secret Trap has no visual indication (write your traps down somewhere else).  
+- 4.6 Secret Trap: When a piece ends a move on a Secret Trap it dies and the trap disappears. A Secret Trap has no visual indication (write your traps down somewhere else).
 
 ### 5 Status Effects
 
 - 5.1 Murderer: The piece is moved to Hell instead of Heaven when it dies on Earth. See rule 2.2.
-- 5.2 Experienced: The piece will be upgraded the next time it captures a piece. See section TBD.
+- 5.2 Experienced: The piece will be upgraded the next time it captures a piece. See section 6.
 - 5.3 Cursed: After you move this piece, it has 25% of dying.
-- 5.4 Stunned: You cannot move this piece as an action. This status effect stacks and one is removed at the end of your turn.
+- 5.4 Stunned: You cannot take actions with this piece (e.g. move it or activate special abilities). This status effect stacks and one is removed at the end of your turn.
 - 5.5 Wizard hat: The piece is not affected by Fire and Ice.
 - 5.6 Double Move: After you move this piece, you may pay one coin to move it a second time.
 - 5.7 Investor: At the end of white's turn, you get an additional coin. This status effect stacks.
 - 5.8 Portal Gun: As an action you can move this piece to the same square on a different plane. This status effect is removed when you do so.
 - 5.9 Increased size: This piece takes up more space. This status effect stacks.
-  - 5.9a When a piece gets this status effect, it must expand into unoccupied squares if possible. Otherwise, it must expand into squares with enemy pieces, capturing them. If that is also not possible, it dies.
-  - 5.9b When a piece with this status effect is captured, it does not die. Instead, it shrinks until it no longer overlaps with the capturing piece. The owner decides whereto. 
+  - 5.9a When a piece gets this status effect, it must expand into unoccupied squares, owner choose how. If this is not possible, nothing happens instead. 
+  - 5.9b When a piece with this status effect dies, it instead shrinks, and it must shrink until it no longer overlaps any danger, e.g. fire or a capturing piece. The owner decides how it shrinks.
+  - 5.9c When a piece with this status effect is moved onto multiple pieces/items, all pieces are captured. If one or more of those are allied pieces or dangers like fire, it must shrink as per rule 5.9b.
 - 5.10 Forced movement: The piece must move according to the effect that applied the status effect.
 
 ### 6 Experience and Upgrades
 
 - 6.1 When a piece captures another piece it gains the Experienced status effect if it does not have it already.
 - 6.2 When a piece with the Experienced status effect captures another piece, it loses the status effect and is upgraded.
-- 6.3 When a piece is upgraded it either changes type or gains a status, but the available upgrades depend on its type. The owner of the piece decides which upgrade is applied. Consult the following list for possible upgrades to each piece:
+- 6.3 When a piece is upgraded it either changes type or gains a status effect. The available upgrades depend on its type. The owner of the piece decides which upgrade is applied. Consult the following list for possible upgrades to each piece:
   - Pawn: Knight, Suicide Bomber, Increases Size status effect
   - Knight: Leopard, Checker Knight, Mounted Archer
   - Bishop: Wizard, King, Archbishop
   - Rook: Fortress, Scout, Warlock
   - Angel: *Cannot be upgraded*
   - Imp: *Cannot be upgraded*
-  - The rest: Wizard Hat status effect, Investor status effect, Increased Size status effect, Portal Gun status effect (not available for Kings), Double Move status effect (only available for Kings)
+  - The rest: Pick from
+    - Wizard Hat status effect
+    - Investor status effect
+    - Increased Size status effect
+    - Portal Gun status effect (not available for Kings)
+    - Double Move status effect (only available for Kings)
 
 ### 7 Non-standard Pieces
 
@@ -87,17 +94,17 @@ Some final terminology:
   - Jump: The piece can move directly to this square (like a Knight jump). ![Directional move](images/movement_icon_jump.png)
   - Shoot: The piece can capture an enemy piece on this square without moving. ![Directional move](images/movement_icon_shoot.png)
 - 7.2 The non-standard pieces have the following movement patterns and abilities:
-  - Suicide Bomber: Moves like a pawn. Creates Fire where it dies.
+  - Suicide Bomber: Moves like a pawn. Creates Fire where it dies. The Suicide bomber dies when reaching the opponent's back rank.
   - Leopard: Moves like indicated in the picture below.
     - ![Leopard movement](images/leopard_movement.png)
   - Checker Knight: Moves like a King, but can also jump over an adjacent piece, if the other side is unoccupied. If the Checker Knight jumps over a piece, it may do a second such jump. If the Checker Knight jumps over an enemy piece, the enemy piece is captured.
   - Mounted Archer: Moves like indicated in the picture below.
     - ![Mounted archer movement](images/mounted_archer_movement.png)
-  - Wizard: Moves like a Bishop and is not affected by Fire and Ice. As an action, the Wizard can create Fire or Ice on all adjacent unoccupied squares.
+  - Wizard: Moves like a Bishop and is not affected by Fire and Ice. After you move the Wizard, may spawn Ice or Fire on an unoccupied square adjacent to it.
   - Archbishop: Moves like a Bishop. Always goes to Heaven when it dies. Allied Pawns in the same rank and file as the Archbishop cannot be captured.
-  - Fortress: Moves like indicated in the picture below. An allied King cannot be captured while adjacent to a Fortress.
+  - Fortress: Moves like indicated in the picture below. An allied King cannot be captured while adjacent to the Fortress.
     - ![Fortress movement](images/fortress_movement.png)
   - Scout: In addition to moving like a Rook, the Scout can jump to any corner square of the plane. The Scout is not affected by Secret Traps.
-  - Warlock: Moves like a Rook. As an action, the Warlock can move a piece from Hell to the same square on Earth and give it the Cursed status effect. The Warlock always goes to Hell when it dies.
-  - Imp: A neutral piece owned by both players. Moves like a Pawn. Both players can take actions with the Imp, but a player is not allowed to immediately undo a move by the other player (unless there are side effects). The Imp is not affected by Fire.
+  - Warlock: Moves like a Rook. As an action, if the Warlock is on Earth or in Hell, the Warlock can move a piece from Hell to the same square on Earth and give it the Cursed status effect. The Warlock always goes to Hell when it dies.
+  - Imp: A neutral piece owned by both players. Moves like a King. Both players can take actions with the Imp, but a player is not allowed to immediately undo a move by the other player. The Imp is not affected by Fire.
   - Angel: A neutral piece owned by both players. Moves like a Queen. You can only take actions with the Angel if you have the most coins. The Angel is not affected by Ice.
