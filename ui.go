@@ -40,6 +40,7 @@ type UiState struct {
 	renderTexHeaven    rl.RenderTexture2D
 	renderTexEarth     rl.RenderTexture2D
 	renderTexHell      rl.RenderTexture2D
+	arrowDraw          ArrowDrawer
 	hideLeft           bool
 	hideTop            bool
 	hideRight          bool
@@ -54,6 +55,7 @@ func NewUiState() UiState {
 		renderTexHeaven: rl.LoadRenderTexture(WindowWidth, WindowHeight),
 		renderTexEarth:  rl.LoadRenderTexture(WindowWidth, WindowHeight),
 		renderTexHell:   rl.LoadRenderTexture(WindowWidth, WindowHeight),
+		arrowDraw:       NewArrowDrawer(),
 	}
 }
 
@@ -87,6 +89,8 @@ func (s *UiState) Update() {
 		sandbox.Render(2, true, &s.selection)
 		rl.EndTextureMode()
 	}
+
+	s.arrowDraw.Update()
 }
 
 func (s *UiState) Render(undo *UndoRedoSystem) {
@@ -128,6 +132,8 @@ func (s *UiState) Render(undo *UndoRedoSystem) {
 			s.RenderBoardUi(undo)
 		}
 	}
+
+	s.arrowDraw.Render()
 }
 
 func (s *UiState) CheckHide() {
