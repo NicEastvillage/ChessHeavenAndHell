@@ -56,6 +56,8 @@ type AssetManager struct {
 	texEffectWizardHat   rl.Texture2D
 	texPieceScale        rl.Texture2D
 
+	texVfxArrowCircle rl.Texture2D
+
 	fontComicSansMs    rl.Font
 	fontComicSansMsBig rl.Font
 
@@ -133,6 +135,8 @@ func (am *AssetManager) LoadAll() {
 	am.texEffectWizardHat = rl.LoadTexture("assets/effects/wizard_hat.png")
 	am.texPieceScale = rl.LoadTexture("assets/effects/piece_scale.png")
 
+	am.texVfxArrowCircle = rl.LoadTexture("assets/vfx/arrow_circle.png")
+
 	am.fontComicSansMs = rl.LoadFontEx("assets/comic.ttf", 20, []rune(FontChars))
 	am.fontComicSansMsBig = rl.LoadFontEx("assets/comic.ttf", 28, []rune(FontChars))
 
@@ -209,6 +213,8 @@ func (am *AssetManager) UnloadAll() {
 	rl.UnloadTexture(am.texEffectStun)
 	rl.UnloadTexture(am.texEffectWizardHat)
 	rl.UnloadTexture(am.texPieceScale)
+
+	rl.UnloadTexture(am.texVfxArrowCircle)
 
 	rl.UnloadFont(am.fontComicSansMs)
 	rl.UnloadFont(am.fontComicSansMsBig)

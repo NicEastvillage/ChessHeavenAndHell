@@ -6,17 +6,25 @@ import (
 	"slices"
 )
 
+var ArrowColors = []rl.Color{
+	{20, 80, 255, 130},
+	{255, 40, 20, 130},
+	{0, 125, 0, 130},
+	{255, 210, 0, 130},
+}
+
 type Arrow struct {
 	Begin Vec2
 	End   Vec2
+	Color uint8
 }
 
 func (a Arrow) Render() {
-	var color = rl.NewColor(0, 0, 255, 130)
+	var color = ArrowColors[a.Color]
 	if a.Begin == a.End {
 		var origo = GetBoardOrigo()
-		var beginPixCent = origo.Add(a.Begin.Scale(TileSize)).Add(ONEONE.Scale(TileSize / 2))
-		rl.DrawCircleLines(int32(beginPixCent.X), int32(beginPixCent.Y), TileSize/2, color)
+		var coord = origo.Add(a.Begin.Scale(TileSize))
+		rl.DrawTexture(assets.texVfxArrowCircle, int32(coord.X), int32(coord.Y), color)
 		return
 	}
 
@@ -38,29 +46,32 @@ type ArrowDrawer struct {
 	Arrows     []Arrow
 }
 
-func NewArrowDrawer() ArrowDrawer {
-	return ArrowDrawer{
-		Current: Arrow{
-			Begin: Vec2{1, 2},
-			End:   Vec2{4, 3},
-		},
-	}
-}
-
 func (ad *ArrowDrawer) Update() {
 	if !rl.IsKeyDown(rl.KeyLeftControl) && !rl.IsKeyDown(rl.KeyRightControl) {
 		ad.HasCurrent = false
 		return
 	}
 	var coord = GetHoveredCoord()
+	var color = uint8(0)
+	if rl.IsKeyDown(rl.KeyRightShift) || rl.IsKeyDown(rl.KeyLeftShift) {
+		color = 1
+	}
+	if rl.IsKeyDown(rl.KeyRightAlt) || rl.IsKeyDown(rl.KeyLeftAlt) {
+		color = 2
+	}
+	if (rl.IsKeyDown(rl.KeyRightShift) || rl.IsKeyDown(rl.KeyLeftShift)) && (rl.IsKeyDown(rl.KeyRightAlt) || rl.IsKeyDown(rl.KeyLeftAlt)) {
+		color = 3
+	}
 	if rl.IsMouseButtonPressed(rl.MouseButtonRight) {
 		ad.HasCurrent = true
 		ad.Current = Arrow{
 			Begin: coord,
 			End:   coord,
+			Color: color,
 		}
 	} else if rl.IsMouseButtonDown(rl.MouseButtonRight) && ad.HasCurrent {
 		ad.Current.End = coord
+		ad.Current.Color = color
 	} else if rl.IsMouseButtonReleased(rl.MouseButtonRight) {
 		ad.HasCurrent = false
 		if slices.Index(ad.Arrows, ad.Current) == -1 {

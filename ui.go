@@ -55,7 +55,6 @@ func NewUiState() UiState {
 		renderTexHeaven: rl.LoadRenderTexture(WindowWidth, WindowHeight),
 		renderTexEarth:  rl.LoadRenderTexture(WindowWidth, WindowHeight),
 		renderTexHell:   rl.LoadRenderTexture(WindowWidth, WindowHeight),
-		arrowDraw:       NewArrowDrawer(),
 	}
 }
 
