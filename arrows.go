@@ -17,6 +17,7 @@ type Arrow struct {
 	Begin Vec2
 	End   Vec2
 	Color uint8
+	Board uint32 // TODO use
 }
 
 func (a Arrow) Render() {
@@ -51,6 +52,11 @@ func (ad *ArrowDrawer) Update() {
 		ad.HasCurrent = false
 		return
 	}
+	if rl.IsKeyPressed(rl.KeyQ) {
+		ad.HasCurrent = false
+		ad.Arrows = []Arrow{}
+		return
+	}
 	var coord = GetHoveredCoord()
 	var color = uint8(0)
 	if rl.IsKeyDown(rl.KeyRightShift) || rl.IsKeyDown(rl.KeyLeftShift) {
@@ -72,13 +78,13 @@ func (ad *ArrowDrawer) Update() {
 	} else if rl.IsMouseButtonDown(rl.MouseButtonRight) && ad.HasCurrent {
 		ad.Current.End = coord
 		ad.Current.Color = color
-	} else if rl.IsMouseButtonReleased(rl.MouseButtonRight) {
+	} else if rl.IsMouseButtonReleased(rl.MouseButtonRight) && ad.HasCurrent {
 		ad.HasCurrent = false
 		if slices.Index(ad.Arrows, ad.Current) == -1 {
 			ad.Arrows = append(ad.Arrows, ad.Current)
 		} else if ad.Current.Begin == ad.Current.End {
 			for i := len(ad.Arrows) - 1; i >= 0; i-- {
-				if ad.Arrows[i].Begin == ad.Current.Begin {
+				if ad.Arrows[i].Begin == ad.Current.Begin && ad.Arrows[i].Color == ad.Current.Color {
 					ad.Arrows[i] = ad.Arrows[len(ad.Arrows)-1]
 					ad.Arrows = ad.Arrows[:len(ad.Arrows)-1]
 				}
