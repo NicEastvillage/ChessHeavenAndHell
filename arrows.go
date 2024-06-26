@@ -3,6 +3,7 @@ package main
 import (
 	rl "github.com/gen2brain/raylib-go/raylib"
 	"math"
+	"slices"
 )
 
 type Arrow struct {
@@ -62,7 +63,16 @@ func (ad *ArrowDrawer) Update() {
 		ad.Current.End = coord
 	} else if rl.IsMouseButtonReleased(rl.MouseButtonRight) {
 		ad.HasCurrent = false
-		ad.Arrows = append(ad.Arrows, ad.Current)
+		if slices.Index(ad.Arrows, ad.Current) == -1 {
+			ad.Arrows = append(ad.Arrows, ad.Current)
+		} else if ad.Current.Begin == ad.Current.End {
+			for i := len(ad.Arrows) - 1; i >= 0; i-- {
+				if ad.Arrows[i].Begin == ad.Current.Begin {
+					ad.Arrows[i] = ad.Arrows[len(ad.Arrows)-1]
+					ad.Arrows = ad.Arrows[:len(ad.Arrows)-1]
+				}
+			}
+		}
 	}
 }
 
