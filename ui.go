@@ -33,7 +33,7 @@ type UiState struct {
 	clipboard          Clipboard
 	rng                RngStuff
 	tab                int32
-	board              int32
+	board              uint32
 	mode               int32
 	color              int32
 	showEffectsOrTypes int32
@@ -51,7 +51,7 @@ func NewUiState() UiState {
 		selection:       NewSelection(),
 		clipboard:       NewClipboard(),
 		rng:             NewRngStuff(),
-		board:           int32(1),
+		board:           uint32(1),
 		renderTexHeaven: rl.LoadRenderTexture(WindowWidth, WindowHeight),
 		renderTexEarth:  rl.LoadRenderTexture(WindowWidth, WindowHeight),
 		renderTexHell:   rl.LoadRenderTexture(WindowWidth, WindowHeight),
@@ -72,24 +72,26 @@ func (s *UiState) Update() {
 	if s.board != 0 || s.tab != TabBoard {
 		rl.BeginTextureMode(s.renderTexHeaven)
 		rl.ClearBackground(rl.RayWhite)
-		//rl.Translatef(previewSourceOrigo.X, previewSourceOrigo.Y, 0)
 		sandbox.Render(0, true, &s.selection)
+		s.arrowDraw.Render(0)
 		rl.EndTextureMode()
 	}
 	if s.board != 1 || s.tab != TabBoard {
 		rl.BeginTextureMode(s.renderTexEarth)
 		rl.ClearBackground(rl.RayWhite)
 		sandbox.Render(1, true, &s.selection)
+		s.arrowDraw.Render(1)
 		rl.EndTextureMode()
 	}
 	if s.board != 2 || s.tab != TabBoard {
 		rl.BeginTextureMode(s.renderTexHell)
 		rl.ClearBackground(rl.RayWhite)
 		sandbox.Render(2, true, &s.selection)
+		s.arrowDraw.Render(2)
 		rl.EndTextureMode()
 	}
 
-	s.arrowDraw.Update()
+	s.arrowDraw.Update(s.board)
 }
 
 func (s *UiState) Render(undo *UndoRedoSystem) {
@@ -132,7 +134,7 @@ func (s *UiState) Render(undo *UndoRedoSystem) {
 		}
 	}
 
-	s.arrowDraw.Render()
+	s.arrowDraw.Render(s.board)
 }
 
 func (s *UiState) CheckHide() {
@@ -149,7 +151,7 @@ func (s *UiState) CheckHide() {
 	}
 }
 
-func (s *UiState) RenderBoardPreview(index int32) {
+func (s *UiState) RenderBoardPreview(index uint32) {
 	if s.board == index && s.tab == TabBoard {
 		// Main Board. Do not render
 		return
