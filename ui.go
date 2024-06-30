@@ -134,6 +134,12 @@ func (s *UiState) Render(undo *UndoRedoSystem) {
 		}
 	}
 
+	if len(s.arrowDraw.Arrows) > 0 {
+		if rg.Button(rl.NewRectangle(float32(rl.GetScreenWidth()/2-UiButtonW/2), float32(rl.GetScreenHeight()-UiMargin-UiButtonH), UiButtonW, UiButtonH), "Remove arrows") {
+			s.arrowDraw.Clear()
+		}
+	}
+
 	s.arrowDraw.Render(s.board)
 }
 
