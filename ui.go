@@ -33,13 +33,14 @@ type UiState struct {
 	clipboard          Clipboard
 	rng                RngStuff
 	tab                int32
-	board              int32
+	board              uint32
 	mode               int32
 	color              int32
 	showEffectsOrTypes int32
 	renderTexHeaven    rl.RenderTexture2D
 	renderTexEarth     rl.RenderTexture2D
 	renderTexHell      rl.RenderTexture2D
+	arrowDraw          ArrowDrawer
 	hideLeft           bool
 	hideTop            bool
 	hideRight          bool
@@ -50,7 +51,7 @@ func NewUiState() UiState {
 		selection:       NewSelection(),
 		clipboard:       NewClipboard(),
 		rng:             NewRngStuff(),
-		board:           int32(1),
+		board:           uint32(1),
 		renderTexHeaven: rl.LoadRenderTexture(WindowWidth, WindowHeight),
 		renderTexEarth:  rl.LoadRenderTexture(WindowWidth, WindowHeight),
 		renderTexHell:   rl.LoadRenderTexture(WindowWidth, WindowHeight),
@@ -71,22 +72,26 @@ func (s *UiState) Update() {
 	if s.board != 0 || s.tab != TabBoard {
 		rl.BeginTextureMode(s.renderTexHeaven)
 		rl.ClearBackground(rl.RayWhite)
-		//rl.Translatef(previewSourceOrigo.X, previewSourceOrigo.Y, 0)
 		sandbox.Render(0, true, &s.selection)
+		s.arrowDraw.Render(0)
 		rl.EndTextureMode()
 	}
 	if s.board != 1 || s.tab != TabBoard {
 		rl.BeginTextureMode(s.renderTexEarth)
 		rl.ClearBackground(rl.RayWhite)
 		sandbox.Render(1, true, &s.selection)
+		s.arrowDraw.Render(1)
 		rl.EndTextureMode()
 	}
 	if s.board != 2 || s.tab != TabBoard {
 		rl.BeginTextureMode(s.renderTexHell)
 		rl.ClearBackground(rl.RayWhite)
 		sandbox.Render(2, true, &s.selection)
+		s.arrowDraw.Render(2)
 		rl.EndTextureMode()
 	}
+
+	s.arrowDraw.Update(s.board)
 }
 
 func (s *UiState) Render(undo *UndoRedoSystem) {
@@ -128,6 +133,14 @@ func (s *UiState) Render(undo *UndoRedoSystem) {
 			s.RenderBoardUi(undo)
 		}
 	}
+
+	if len(s.arrowDraw.Arrows) > 0 {
+		if rg.Button(rl.NewRectangle(float32(rl.GetScreenWidth()/2-UiButtonW/2), float32(rl.GetScreenHeight()-UiMargin-UiButtonH), UiButtonW, UiButtonH), "Remove arrows") {
+			s.arrowDraw.Clear()
+		}
+	}
+
+	s.arrowDraw.Render(s.board)
 }
 
 func (s *UiState) CheckHide() {
@@ -144,7 +157,7 @@ func (s *UiState) CheckHide() {
 	}
 }
 
-func (s *UiState) RenderBoardPreview(index int32) {
+func (s *UiState) RenderBoardPreview(index uint32) {
 	if s.board == index && s.tab == TabBoard {
 		// Main Board. Do not render
 		return

@@ -153,7 +153,7 @@ func handleMouseInteraction(undo *UndoRedoSystem, ui *UiState) {
 			ui.selection.SelectCoord(coord)
 		}
 	} else if id, ok := ui.selection.GetSelectedPieceId(); ok {
-		if rl.IsMouseButtonPressed(rl.MouseButtonRight) {
+		if rl.IsMouseButtonPressed(rl.MouseButtonRight) && !rl.IsKeyDown(rl.KeyRightControl) && !rl.IsKeyDown(rl.KeyLeftControl) {
 			var piece = sandbox.GetPiece(id)
 			if piece.Coord != coord || piece.Board != uint32(ui.board) {
 				undo.Append(NewMovePieceCmd(&sandbox, id, coord, uint32(ui.board)))

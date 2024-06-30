@@ -1,6 +1,9 @@
 package main
 
-import rl "github.com/gen2brain/raylib-go/raylib"
+import (
+	rl "github.com/gen2brain/raylib-go/raylib"
+	"math"
+)
 
 var UP = Vec2{0, -1}
 var DOWN = Vec2{0, 1}
@@ -30,7 +33,19 @@ func (v Vec2) ManLength() int {
 	return Absi(v.X) + Absi(v.Y)
 }
 
-func (v Vec2) Modulo(d int) Vec2 {
+func (v Vec2) Length() float32 {
+	return float32(math.Sqrt(float64(v.X*v.X + v.Y*v.Y)))
+}
+
+func (v Vec2) Normalized() Vec2 {
+	var length = v.Length()
+	return Vec2{
+		X: int(float32(v.X) / length),
+		Y: int(float32(v.Y) / length),
+	}
+}
+
+func (v Vec2) CompwiseModulo(d int) Vec2 {
 	return Vec2{X: v.X % d, Y: v.Y % d}
 }
 

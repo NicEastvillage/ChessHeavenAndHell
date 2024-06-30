@@ -44,7 +44,7 @@ func (cmd *CreatePieceCmd) redo(sb *Sandbox, ui *UiState) {
 		rl.PlaySound(assets.sfxPieceAdd)
 	}
 	if cmd.piece.Board != OffBoard {
-		ui.board = int32(cmd.piece.Board)
+		ui.board = cmd.piece.Board
 	}
 	ui.selection.Deselect()
 	ui.tab = TabBoard
@@ -64,7 +64,7 @@ func (cmd *CreatePieceCmd) undo(sb *Sandbox, ui *UiState) {
 		rl.PlaySound(assets.sfxPieceRemove)
 	}
 	if cmd.piece.Board != OffBoard {
-		ui.board = int32(cmd.piece.Board)
+		ui.board = cmd.piece.Board
 	}
 	ui.selection.Deselect()
 	ui.tab = TabBoard
@@ -93,7 +93,7 @@ func (cmd *DeletePieceCmd) redo(sb *Sandbox, ui *UiState) {
 	sb.RemovePiece(cmd.piece.Id)
 	rl.PlaySound(assets.sfxPieceRemove)
 	if cmd.piece.Board != OffBoard {
-		ui.board = int32(cmd.piece.Board)
+		ui.board = cmd.piece.Board
 	}
 	ui.tab = TabBoard
 }
@@ -105,7 +105,7 @@ func (cmd *DeletePieceCmd) undo(sb *Sandbox, ui *UiState) {
 	}
 	rl.PlaySound(assets.sfxPieceAdd)
 	if cmd.piece.Board != OffBoard {
-		ui.board = int32(cmd.piece.Board)
+		ui.board = cmd.piece.Board
 	}
 	ui.selection.SelectPiece(cmd.piece.Id)
 	ui.tab = TabBoard
@@ -166,7 +166,7 @@ func (cmd *MovePieceCmd) redo(sb *Sandbox, ui *UiState) {
 		rl.PlaySound(assets.sfxPieceMove)
 	}
 	if piece.Board != OffBoard {
-		ui.board = int32(piece.Board)
+		ui.board = piece.Board
 	}
 	ui.selection.SelectPiece(cmd.piece)
 	ui.tab = TabBoard
@@ -185,7 +185,7 @@ func (cmd *MovePieceCmd) undo(sb *Sandbox, ui *UiState) {
 		rl.PlaySound(assets.sfxPieceMove)
 	}
 	if piece.Board != OffBoard {
-		ui.board = int32(piece.Board)
+		ui.board = piece.Board
 	}
 	ui.selection.SelectPiece(cmd.piece)
 	ui.tab = TabBoard
@@ -210,7 +210,7 @@ func (cmd *CreateStatusEffectCmd) redo(sb *Sandbox, ui *UiState) {
 	var piece = sb.GetPiece(cmd.piece)
 	rl.PlaySound(assets.sfxStatusEffectAdd)
 	if piece.Board != OffBoard {
-		ui.board = int32(piece.Board)
+		ui.board = piece.Board
 	}
 	ui.selection.SelectPiece(cmd.piece)
 	ui.tab = TabBoard
@@ -221,7 +221,7 @@ func (cmd *CreateStatusEffectCmd) undo(sb *Sandbox, ui *UiState) {
 	var piece = sb.GetPiece(cmd.piece)
 	rl.PlaySound(assets.sfxStatusEffectRemove)
 	if piece.Board != OffBoard {
-		ui.board = int32(piece.Board)
+		ui.board = piece.Board
 	}
 	ui.selection.SelectPiece(cmd.piece)
 	ui.tab = TabBoard
@@ -246,7 +246,7 @@ func (cmd *DeleteStatusEffectCmd) redo(sb *Sandbox, ui *UiState) {
 	var piece = sb.GetPiece(cmd.piece)
 	rl.PlaySound(assets.sfxStatusEffectRemove)
 	if piece.Board != OffBoard {
-		ui.board = int32(piece.Board)
+		ui.board = piece.Board
 	}
 	ui.selection.SelectPiece(cmd.piece)
 	ui.tab = TabBoard
@@ -257,7 +257,7 @@ func (cmd *DeleteStatusEffectCmd) undo(sb *Sandbox, ui *UiState) {
 	var piece = sb.GetPiece(cmd.piece)
 	rl.PlaySound(assets.sfxStatusEffectAdd)
 	if piece.Board != OffBoard {
-		ui.board = int32(piece.Board)
+		ui.board = piece.Board
 	}
 	ui.selection.SelectPiece(cmd.piece)
 	ui.tab = TabBoard
@@ -286,7 +286,7 @@ func (cmd *ChangePieceScaleCmd) redo(sb *Sandbox, ui *UiState) {
 	piece.Scale = cmd.newScale
 	rl.PlaySound(assets.sfxPieceSizeChange)
 	if piece.Board != OffBoard {
-		ui.board = int32(piece.Board)
+		ui.board = piece.Board
 	}
 	ui.selection.SelectPiece(cmd.piece)
 	ui.tab = TabBoard
@@ -296,7 +296,7 @@ func (cmd *ChangePieceScaleCmd) undo(sb *Sandbox, ui *UiState) {
 	var piece = sb.GetPiece(cmd.piece)
 	piece.Scale = cmd.oldScale
 	if piece.Board != OffBoard {
-		ui.board = int32(piece.Board)
+		ui.board = piece.Board
 	}
 	ui.selection.SelectPiece(cmd.piece)
 	ui.tab = TabBoard
@@ -319,7 +319,7 @@ func NewCreateTileCmd(sb *Sandbox, board uint32, coord Vec2) *CreateTileCmd {
 func (cmd *CreateTileCmd) redo(sb *Sandbox, ui *UiState) {
 	sb.NewTile(cmd.board, cmd.coord)
 	rl.PlaySound(assets.sfxTileAddRemove)
-	ui.board = int32(cmd.board)
+	ui.board = cmd.board
 	ui.selection.SelectCoord(cmd.coord)
 	ui.tab = TabBoard
 }
@@ -327,7 +327,7 @@ func (cmd *CreateTileCmd) redo(sb *Sandbox, ui *UiState) {
 func (cmd *CreateTileCmd) undo(sb *Sandbox, ui *UiState) {
 	sb.RemoveTile(cmd.board, cmd.coord)
 	rl.PlaySound(assets.sfxTileAddRemove)
-	ui.board = int32(cmd.board)
+	ui.board = cmd.board
 	ui.selection.SelectCoord(cmd.coord)
 	ui.tab = TabBoard
 }
@@ -349,7 +349,7 @@ func NewDeleteTileCmd(sb *Sandbox, board uint32, coord Vec2) *DeleteTileCmd {
 func (cmd *DeleteTileCmd) redo(sb *Sandbox, ui *UiState) {
 	sb.RemoveTile(cmd.board, cmd.coord)
 	rl.PlaySound(assets.sfxTileAddRemove)
-	ui.board = int32(cmd.board)
+	ui.board = cmd.board
 	ui.selection.SelectCoord(cmd.coord)
 	ui.tab = TabBoard
 }
@@ -357,7 +357,7 @@ func (cmd *DeleteTileCmd) redo(sb *Sandbox, ui *UiState) {
 func (cmd *DeleteTileCmd) undo(sb *Sandbox, ui *UiState) {
 	sb.NewTile(cmd.board, cmd.coord)
 	rl.PlaySound(assets.sfxTileAddRemove)
-	ui.board = int32(cmd.board)
+	ui.board = cmd.board
 	ui.selection.SelectCoord(cmd.coord)
 	ui.tab = TabBoard
 }
@@ -381,7 +381,7 @@ func NewCreateObstacleCmd(sb *Sandbox, coord Vec2, board uint32, obstacle uint32
 func (cmd *CreateObstacleCmd) redo(sb *Sandbox, ui *UiState) {
 	sb.NewObstacle(cmd.coord, cmd.board, cmd.obstacle)
 	rl.PlaySound(assets.sfxObstacleAdd)
-	ui.board = int32(cmd.board)
+	ui.board = cmd.board
 	ui.selection.SelectCoord(cmd.coord)
 	ui.tab = TabBoard
 }
@@ -389,7 +389,7 @@ func (cmd *CreateObstacleCmd) redo(sb *Sandbox, ui *UiState) {
 func (cmd *CreateObstacleCmd) undo(sb *Sandbox, ui *UiState) {
 	sb.RemoveObstacle(cmd.coord, cmd.board, cmd.obstacle)
 	rl.PlaySound(assets.sfxObstacleRemove)
-	ui.board = int32(cmd.board)
+	ui.board = cmd.board
 	ui.selection.SelectCoord(cmd.coord)
 	ui.tab = TabBoard
 }
@@ -413,7 +413,7 @@ func NewDeleteObstacleCmd(sb *Sandbox, coord Vec2, board uint32, obstacle uint32
 func (cmd *DeleteObstacleCmd) redo(sb *Sandbox, ui *UiState) {
 	sb.RemoveObstacle(cmd.coord, cmd.board, cmd.obstacle)
 	rl.PlaySound(assets.sfxObstacleRemove)
-	ui.board = int32(cmd.board)
+	ui.board = cmd.board
 	ui.selection.SelectCoord(cmd.coord)
 	ui.tab = TabBoard
 }
@@ -421,7 +421,7 @@ func (cmd *DeleteObstacleCmd) redo(sb *Sandbox, ui *UiState) {
 func (cmd *DeleteObstacleCmd) undo(sb *Sandbox, ui *UiState) {
 	sb.NewObstacle(cmd.coord, cmd.board, cmd.obstacle)
 	rl.PlaySound(assets.sfxObstacleAdd)
-	ui.board = int32(cmd.board)
+	ui.board = cmd.board
 	ui.selection.SelectCoord(cmd.coord)
 	ui.tab = TabBoard
 }
@@ -476,7 +476,7 @@ func (cmd *PastePieceCmd) redo(sb *Sandbox, ui *UiState) {
 		rl.PlaySound(assets.sfxPieceMove)
 	}
 	if cmd.piece.Board != OffBoard {
-		ui.board = int32(cmd.piece.Board)
+		ui.board = cmd.piece.Board
 	}
 	ui.selection.SelectPiece(cmd.piece.Id)
 	ui.tab = TabBoard
@@ -496,7 +496,7 @@ func (cmd *PastePieceCmd) undo(sb *Sandbox, ui *UiState) {
 		rl.PlaySound(assets.sfxPieceAdd)
 	}
 	if cmd.piece.Board != OffBoard {
-		ui.board = int32(cmd.piece.Board)
+		ui.board = cmd.piece.Board
 	}
 	ui.tab = TabBoard
 }
