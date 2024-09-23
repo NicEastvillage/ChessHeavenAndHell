@@ -55,7 +55,7 @@ func NewRngStuff() RngStuff {
 	res.AddChaosOption("Swap your King with an allied Pawn on the same plane.")
 	res.AddChaosOption("Pick a plane. Downgrade all pieces on that plane.")
 	res.AddChaosOption("Replace all Pawns with Suicide Bombers.")
-	res.AddChaosOption("Pick a Pawn of yours. While it is a Pawn make as many moves and captures with it as you desire/can.")
+	res.AddChaosOption("Pick a Pawn of yours. Take actions with until it captures, promotes, or you cannot take more actions.")
 	res.AddChaosOption("Pick a plane. Spawn white Pawns on empty rank 2 squares and black Pawns on empty rank 7 squares.")
 	res.AddChaosOption("Gain 8 coins. Then buy something from the shop. Then remove that option from the shop.")
 	res.AddChaosOption("Pick a non-royal piece. Move it to a random position on a random plane.")
