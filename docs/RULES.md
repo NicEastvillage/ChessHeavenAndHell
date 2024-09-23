@@ -42,6 +42,9 @@ Some final terminology:
   - 3.1a If a piece is moved onto an enemy piece which cannot be captured due to some other effect, the moving piece dies.
 - 3.2 If a piece is moved onto an allied piece, the moving piece dies.
 - 3.3 If a piece is moved off the board, it is dies.
+- 3.4 Pawns can make their standard two-squares-forwards move while positioned on their initial rank (rank 2 for white, rank 6 for black).
+  - 3.4a Note that it does not matter if the Pawn has been moved previously or has been sent to Heaven or Hell.
+  - 3.4b Pawns with increased size cannot make this move, nor can Suicide Bombers even though they look like Pawns.
 
 ### 4 Items
 
@@ -72,7 +75,8 @@ Some final terminology:
 ### 6 Experience and Upgrades
 
 - 6.1 When a piece captures another piece it gains the Experienced status effect if it does not have it already.
-- 6.2 When a piece with the Experienced status effect captures another piece, it loses the status effect and is upgraded.
+- 6.2 When a piece with the Experienced status effect captures another piece, it loses the Experienced status effect and is upgraded.
+  - 6.2a When a Pawn with the Experienced status effect captures a piece on the opponents back rank, the Pawn's owner must choose whether they want to upgrade or promote the Pawn. In either case, the Experience status effect is removed. 
 - 6.3 When a piece is upgraded it either changes type or gains a status effect. The available upgrades depend on its type. The owner of the piece decides which upgrade is applied. Consult the following list for possible upgrades to each piece:
   - Pawn: Knight, Suicide Bomber, Increases Size status effect
   - Knight: Leopard, Checker Knight, Mounted Archer
